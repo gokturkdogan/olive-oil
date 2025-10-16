@@ -1,5 +1,5 @@
 # 🫒 Zeytinyağı E-Ticaret Platformu
-
+ 
 Modern, full-stack zeytinyağı e-ticaret platformu.
 
 ## ✨ Özellikler
