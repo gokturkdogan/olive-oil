@@ -92,7 +92,7 @@ export default async function OrdersPage() {
           ) : (
             <div className="space-y-4 md:space-y-6">
               {orders.map((order) => (
-                <Card key={order.id} className="border-2 border-transparent hover:border-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden">
+                <Card key={order.id} className="border-2 border-primary/15 shadow-md hover:border-primary/40 hover:shadow-2xl transition-all duration-300 overflow-hidden backdrop-blur-sm bg-white/95">
                   <CardContent className="p-5 md:p-6">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 md:gap-4 mb-4 md:mb-6">
                       <div className="flex-1">
