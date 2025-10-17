@@ -1,25 +1,35 @@
 import Link from "next/link";
 import { getCart } from "@/actions/cart";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/money";
 import { CartItem } from "@/components/cart-item";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, ArrowRight, Leaf, Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 export default async function CartPage() {
   const cart = await getCart();
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto text-center py-12">
-          <ShoppingBag className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-          <h1 className="text-2xl font-bold mb-2">Sepetiniz Boş</h1>
-          <p className="text-gray-600 mb-6">
-            Henüz sepetinize ürün eklemediniz.
+      <div className="min-h-[70vh] flex items-center justify-center px-4">
+        <div className="max-w-md mx-auto text-center">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 bg-olive-gradient opacity-10 rounded-full blur-3xl"></div>
+            <div className="relative bg-gradient-to-br from-primary/10 to-primary/5 rounded-full p-8 inline-block">
+              <ShoppingBag className="h-20 w-20 text-primary" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold mb-3 text-gradient">Sepetiniz Boş</h1>
+          <p className="text-muted-foreground mb-8 text-lg">
+            Premium zeytinyağı ürünlerimizi keşfetmeye hazır mısınız?
           </p>
           <Link href="/products">
-            <Button size="lg">Alışverişe Başla</Button>
+            <Button size="lg" className="bg-olive-gradient hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl group">
+              <Leaf className="mr-2 h-5 w-5" />
+              Ürünleri Keşfet
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </Link>
         </div>
       </div>
@@ -32,50 +42,101 @@ export default async function CartPage() {
     0
   );
 
-  return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Sepetim</h1>
+  const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
-      <div className="grid lg:grid-cols-3 gap-8">
+  return (
+    <div className="container mx-auto px-4 py-8 md:py-12">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">Sepetim</h1>
+            <p className="text-muted-foreground flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              <span>{totalItems} ürün</span>
+            </p>
+          </div>
+          <Badge variant="secondary" className="text-lg px-4 py-2">
+            <Leaf className="h-4 w-4 mr-2" />
+            Ücretsiz Kargo
+          </Badge>
+        </div>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
-          {cart.items.map((item) => (
-            <CartItem key={item.id} item={item} />
+          {cart.items.map((item, index) => (
+            <div
+              key={item.id}
+              className="animate-fadeInUp"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <CartItem item={item} />
+            </div>
           ))}
         </div>
 
         {/* Order Summary */}
-        <div>
-          <Card className="sticky top-4">
-            <CardContent className="pt-6 space-y-4">
-              <h2 className="text-xl font-semibold">Sipariş Özeti</h2>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Ara Toplam</span>
-                  <span>{formatPrice(subtotal)}</span>
+        <div className="lg:col-span-1">
+          <Card className="sticky top-24 border-2 border-primary/10 shadow-lg hover:shadow-xl transition-all duration-300">
+            <CardHeader className="bg-gradient-to-br from-primary/5 to-primary/10">
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingBag className="h-5 w-5 text-primary" />
+                Sipariş Özeti
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-6">
+              {/* Price Breakdown */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Ara Toplam</span>
+                  <span className="font-medium">{formatPrice(subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Kargo</span>
-                  <span className="text-green-600">Ücretsiz</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Kargo</span>
+                  <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
+                    Ücretsiz
+                  </Badge>
                 </div>
-                <div className="border-t pt-2 flex justify-between font-semibold text-lg">
-                  <span>Toplam</span>
-                  <span className="text-primary">{formatPrice(subtotal)}</span>
+                <div className="border-t pt-3 flex justify-between items-center">
+                  <span className="text-lg font-semibold">Toplam</span>
+                  <span className="text-2xl font-bold text-gradient">{formatPrice(subtotal)}</span>
                 </div>
               </div>
 
-              <Link href="/checkout" className="block">
-                <Button size="lg" className="w-full">
-                  Ödemeye Geç
-                </Button>
-              </Link>
+              {/* Actions */}
+              <div className="space-y-3">
+                <Link href="/checkout" className="block">
+                  <Button 
+                    size="lg" 
+                    className="w-full bg-olive-gradient hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg group"
+                  >
+                    Ödemeye Geç
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </Link>
 
-              <Link href="/products">
-                <Button variant="outline" className="w-full">
-                  Alışverişe Devam Et
-                </Button>
-              </Link>
+                <Link href="/products" className="block">
+                  <Button variant="outline" className="w-full hover:bg-primary/5 transition-all duration-300">
+                    <Leaf className="mr-2 h-4 w-4" />
+                    Alışverişe Devam Et
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Info */}
+              <div className="pt-4 border-t space-y-2 text-xs text-muted-foreground">
+                <p className="flex items-center gap-2">
+                  ✓ Güvenli ödeme
+                </p>
+                <p className="flex items-center gap-2">
+                  ✓ Hızlı teslimat
+                </p>
+                <p className="flex items-center gap-2">
+                  ✓ 100% doğal ürünler
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

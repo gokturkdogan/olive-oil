@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ShoppingCart, User, LogOut, Leaf, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -8,10 +9,12 @@ import { handleLogout } from "@/actions/logout";
 
 interface NavbarProps {
   session: any;
+  cartItemsCount: number;
 }
 
-export function NavbarClient({ session }: NavbarProps) {
+export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <nav className="sticky top-0 z-50 border-b border-primary/10 glass shadow-sm">
@@ -32,25 +35,41 @@ export function NavbarClient({ session }: NavbarProps) {
           <div className="hidden md:flex items-center gap-8">
             <Link
               href="/"
-              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+              className={`relative text-sm font-medium transition-all duration-300 group ${
+                pathname === "/" ? "text-primary" : "text-foreground hover:text-primary"
+              }`}
             >
               Ana Sayfa
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              <span className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                pathname === "/" ? "w-full" : "w-0 group-hover:w-full"
+              }`}></span>
             </Link>
             <Link
               href="/products"
-              className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+              className={`relative text-sm font-medium transition-all duration-300 group ${
+                pathname === "/products" || pathname?.startsWith("/products/") 
+                  ? "text-primary" 
+                  : "text-foreground hover:text-primary"
+              }`}
             >
               Ürünler
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+              <span className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                pathname === "/products" || pathname?.startsWith("/products/") 
+                  ? "w-full" 
+                  : "w-0 group-hover:w-full"
+              }`}></span>
             </Link>
             {session?.user?.role === "ADMIN" && (
               <Link
                 href="/admin"
-                className="relative text-sm font-medium text-foreground hover:text-primary transition-all duration-300 group"
+                className={`relative text-sm font-medium transition-all duration-300 group ${
+                  pathname?.startsWith("/admin") ? "text-primary" : "text-foreground hover:text-primary"
+                }`}
               >
                 Admin
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+                <span className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                  pathname?.startsWith("/admin") ? "w-full" : "w-0 group-hover:w-full"
+                }`}></span>
               </Link>
             )}
           </div>
@@ -60,6 +79,11 @@ export function NavbarClient({ session }: NavbarProps) {
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative hover:bg-primary/10 hover:text-primary transition-all duration-300">
                 <ShoppingCart className="h-5 w-5" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md animate-pulse">
+                    {cartItemsCount > 9 ? "9+" : cartItemsCount}
+                  </span>
+                )}
                 <span className="sr-only">Sepet</span>
               </Button>
             </Link>
@@ -67,18 +91,42 @@ export function NavbarClient({ session }: NavbarProps) {
             {session?.user ? (
               <div className="flex items-center gap-2">
                 <Link href="/profile">
-                  <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`transition-all duration-300 ${
+                      pathname === "/profile" 
+                        ? "bg-primary/10 text-primary" 
+                        : "hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
                     <User className="h-4 w-4 mr-2" />
                     {session.user.name}
                   </Button>
                 </Link>
                 <Link href="/profile/orders">
-                  <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`transition-all duration-300 ${
+                      pathname === "/profile/orders" 
+                        ? "bg-primary/10 text-primary" 
+                        : "hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
                     Siparişlerim
                   </Button>
                 </Link>
                 <Link href="/profile/addresses">
-                  <Button variant="ghost" size="sm" className="hover:bg-primary/10 hover:text-primary transition-all duration-300">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className={`transition-all duration-300 ${
+                      pathname === "/profile/addresses" 
+                        ? "bg-primary/10 text-primary" 
+                        : "hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
                     Adreslerim
                   </Button>
                 </Link>
@@ -102,8 +150,13 @@ export function NavbarClient({ session }: NavbarProps) {
           {/* Mobile Actions */}
           <div className="flex md:hidden items-center gap-2">
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className="h-9 w-9">
+              <Button variant="ghost" size="icon" className="h-9 w-9 relative">
                 <ShoppingCart className="h-5 w-5" />
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center shadow-md animate-pulse">
+                    {cartItemsCount > 9 ? "9+" : cartItemsCount}
+                  </span>
+                )}
               </Button>
             </Link>
             <Button
@@ -123,14 +176,22 @@ export function NavbarClient({ session }: NavbarProps) {
             <div className="flex flex-col space-y-3">
               <Link
                 href="/"
-                className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  pathname === "/" 
+                    ? "text-primary bg-primary/10" 
+                    : "text-foreground hover:text-primary hover:bg-primary/5"
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Ana Sayfa
               </Link>
               <Link
                 href="/products"
-                className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  pathname === "/products" || pathname?.startsWith("/products/") 
+                    ? "text-primary bg-primary/10" 
+                    : "text-foreground hover:text-primary hover:bg-primary/5"
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Ürünler
@@ -138,7 +199,11 @@ export function NavbarClient({ session }: NavbarProps) {
               {session?.user?.role === "ADMIN" && (
                 <Link
                   href="/admin"
-                  className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    pathname?.startsWith("/admin") 
+                      ? "text-primary bg-primary/10" 
+                      : "text-foreground hover:text-primary hover:bg-primary/5"
+                  }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Admin
@@ -149,7 +214,11 @@ export function NavbarClient({ session }: NavbarProps) {
                 <>
                   <Link
                     href="/profile"
-                    className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all flex items-center"
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center ${
+                      pathname === "/profile" 
+                        ? "text-primary bg-primary/10" 
+                        : "text-foreground hover:text-primary hover:bg-primary/5"
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <User className="h-4 w-4 mr-2" />
@@ -157,14 +226,22 @@ export function NavbarClient({ session }: NavbarProps) {
                   </Link>
                   <Link
                     href="/profile/orders"
-                    className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                      pathname === "/profile/orders" 
+                        ? "text-primary bg-primary/10" 
+                        : "text-foreground hover:text-primary hover:bg-primary/5"
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Siparişlerim
                   </Link>
                   <Link
                     href="/profile/addresses"
-                    className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                      pathname === "/profile/addresses" 
+                        ? "text-primary bg-primary/10" 
+                        : "text-foreground hover:text-primary hover:bg-primary/5"
+                    }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Adreslerim
