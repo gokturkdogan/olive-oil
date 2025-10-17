@@ -7,84 +7,72 @@ import { Suspense } from "react";
 
 function SuccessContent({ orderId }: { orderId?: string }) {
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-primary/5 to-green-50 -z-10"></div>
-      <div className="absolute top-20 left-20 w-72 h-72 bg-olive-gradient opacity-10 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-20 w-96 h-96 bg-olive-gradient opacity-10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="max-w-3xl mx-auto w-full">
-        <Card className="border-2 border-green-200 shadow-2xl overflow-hidden animate-fadeInUp">
+        <Card className="border border-border shadow-lg overflow-hidden">
           <CardContent className="pt-12 pb-12 px-6 md:px-12">
             {/* Success Icon */}
-            <div className="relative mb-8">
-              <div className="absolute inset-0 bg-olive-gradient opacity-20 rounded-full blur-2xl animate-pulse"></div>
-              <div className="relative bg-gradient-to-br from-green-500 to-green-600 rounded-full p-6 inline-block shadow-xl">
-                <CheckCircle className="h-16 w-16 md:h-20 md:w-20 text-white animate-bounce" />
+            <div className="mb-8">
+              <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-full p-6 inline-block shadow-lg">
+                <CheckCircle className="h-16 w-16 md:h-20 md:w-20 text-white" strokeWidth={2.5} />
               </div>
             </div>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-gradient animate-fadeIn">
-              🎉 Siparişiniz Alındı!
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-gradient">
+              Siparişiniz Alındı!
             </h1>
             
-            <p className="text-lg text-muted-foreground mb-6 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+            <p className="text-lg text-muted-foreground mb-6">
               Ödemeniz başarıyla tamamlandı. Teşekkür ederiz!
             </p>
 
             {/* Order Number */}
             {orderId && (
-              <div className="mb-8 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
-                <Badge variant="secondary" className="text-lg px-6 py-3">
-                  <Package className="mr-2 h-5 w-5" />
-                  Sipariş No: <span className="font-bold ml-2">{orderId}</span>
+              <div className="mb-8">
+                <Badge variant="secondary" className="text-base px-5 py-2.5 font-medium">
+                  <Package className="mr-2 h-4 w-4" />
+                  Sipariş No: <span className="font-bold ml-1">{orderId}</span>
                 </Badge>
               </div>
             )}
 
             {/* Info Cards */}
             <div className="grid md:grid-cols-3 gap-4 mb-8 text-left">
-              <Card className="border-2 border-green-100 bg-gradient-to-br from-green-50 to-white animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-                <CardContent className="p-4">
-                  <Truck className="h-8 w-8 text-green-600 mb-2" />
-                  <h3 className="font-semibold mb-1 text-sm">Hızlı Kargo</h3>
-                  <p className="text-xs text-muted-foreground">En kısa sürede kargoya verilecek</p>
-                </CardContent>
-              </Card>
+              <div className="border rounded-lg p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
+                <Truck className="h-7 w-7 text-green-600 mb-2" />
+                <h3 className="font-semibold mb-1 text-sm">Hızlı Kargo</h3>
+                <p className="text-xs text-muted-foreground">En kısa sürede kargoya verilecek</p>
+              </div>
               
-              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-white animate-fadeInUp" style={{ animationDelay: '0.4s' }}>
-                <CardContent className="p-4">
-                  <Mail className="h-8 w-8 text-primary mb-2" />
-                  <h3 className="font-semibold mb-1 text-sm">E-posta Onayı</h3>
-                  <p className="text-xs text-muted-foreground">Detaylı bilgi gönderildi</p>
-                </CardContent>
-              </Card>
+              <div className="border rounded-lg p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
+                <Mail className="h-7 w-7 text-primary mb-2" />
+                <h3 className="font-semibold mb-1 text-sm">E-posta Onayı</h3>
+                <p className="text-xs text-muted-foreground">Detaylı bilgi gönderildi</p>
+              </div>
               
-              <Card className="border-2 border-green-100 bg-gradient-to-br from-green-50 to-white animate-fadeInUp" style={{ animationDelay: '0.5s' }}>
-                <CardContent className="p-4">
-                  <Leaf className="h-8 w-8 text-green-600 mb-2" />
-                  <h3 className="font-semibold mb-1 text-sm">Premium Kalite</h3>
-                  <p className="text-xs text-muted-foreground">%100 doğal ürünler</p>
-                </CardContent>
-              </Card>
+              <div className="border rounded-lg p-4 bg-muted/30 hover:bg-muted/50 transition-colors">
+                <Leaf className="h-7 w-7 text-green-600 mb-2" />
+                <h3 className="font-semibold mb-1 text-sm">Premium Kalite</h3>
+                <p className="text-xs text-muted-foreground">%100 doğal ürünler</p>
+              </div>
             </div>
 
             {/* Message */}
-            <p className="text-muted-foreground mb-8 animate-fadeIn" style={{ animationDelay: '0.6s' }}>
+            <p className="text-muted-foreground mb-8">
               Siparişinizin durumunu <span className="font-semibold text-primary">Siparişlerim</span> sayfasından takip edebilirsiniz.
             </p>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fadeIn" style={{ animationDelay: '0.7s' }}>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/profile/orders">
-                <Button size="lg" className="bg-olive-gradient hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl w-full sm:w-auto">
+                <Button size="lg" className="bg-olive-gradient hover:opacity-90 transition-all w-full sm:w-auto">
                   <Package className="mr-2 h-5 w-5" />
                   Siparişlerimi Görüntüle
                 </Button>
               </Link>
               <Link href="/">
-                <Button size="lg" variant="outline" className="border-2 hover:bg-primary/5 transition-all duration-300 w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="hover:bg-muted transition-all w-full sm:w-auto">
                   <Home className="mr-2 h-5 w-5" />
                   Ana Sayfaya Dön
                 </Button>
@@ -92,7 +80,7 @@ function SuccessContent({ orderId }: { orderId?: string }) {
             </div>
 
             {/* Thank You Message */}
-            <div className="mt-8 pt-8 border-t animate-fadeIn" style={{ animationDelay: '0.8s' }}>
+            <div className="mt-8 pt-8 border-t">
               <p className="text-sm text-muted-foreground">
                 Bizi tercih ettiğiniz için teşekkür ederiz! 🌿
               </p>
