@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DeleteConfirmationDialog } from "@/components/admin/delete-confirmation-dialog";
 import { MapPin, Trash2, Star, Edit } from "lucide-react";
 import { deleteAddress, setDefaultAddress, updateAddress } from "@/actions/addresses";
 import { useToast } from "@/hooks/use-toast";
@@ -36,15 +37,16 @@ interface AddressCardProps {
 export function AddressCard({ address }: AddressCardProps) {
   const [loading, setLoading] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [updating, setUpdating] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
-  const handleDelete = async () => {
-    if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) {
-      return;
-    }
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true);
+  };
 
+  const handleDeleteConfirm = async () => {
     setLoading(true);
     const result = await deleteAddress(address.id);
 
@@ -62,6 +64,7 @@ export function AddressCard({ address }: AddressCardProps) {
       });
       setLoading(false);
     }
+    setShowDeleteDialog(false);
   };
 
   const handleSetDefault = async () => {
@@ -176,7 +179,7 @@ export function AddressCard({ address }: AddressCardProps) {
             <Button
               variant="destructive"
               size="sm"
-              onClick={handleDelete}
+              onClick={handleDeleteClick}
               disabled={loading}
               className="ml-auto"
             >
@@ -311,6 +314,16 @@ export function AddressCard({ address }: AddressCardProps) {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDeleteConfirm}
+        title={address.title}
+        description="Bu adres kalıcı olarak silinecektir."
+        loading={loading}
+      />
     </>
   );
 }

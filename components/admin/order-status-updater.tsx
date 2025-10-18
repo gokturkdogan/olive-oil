@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { StatusConfirmationDialog } from "./status-confirmation-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { updateOrderStatus } from "@/actions/admin";
@@ -76,6 +77,13 @@ interface OrderStatusUpdaterProps {
 
 export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdaterProps) {
   const [loading, setLoading] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    newStatus: OrderStatus | null;
+  }>({
+    open: false,
+    newStatus: null,
+  });
   const { toast } = useToast();
   const router = useRouter();
 
@@ -83,14 +91,19 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
   const prevStatus = currentFlow?.prev;
   const nextStatus = currentFlow?.next;
 
-  const handleUpdateStatus = async (newStatus: OrderStatus) => {
-    if (!confirm(`Sipariş durumunu "${statusFlow[newStatus as keyof typeof statusFlow]?.label}" olarak değiştirmek istediğinize emin misiniz?`)) {
-      return;
-    }
+  const handleStatusClick = (newStatus: OrderStatus) => {
+    setConfirmDialog({
+      open: true,
+      newStatus,
+    });
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (!confirmDialog.newStatus) return;
 
     setLoading(true);
 
-    const result = await updateOrderStatus(orderId, newStatus);
+    const result = await updateOrderStatus(orderId, confirmDialog.newStatus);
 
     if (result.success) {
       toast({
@@ -107,6 +120,7 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
     }
 
     setLoading(false);
+    setConfirmDialog({ open: false, newStatus: null });
   };
 
   // Don't show updater for terminal states
@@ -118,7 +132,15 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
     );
   }
 
+  const newStatusLabel = confirmDialog.newStatus 
+    ? statusFlow[confirmDialog.newStatus as keyof typeof statusFlow]?.label || ""
+    : "";
+  const newStatusColor = confirmDialog.newStatus
+    ? statusFlow[confirmDialog.newStatus as keyof typeof statusFlow]?.color || ""
+    : "";
+
   return (
+    <>
     <div className="space-y-6">
       <div>
         <p className="text-sm text-gray-600 mb-2">Mevcut Durum</p>
@@ -169,21 +191,21 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
             {prevStatus && (
               <Button
                 variant="outline"
-                onClick={() => handleUpdateStatus(prevStatus as OrderStatus)}
+                onClick={() => handleStatusClick(prevStatus as OrderStatus)}
                 disabled={loading}
                 className="flex items-center gap-2"
               >
                 <ChevronLeft className="h-4 w-4" />
-                {loading ? "Güncelleniyor..." : `${statusFlow[prevStatus as keyof typeof statusFlow].label}`}
+                {statusFlow[prevStatus as keyof typeof statusFlow].label}
               </Button>
             )}
             {nextStatus && (
               <Button
-                onClick={() => handleUpdateStatus(nextStatus as OrderStatus)}
+                onClick={() => handleStatusClick(nextStatus as OrderStatus)}
                 disabled={loading}
                 className="flex items-center gap-2 bg-olive-gradient"
               >
-                {loading ? "Güncelleniyor..." : `${statusFlow[nextStatus as keyof typeof statusFlow].label}`}
+                {statusFlow[nextStatus as keyof typeof statusFlow].label}
                 <ChevronRight className="h-4 w-4" />
               </Button>
             )}
@@ -201,7 +223,7 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
                 key={status.value}
                 variant={currentStatus === status.value ? "default" : "outline"}
                 size="sm"
-                onClick={() => handleUpdateStatus(status.value)}
+                onClick={() => handleStatusClick(status.value)}
                 disabled={loading || currentStatus === status.value}
                 className={`${
                   currentStatus === status.value 
@@ -223,7 +245,7 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => handleUpdateStatus("CANCELLED")}
+            onClick={() => handleStatusClick("CANCELLED")}
             disabled={loading}
           >
             Siparişi İptal Et
@@ -231,5 +253,17 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
         </div>
       )}
     </div>
+
+    {/* Status Confirmation Dialog */}
+    <StatusConfirmationDialog
+      open={confirmDialog.open}
+      onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}
+      onConfirm={handleConfirmStatusChange}
+      currentStatus={currentFlow?.label || currentStatus}
+      newStatus={newStatusLabel}
+      statusColor={newStatusColor}
+      loading={loading}
+    />
+    </>
   );
 }

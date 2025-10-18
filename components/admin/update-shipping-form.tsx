@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ClearShippingDialog } from "./clear-shipping-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { updateOrderShipping } from "@/actions/admin";
@@ -23,6 +24,7 @@ export function UpdateShippingForm({
   const [shippingProvider, setShippingProvider] = useState(initialProvider);
   const [trackingCode, setTrackingCode] = useState(initialCode);
   const [loading, setLoading] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -57,14 +59,17 @@ export function UpdateShippingForm({
     setLoading(false);
   };
 
-  const handleClear = () => {
-    if (confirm("Kargo bilgilerini temizlemek istediğinize emin misiniz?")) {
-      setShippingProvider("");
-      setTrackingCode("");
-    }
+  const handleClearClick = () => {
+    setShowClearDialog(true);
+  };
+
+  const handleClearConfirm = () => {
+    setShippingProvider("");
+    setTrackingCode("");
   };
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="shippingProvider" className="flex items-center gap-2">
@@ -113,7 +118,7 @@ export function UpdateShippingForm({
           <Button
             type="button"
             variant="outline"
-            onClick={handleClear}
+            onClick={handleClearClick}
             disabled={loading}
           >
             Temizle
@@ -128,5 +133,16 @@ export function UpdateShippingForm({
         </p>
       )}
     </form>
+
+    {/* Clear Confirmation Dialog */}
+    <ClearShippingDialog
+      open={showClearDialog}
+      onOpenChange={setShowClearDialog}
+      onConfirm={handleClearConfirm}
+      shippingProvider={shippingProvider}
+      trackingCode={trackingCode}
+      loading={loading}
+    />
+    </>
   );
 }

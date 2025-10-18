@@ -73,7 +73,17 @@ export async function login(formData: FormData) {
     });
 
     if (!result?.error) {
-      redirect("/");
+      // Check user role to determine redirect path
+      const user = await db.user.findUnique({
+        where: { email },
+        select: { role: true },
+      });
+
+      if (user?.role === "ADMIN") {
+        redirect("/admin");
+      } else {
+        redirect("/");
+      }
     }
 
     return { error: "Geçersiz e-posta veya şifre" };

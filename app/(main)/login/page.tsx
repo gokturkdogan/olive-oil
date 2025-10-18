@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { login } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,6 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,10 +35,8 @@ export default function LoginPage() {
       if (result?.error) {
         setError(result.error);
         setLoading(false);
-      } else {
-        // Başarılı login - redirect edilecek
-        router.push("/");
       }
+      // Success case handled by server action redirect
     } catch (err) {
       setError("Bir hata oluştu");
       setLoading(false);

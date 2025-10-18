@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { AdminUserMenu } from "@/components/admin/admin-user-menu";
 import { Shield } from "lucide-react";
 
 export default async function AdminLayout({
@@ -29,7 +30,11 @@ export default async function AdminLayout({
                 <p className="text-xs text-muted-foreground -mt-0.5">Yönetim Sistemi</p>
               </div>
             </Link>
-            <AdminNav />
+            <div className="flex items-center gap-4">
+              <AdminNav />
+              <div className="h-8 w-px bg-gray-200 hidden md:block"></div>
+              <AdminUserMenu user={session.user} />
+            </div>
           </div>
         </div>
       </div>
