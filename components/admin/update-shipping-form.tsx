@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { updateOrderShipping } from "@/actions/admin";
+import { Truck, Package } from "lucide-react";
 
 interface UpdateShippingFormProps {
   orderId: string;
@@ -24,6 +25,10 @@ export function UpdateShippingForm({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  const hasChanges = 
+    shippingProvider !== initialProvider || 
+    trackingCode !== initialCode;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,34 +57,76 @@ export function UpdateShippingForm({
     setLoading(false);
   };
 
+  const handleClear = () => {
+    if (confirm("Kargo bilgilerini temizlemek istediğinize emin misiniz?")) {
+      setShippingProvider("");
+      setTrackingCode("");
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="shippingProvider">Kargo Şirketi</Label>
+        <Label htmlFor="shippingProvider" className="flex items-center gap-2">
+          <Truck className="h-4 w-4 text-primary" />
+          Kargo Şirketi
+        </Label>
         <Input
           id="shippingProvider"
           value={shippingProvider}
           onChange={(e) => setShippingProvider(e.target.value)}
-          placeholder="Örn: Aras Kargo, Yurtiçi Kargo"
-          required
+          placeholder="Örn: Aras Kargo, Yurtiçi Kargo, MNG Kargo"
+          className="mt-1.5"
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Kargo şirketinin tam adını girin
+        </p>
       </div>
 
       <div>
-        <Label htmlFor="trackingCode">Takip Kodu</Label>
+        <Label htmlFor="trackingCode" className="flex items-center gap-2">
+          <Package className="h-4 w-4 text-primary" />
+          Takip Kodu
+        </Label>
         <Input
           id="trackingCode"
           value={trackingCode}
           onChange={(e) => setTrackingCode(e.target.value)}
           placeholder="Takip numarası"
-          required
+          className="mt-1.5 font-mono"
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Kargo takip numarasını girin
+        </p>
       </div>
 
-      <Button type="submit" disabled={loading}>
-        {loading ? "Kaydediliyor..." : "Kargo Bilgilerini Güncelle"}
-      </Button>
+      <div className="flex gap-2 pt-2">
+        <Button 
+          type="submit" 
+          disabled={loading || !hasChanges}
+          className="bg-olive-gradient"
+        >
+          {loading ? "Kaydediliyor..." : "Kargo Bilgilerini Güncelle"}
+        </Button>
+        
+        {(shippingProvider || trackingCode) && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleClear}
+            disabled={loading}
+          >
+            Temizle
+          </Button>
+        )}
+      </div>
+
+      {!hasChanges && (shippingProvider || trackingCode) && (
+        <p className="text-xs text-green-600 flex items-center gap-1">
+          <span className="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
+          Kayıtlı bilgiler görüntüleniyor
+        </p>
+      )}
     </form>
   );
 }
-

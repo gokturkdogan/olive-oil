@@ -178,33 +178,59 @@ export default async function OrderDetailPage({
         </CardContent>
       </Card>
 
-      {/* Order Status Management */}
-      {order.status !== "FAILED" && order.status !== "CANCELLED" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Sipariş Durumu Yönetimi</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <OrderStatusUpdater orderId={id} currentStatus={order.status} />
-          </CardContent>
-        </Card>
-      )}
+      {/* Two Column Layout for Status and Shipping */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Order Status Management */}
+        {order.status !== "FAILED" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Sipariş Durumu Yönetimi</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <OrderStatusUpdater orderId={id} currentStatus={order.status} />
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Shipping Info */}
-      {(order.status === "PAID" || order.status === "PROCESSING") && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Kargo Bilgileri</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UpdateShippingForm
-              orderId={id}
-              shippingProvider={order.shipping_provider || ""}
-              trackingCode={order.tracking_code || ""}
-            />
-          </CardContent>
-        </Card>
-      )}
+        {/* Shipping Info - Available for all active orders */}
+        {order.status !== "FAILED" && order.status !== "CANCELLED" && order.status !== "PENDING" && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Kargo Bilgileri</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <UpdateShippingForm
+                orderId={id}
+                shippingProvider={order.shipping_provider || ""}
+                trackingCode={order.tracking_code || ""}
+              />
+              
+              {/* Show current shipping info if exists */}
+              {(order.shipping_provider || order.tracking_code) && (
+                <div className="mt-6 pt-6 border-t space-y-3">
+                  <p className="text-sm font-medium text-gray-700">Mevcut Kargo Bilgileri</p>
+                  <div className="bg-primary/5 rounded-lg p-4 space-y-2">
+                    {order.shipping_provider && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Kargo Şirketi:</span>
+                        <span className="text-sm font-medium">{order.shipping_provider}</span>
+                      </div>
+                    )}
+                    {order.tracking_code && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Takip Kodu:</span>
+                        <span className="text-sm font-medium font-mono bg-white px-2 py-1 rounded">
+                          {order.tracking_code}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }
