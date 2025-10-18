@@ -147,6 +147,7 @@ export async function addToCart(productId: string, quantity: number = 1) {
     }
 
     revalidatePath("/cart");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Add to cart error:", error);
@@ -164,6 +165,7 @@ export async function removeFromCart(itemId: string) {
     });
 
     revalidatePath("/cart");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Remove from cart error:", error);
@@ -199,6 +201,7 @@ export async function updateCartItemQuantity(itemId: string, quantity: number) {
     });
 
     revalidatePath("/cart");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("Update cart item error:", error);
