@@ -143,3 +143,68 @@ export async function setDefaultAddress(addressId: string) {
   }
 }
 
+/**
+ * Adresi günceller
+ */
+export async function updateAddress(
+  addressId: string,
+  data: {
+    title: string;
+    name: string;
+    phone: string;
+    addressLine1: string;
+    addressLine2?: string;
+    city: string;
+    district: string;
+    postalCode: string;
+    isDefault?: boolean;
+  }
+) {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return { success: false, error: "Giriş yapmalısınız" };
+    }
+
+    // Verify ownership
+    const address = await db.address.findUnique({
+      where: { id: addressId },
+    });
+
+    if (!address || address.user_id !== session.user.id) {
+      return { success: false, error: "Adres bulunamadı" };
+    }
+
+    // If this is set as default, unset others
+    if (data.isDefault) {
+      await db.address.updateMany({
+        where: { user_id: session.user.id, is_default: true },
+        data: { is_default: false },
+      });
+    }
+
+    await db.address.update({
+      where: { id: addressId },
+      data: {
+        title: data.title,
+        name: data.name,
+        phone: data.phone,
+        address_line1: data.addressLine1,
+        address_line2: data.addressLine2 || null,
+        city: data.city,
+        district: data.district,
+        postal_code: data.postalCode,
+        is_default: data.isDefault || false,
+      },
+    });
+
+    revalidatePath("/profile/addresses");
+    revalidatePath("/checkout");
+    return { success: true };
+  } catch (error) {
+    console.error("Update address error:", error);
+    return { success: false, error: "Adres güncellenemedi" };
+  }
+}
+
