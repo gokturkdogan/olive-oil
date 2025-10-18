@@ -56,6 +56,17 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                 pathname.startsWith("/products") ? "w-full" : "w-0 group-hover:w-full"
               }`}></span>
             </Link>
+            <Link
+              href="/loyalty"
+              className={`relative text-sm font-medium transition-all duration-300 group ${
+                pathname === "/loyalty" ? "text-primary" : "text-foreground hover:text-primary"
+              }`}
+            >
+              Sadakat Programı
+              <span className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
+                pathname === "/loyalty" ? "w-full" : "w-0 group-hover:w-full"
+              }`}></span>
+            </Link>
             {session?.user?.role === "ADMIN" && (
               <Link
                 href="/admin"
@@ -208,6 +219,17 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Ürünler
+              </Link>
+              <Link
+                href="/loyalty"
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  pathname === "/loyalty"
+                    ? "text-primary bg-primary/10" 
+                    : "text-foreground hover:text-primary hover:bg-primary/5"
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sadakat Programı
               </Link>
               {session?.user?.role === "ADMIN" && (
                 <Link
