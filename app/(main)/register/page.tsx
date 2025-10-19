@@ -37,11 +37,17 @@ export default function RegisterPage() {
       if (result?.error) {
         setError(result.error);
         setLoading(false);
-      } else {
-        // Başarılı kayıt - redirect edilecek
-        router.push("/");
       }
-    } catch (err) {
+      // Success case handled by server action redirect
+    } catch (err: any) {
+      // Next.js redirect() throws a special error with 'digest' property
+      // This is expected behavior - don't show error message for redirects
+      if (err && typeof err === 'object' && 'digest' in err) {
+        // This is a redirect, do nothing - let it happen
+        return;
+      }
+      
+      // Only show error for actual errors
       setError("Bir hata oluştu");
       setLoading(false);
     }

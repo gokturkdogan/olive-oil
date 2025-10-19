@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { getCart } from "@/actions/cart";
 import { validateCoupon, incrementCouponUsage } from "@/lib/coupons";
+import { calculateShippingFee } from "@/lib/shipping";
 import { redirect } from "next/navigation";
 import { createCheckoutForm } from "@/lib/iyzico";
 
@@ -44,6 +45,17 @@ export async function createOrder(data: CreateOrderData) {
       return { success: false, error: "Sepetiniz boş" };
     }
 
+    // Get user's loyalty tier for shipping calculation
+    let loyaltyTier = "STANDARD";
+    if (session?.user?.id) {
+      const user = await db.user.findUnique({
+        where: { id: session.user.id },
+        select: { loyalty_tier: true },
+      });
+      loyaltyTier = user?.loyalty_tier || "STANDARD";
+    }
+    console.log("🎖️ Loyalty Tier:", loyaltyTier);
+
     // Calculate subtotal
     const subtotal = cart.items.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
@@ -63,8 +75,9 @@ export async function createOrder(data: CreateOrderData) {
       validCoupon = couponResult.coupon;
     }
 
-    // Calculate shipping fee (free for now)
-    const shippingFee = 0;
+    // Calculate shipping fee based on loyalty tier and subtotal
+    const shippingFee = calculateShippingFee(subtotal, loyaltyTier as any);
+    console.log("🚚 Shipping Fee:", shippingFee, "(Subtotal:", subtotal, ")");
 
     // Calculate total
     const total = subtotal - discountTotal + shippingFee;

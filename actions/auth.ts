@@ -49,6 +49,11 @@ export async function register(formData: FormData) {
       redirect: false,
     });
   } catch (error) {
+    // Next.js redirect() throws a special error - we need to re-throw it
+    if (error && typeof error === 'object' && 'digest' in error) {
+      throw error; // Re-throw redirect errors
+    }
+    
     if (error instanceof AuthError) {
       return { error: "Kayıt başarılı ancak giriş yapılamadı" };
     }
@@ -79,6 +84,7 @@ export async function login(formData: FormData) {
         select: { role: true },
       });
 
+      // redirect() throws NEXT_REDIRECT error which is expected
       if (user?.role === "ADMIN") {
         redirect("/admin");
       } else {
@@ -88,6 +94,11 @@ export async function login(formData: FormData) {
 
     return { error: "Geçersiz e-posta veya şifre" };
   } catch (error) {
+    // Next.js redirect() throws a special error - we need to re-throw it
+    if (error && typeof error === 'object' && 'digest' in error) {
+      throw error; // Re-throw redirect errors
+    }
+    
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":

@@ -1,14 +1,28 @@
 import Link from "next/link";
+import { auth } from "@/auth";
 import { getCart } from "@/actions/cart";
+import { db } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/money";
+import { calculateShippingFee, getRemainingForFreeShipping } from "@/lib/shipping";
 import { CartItem } from "@/components/cart-item";
-import { ShoppingBag, ArrowRight, Leaf, Package } from "lucide-react";
+import { ShoppingBag, ArrowRight, Leaf, Package, Truck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default async function CartPage() {
+  const session = await auth();
   const cart = await getCart();
+  
+  // Get user's loyalty tier
+  let loyaltyTier = "STANDARD";
+  if (session?.user?.id) {
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { loyalty_tier: true },
+    });
+    loyaltyTier = user?.loyalty_tier || "STANDARD";
+  }
 
   if (!cart || cart.items.length === 0) {
     return (
@@ -43,6 +57,11 @@ export default async function CartPage() {
   );
 
   const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  
+  // Calculate shipping based on loyalty tier
+  const shippingCost = calculateShippingFee(subtotal, loyaltyTier as any);
+  const remainingForFreeShipping = getRemainingForFreeShipping(subtotal, loyaltyTier as any);
+  const total = subtotal + shippingCost;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -56,10 +75,12 @@ export default async function CartPage() {
               <span>{totalItems} ürün</span>
             </p>
           </div>
-          <Badge variant="secondary" className="text-lg px-4 py-2">
-            <Leaf className="h-4 w-4 mr-2" />
-            Ücretsiz Kargo
-          </Badge>
+          {shippingCost === 0 && subtotal > 0 && (
+            <Badge variant="secondary" className="text-lg px-4 py-2 bg-green-100 text-green-700 border-green-300">
+              <Truck className="h-4 w-4 mr-2" />
+              Ücretsiz Kargo
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -94,14 +115,40 @@ export default async function CartPage() {
                   <span className="font-medium">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Kargo</span>
-                  <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
-                    Ücretsiz
-                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <Truck className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">Kargo</span>
+                  </div>
+                  {shippingCost === 0 ? (
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
+                      Ücretsiz
+                    </Badge>
+                  ) : (
+                    <span className="font-medium">{formatPrice(shippingCost)}</span>
+                  )}
                 </div>
+                
+                {/* Free shipping progress */}
+                {remainingForFreeShipping !== null && remainingForFreeShipping > 0 && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg animate-fadeInUp">
+                    <p className="text-xs text-amber-800 font-medium">
+                      ✨ Ücretsiz kargo için sadece {formatPrice(remainingForFreeShipping)} daha ekleyin!
+                    </p>
+                  </div>
+                )}
+                
+                {shippingCost === 0 && subtotal > 0 && (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg animate-fadeInUp">
+                    <p className="text-xs text-green-800 font-medium flex items-center gap-1">
+                      <Truck className="h-4 w-4" />
+                      🎉 Ücretsiz kargo kazandınız!
+                    </p>
+                  </div>
+                )}
+                
                 <div className="border-t pt-3 flex justify-between items-center">
                   <span className="text-lg font-semibold">Toplam</span>
-                  <span className="text-2xl font-bold text-gradient">{formatPrice(subtotal)}</span>
+                  <span className="text-2xl font-bold text-gradient">{formatPrice(total)}</span>
                 </div>
               </div>
 

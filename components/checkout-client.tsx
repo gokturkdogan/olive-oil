@@ -16,8 +16,9 @@ import {
 import { createOrder } from "@/actions/orders";
 import { createAddress, getUserAddresses } from "@/actions/addresses";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingBag, Package, Plus, MapPin, CheckCircle2, Home } from "lucide-react";
+import { ShoppingBag, Package, Plus, MapPin, CheckCircle2, Home, Truck } from "lucide-react";
 import { formatPrice } from "@/lib/money";
+import { calculateShippingFee, getRemainingForFreeShipping } from "@/lib/shipping";
 import Image from "next/image";
 
 interface Address {
@@ -37,9 +38,10 @@ interface CheckoutClientProps {
   session: any;
   cart: any;
   addresses: Address[];
+  loyaltyTier: string;
 }
 
-export function CheckoutClient({ session, cart, addresses: initialAddresses }: CheckoutClientProps) {
+export function CheckoutClient({ session, cart, addresses: initialAddresses, loyaltyTier }: CheckoutClientProps) {
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
@@ -57,7 +59,11 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses }: C
     (sum: number, item: any) => sum + item.product.price * item.quantity,
     0
   ) || 0;
-  const shippingCost = subtotal > 0 ? 50 : 0;
+  
+  // Dynamic shipping fee based on loyalty tier
+  const shippingCost = calculateShippingFee(subtotal, loyaltyTier as any);
+  const remainingForFreeShipping = getRemainingForFreeShipping(subtotal, loyaltyTier as any);
+  
   const total = subtotal + shippingCost;
 
   const handleAddressSelect = (addressId: string) => {
@@ -289,9 +295,33 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses }: C
                     <span className="font-medium">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Kargo</span>
-                    <span className="font-medium">{formatPrice(shippingCost)}</span>
+                    <div className="flex items-center gap-1">
+                      <Truck className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Kargo</span>
+                    </div>
+                    <span className={`font-medium ${shippingCost === 0 ? 'text-green-600' : ''}`}>
+                      {shippingCost === 0 ? 'Ücretsiz' : formatPrice(shippingCost)}
+                    </span>
                   </div>
+                  
+                  {/* Free shipping progress */}
+                  {remainingForFreeShipping !== null && remainingForFreeShipping > 0 && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <p className="text-xs text-amber-800 font-medium">
+                        ✨ Ücretsiz kargo için sadece {formatPrice(remainingForFreeShipping)} daha ekleyin!
+                      </p>
+                    </div>
+                  )}
+                  
+                  {shippingCost === 0 && subtotal > 0 && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-xs text-green-800 font-medium flex items-center gap-1">
+                        <Truck className="h-4 w-4" />
+                        🎉 Ücretsiz kargo kazandınız!
+                      </p>
+                    </div>
+                  )}
+                  
                   <div className="flex justify-between text-lg font-bold pt-3 border-t">
                     <span>Toplam</span>
                     <span className="text-primary">{formatPrice(total)}</span>
