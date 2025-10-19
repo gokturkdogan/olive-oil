@@ -92,18 +92,20 @@ function SuccessContent({ orderId }: { orderId?: string }) {
   );
 }
 
-export default function SuccessPage({
+export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: { order?: string };
+  searchParams: Promise<{ order?: string }>;
 }) {
+  const params = await searchParams;
+  
   return (
     <Suspense fallback={
       <div className="min-h-[80vh] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     }>
-      <SuccessContent orderId={searchParams.order} />
+      <SuccessContent orderId={params.order} />
     </Suspense>
   );
 }
