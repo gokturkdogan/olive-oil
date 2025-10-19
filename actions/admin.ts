@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { OrderStatus } from "@prisma/client";
+import { calculateLoyaltyTier } from "@/lib/loyalty";
 
 /**
  * Sipariş durumunu günceller (Admin)
@@ -16,10 +17,52 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
       return { success: false, error: "Yetkisiz erişim" };
     }
 
+    // Get order details before updating
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      select: {
+        id: true,
+        user_id: true,
+        total: true,
+        status: true,
+      },
+    });
+
+    if (!order) {
+      return { success: false, error: "Sipariş bulunamadı" };
+    }
+
+    // Update order status
     await db.order.update({
       where: { id: orderId },
       data: { status },
     });
+
+    // If status changed to DELIVERED and user exists, update loyalty
+    if (status === "DELIVERED" && order.user_id && order.status !== "DELIVERED") {
+      // Get current user data
+      const user = await db.user.findUnique({
+        where: { id: order.user_id },
+        select: { total_spent: true },
+      });
+
+      if (user) {
+        // Calculate new total spent
+        const newTotalSpent = user.total_spent + order.total;
+
+        // Calculate new loyalty tier
+        const newLoyaltyTier = calculateLoyaltyTier(newTotalSpent);
+
+        // Update user
+        await db.user.update({
+          where: { id: order.user_id },
+          data: {
+            total_spent: newTotalSpent,
+            loyalty_tier: newLoyaltyTier,
+          },
+        });
+      }
+    }
 
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath("/admin/orders");

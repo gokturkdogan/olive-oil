@@ -1,0 +1,4 @@
+-- AddLoyaltyProgram
+ALTER TABLE "users" ADD COLUMN "loyalty_tier" TEXT NOT NULL DEFAULT 'STANDARD';
+ALTER TABLE "users" ADD COLUMN "total_spent" INTEGER NOT NULL DEFAULT 0;
+

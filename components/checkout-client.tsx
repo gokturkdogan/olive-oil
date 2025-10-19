@@ -178,22 +178,35 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses }: C
     };
 
     try {
-      const result = await createOrder(data);
+      console.log("🛒 Sipariş oluşturuluyor...");
+      
+      // 15 saniye timeout
+      const orderPromise = createOrder(data);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("İstek zaman aşımına uğradı (15s)")), 15000)
+      );
+      
+      const result = await Promise.race([orderPromise, timeoutPromise]) as any;
+
+      console.log("Order result:", result);
 
       if (result.success && result.paymentPageUrl) {
+        console.log("✅ Ödeme sayfasına yönlendiriliyor...");
         window.location.href = result.paymentPageUrl;
       } else {
+        console.error("❌ Sipariş hatası:", result.error);
         toast({
-          title: "Hata",
-          description: result.error || "Sipariş oluşturulamadı",
+          title: "Ödeme Hatası",
+          description: result.error || "Sipariş oluşturulamadı. Lütfen tekrar deneyin.",
           variant: "destructive",
         });
         setLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("💥 Checkout error:", error);
       toast({
-        title: "Hata",
-        description: "Bir hata oluştu",
+        title: error.message?.includes("zaman aşımı") ? "Bağlantı Zaman Aşımı" : "Bağlantı Hatası",
+        description: error.message || "Bir hata oluştu. Lütfen tekrar deneyin.",
         variant: "destructive",
       });
       setLoading(false);

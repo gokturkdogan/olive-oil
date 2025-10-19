@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/money";
 import { UpdateShippingForm } from "@/components/admin/update-shipping-form";
 import { OrderStatusUpdater } from "@/components/admin/order-status-updater";
+import { LOYALTY_LABELS, LOYALTY_COLORS } from "@/lib/loyalty";
+import { Star, Award, Gem, Crown } from "lucide-react";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-800",
@@ -27,6 +29,21 @@ const statusLabels: Record<string, string> = {
   CANCELLED: "İptal Edildi",
   FULFILLED: "Tamamlandı",
 };
+
+// Helper function to get tier icon component
+function getTierIcon(tier: keyof typeof LOYALTY_LABELS, className?: string) {
+  const iconProps = { className: className || "h-4 w-4" };
+  switch (tier) {
+    case "DIAMOND":
+      return <Crown {...iconProps} />;
+    case "PLATINUM":
+      return <Gem {...iconProps} />;
+    case "GOLD":
+      return <Award {...iconProps} />;
+    default:
+      return <Star {...iconProps} />;
+  }
+}
 
 export default async function OrderDetailPage({
   params,
@@ -133,6 +150,15 @@ export default async function OrderDetailPage({
               <p className="text-gray-600">Telefon</p>
               <p className="font-medium">{order.shipping_phone}</p>
             </div>
+            {order.user && (
+              <div>
+                <p className="text-gray-600 mb-1">Müşteri Seviyesi</p>
+                <Badge className={`${LOYALTY_COLORS[order.user.loyalty_tier as keyof typeof LOYALTY_LABELS]} flex items-center gap-2 w-fit`}>
+                  {getTierIcon(order.user.loyalty_tier as keyof typeof LOYALTY_LABELS, "h-4 w-4")}
+                  {LOYALTY_LABELS[order.user.loyalty_tier as keyof typeof LOYALTY_LABELS]}
+                </Badge>
+              </div>
+            )}
             <div>
               <p className="text-gray-600">Teslimat Adresi</p>
               <p className="font-medium">

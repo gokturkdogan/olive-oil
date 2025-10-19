@@ -186,14 +186,29 @@ export async function createOrder(data: CreateOrderData) {
       })),
     };
 
-    const paymentResult = await createCheckoutForm(iyzicoParams);
-
-    if (paymentResult.status !== "success") {
+    console.log("🚀 İyzico API çağrılıyor...");
+    
+    let paymentResult;
+    try {
+      paymentResult = await createCheckoutForm(iyzicoParams);
+      console.log("📥 İyzico yanıt aldı:", paymentResult);
+    } catch (error: any) {
+      console.error("❌ İyzico API hatası:", error.message);
       // Delete order if payment initialization failed
       await db.order.delete({ where: { id: order.id } });
       return {
         success: false,
-        error: "Ödeme başlatılamadı. Lütfen tekrar deneyin.",
+        error: error.message || "İyzico bağlantı hatası. Lütfen tekrar deneyin.",
+      };
+    }
+
+    if (paymentResult.status !== "success") {
+      console.error("⚠️ İyzico başarısız status:", paymentResult);
+      // Delete order if payment initialization failed
+      await db.order.delete({ where: { id: order.id } });
+      return {
+        success: false,
+        error: paymentResult.errorMessage || "Ödeme başlatılamadı. Lütfen tekrar deneyin.",
       };
     }
 

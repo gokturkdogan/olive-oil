@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
       apiKey: process.env.IYZICO_API_KEY,
       secretKey: process.env.IYZICO_SECRET_KEY,
       uri: process.env.IYZICO_BASE_URL || "https://sandbox-api.iyzipay.com",
+      timeout: 10000, // 10 saniye timeout
     });
 
     return new Promise((resolve) => {

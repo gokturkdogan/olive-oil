@@ -119,8 +119,6 @@ export async function createCheckoutForm(
   try {
     console.log("İyzico Request Params:", JSON.stringify(params, null, 2));
     
-    // API route'u çağır (iyzipay paketi orada kullanılıyor)
-    // Server-side: use full URL, Client-side: use relative
     const baseUrl = typeof window === 'undefined' 
       ? (process.env.NEXTAUTH_URL || "http://localhost:3000")
       : '';
