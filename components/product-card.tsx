@@ -42,6 +42,7 @@ export function ProductCard({ product }: ProductCardProps) {
       toast({
         title: "Sepete Eklendi! 🎉",
         description: `${product.title} sepetinize eklendi.`,
+        variant: "success" as any,
       });
       
       // 2 saniye sonra "added" state'ini sıfırla

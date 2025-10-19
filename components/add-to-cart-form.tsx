@@ -29,8 +29,9 @@ export function AddToCartForm({ productId, inStock }: AddToCartFormProps) {
 
       if (result.success) {
         toast({
-          title: "Sepete eklendi!",
+          title: "Sepete Eklendi! 🎉",
           description: `${quantity} adet ürün sepetinize eklendi.`,
+          variant: "success" as any,
         });
         router.refresh();
       } else {
