@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/money";
-import { Package, ShoppingCart, Tag, Users } from "lucide-react";
+import { Package, ShoppingCart, Tag, Users, Clock, TruckIcon, CheckCircle, XCircle } from "lucide-react";
 
 export default async function AdminDashboard() {
   const now = new Date();
@@ -23,20 +23,28 @@ export default async function AdminDashboard() {
     weekRevenue,
     monthRevenue,
     yearRevenue,
+    pendingOrders,
+    activeOrders,
+    completedOrders,
+    failedOrders,
   ] = await Promise.all([
     db.product.count(),
-    db.order.count({ where: { status: "PAID" } }),
+    db.order.count({ 
+      where: { 
+        status: { in: ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"] as const }
+      } 
+    }),
     db.coupon.count(),
     db.user.count(),
-    // Tüm zamanlar
+    // Tüm zamanlar - Ödeme alınmış tüm siparişler
     db.order.aggregate({
-      where: { status: "PAID" },
+      where: { status: { in: ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"] as const } },
       _sum: { total: true },
     }),
     // Bu hafta
     db.order.aggregate({
       where: { 
-        status: "PAID",
+        status: { in: ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"] as const },
         created_at: { gte: weekStart },
       },
       _sum: { total: true },
@@ -44,7 +52,7 @@ export default async function AdminDashboard() {
     // Bu ay
     db.order.aggregate({
       where: { 
-        status: "PAID",
+        status: { in: ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"] as const },
         created_at: { gte: monthStart },
       },
       _sum: { total: true },
@@ -52,10 +60,26 @@ export default async function AdminDashboard() {
     // Bu yıl
     db.order.aggregate({
       where: { 
-        status: "PAID",
+        status: { in: ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"] as const },
         created_at: { gte: yearStart },
       },
       _sum: { total: true },
+    }),
+    // Bekleyen siparişler (PENDING, PAID)
+    db.order.count({
+      where: { status: { in: ["PENDING", "PAID"] as const } }
+    }),
+    // Aktif siparişler (PROCESSING, SHIPPED)
+    db.order.count({
+      where: { status: { in: ["PROCESSING", "SHIPPED"] as const } }
+    }),
+    // Tamamlanan (DELIVERED)
+    db.order.count({
+      where: { status: "DELIVERED" }
+    }),
+    // İptal/Başarısız (CANCELLED, FAILED)
+    db.order.count({
+      where: { status: { in: ["CANCELLED", "FAILED"] as const } }
     }),
   ]);
 
@@ -67,7 +91,7 @@ export default async function AdminDashboard() {
       color: "text-blue-600",
     },
     {
-      title: "Tamamlanan Siparişler",
+      title: "Başarılı Siparişler",
       value: orderCount,
       icon: ShoppingCart,
       color: "text-green-600",
@@ -167,6 +191,76 @@ export default async function AdminDashboard() {
                 {formatPrice(totalRevenue._sum.total || 0)}
               </p>
               <p className="text-xs text-gray-600 mt-1">Toplam gelir</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Order Status Breakdown */}
+      <div>
+        <h3 className="text-xl font-bold mb-4">Sipariş Durumu</h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Bekleyen Siparişler */}
+          <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-white hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <Clock className="h-10 w-10 text-yellow-600" />
+                <div className="bg-yellow-100 text-yellow-800 text-lg px-3 py-1 rounded-full font-bold">
+                  {pendingOrders}
+                </div>
+              </div>
+              <h4 className="font-semibold text-gray-800 mb-1">Bekleyen</h4>
+              <p className="text-xs text-gray-600">
+                Ödeme bekleniyor veya sipariş alındı
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Aktif Siparişler */}
+          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <TruckIcon className="h-10 w-10 text-blue-600" />
+                <div className="bg-blue-100 text-blue-800 text-lg px-3 py-1 rounded-full font-bold">
+                  {activeOrders}
+                </div>
+              </div>
+              <h4 className="font-semibold text-gray-800 mb-1">Aktif</h4>
+              <p className="text-xs text-gray-600">
+                Hazırlanıyor veya kargoda
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Tamamlanan Siparişler */}
+          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-white hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <CheckCircle className="h-10 w-10 text-green-600" />
+                <div className="bg-green-100 text-green-800 text-lg px-3 py-1 rounded-full font-bold">
+                  {completedOrders}
+                </div>
+              </div>
+              <h4 className="font-semibold text-gray-800 mb-1">Tamamlandı</h4>
+              <p className="text-xs text-gray-600">
+                Başarıyla teslim edildi
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* İptal/Başarısız */}
+          <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-white hover:shadow-lg transition-shadow">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between mb-4">
+                <XCircle className="h-10 w-10 text-red-600" />
+                <div className="bg-red-100 text-red-800 text-lg px-3 py-1 rounded-full font-bold">
+                  {failedOrders}
+                </div>
+              </div>
+              <h4 className="font-semibold text-gray-800 mb-1">İptal/Başarısız</h4>
+              <p className="text-xs text-gray-600">
+                İptal edildi veya başarısız oldu
+              </p>
             </CardContent>
           </Card>
         </div>
