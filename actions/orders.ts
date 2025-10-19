@@ -63,41 +63,9 @@ export async function createOrder(data: CreateOrderData) {
       return { success: false, error: "Geçersiz sipariş tutarı" };
     }
 
-    // Create order
-    const order = await db.order.create({
-      data: {
-        user_id: session?.user?.id || null,
-        email: data.email,
-        shipping_name: data.shippingName,
-        shipping_phone: data.shippingPhone,
-        shipping_address_line1: data.shippingAddressLine1,
-        shipping_address_line2: data.shippingAddressLine2 || null,
-        city: data.city,
-        district: data.district,
-        postal_code: data.postalCode,
-        country: data.country,
-        subtotal,
-        discount_total: discountTotal,
-        shipping_fee: shippingFee,
-        total,
-        coupon_code: data.couponCode?.toUpperCase() || null,
-        status: "PENDING",
-      },
-    });
-
-    // Create order items (snapshot)
-    for (const item of cart.items) {
-      await db.orderItem.create({
-        data: {
-          order_id: order.id,
-          product_id: item.product.id,
-          title_snapshot: item.product.title,
-          unit_price_snapshot: item.product.price,
-          quantity: item.quantity,
-          line_total: item.product.price * item.quantity,
-        },
-      });
-    }
+    // ÖNCE İyzico'yu test et, SONRA order oluştur
+    // Geçici conversationId oluştur
+    const tempConversationId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Save address if requested
     if (session?.user?.id && data.saveAddress && data.addressTitle) {
@@ -143,7 +111,7 @@ export async function createOrder(data: CreateOrderData) {
 
     const iyzicoParams = {
       locale: "tr",
-      conversationId: order.id,
+      conversationId: tempConversationId, // Geçici ID kullan
       price: (total / 100).toFixed(2),
       paidPrice: (total / 100).toFixed(2),
       currency: "TRY",
@@ -151,7 +119,7 @@ export async function createOrder(data: CreateOrderData) {
       paymentGroup: "PRODUCT",
       callbackUrl,
       buyer: {
-        id: session?.user?.id || order.id,
+        id: session?.user?.id || tempConversationId,
         name,
         surname,
         gsmNumber: data.shippingPhone,
@@ -186,7 +154,7 @@ export async function createOrder(data: CreateOrderData) {
       })),
     };
 
-    console.log("🚀 İyzico API çağrılıyor...");
+    console.log("🚀 ÖNCE İyzico API test ediliyor (order henüz oluşturulmadı)...");
     
     let paymentResult;
     try {
@@ -194,31 +162,64 @@ export async function createOrder(data: CreateOrderData) {
       console.log("📥 İyzico yanıt aldı:", paymentResult);
     } catch (error: any) {
       console.error("❌ İyzico API hatası:", error.message);
-      // Delete order if payment initialization failed
-      await db.order.delete({ where: { id: order.id } });
+      
+      // Order henüz oluşturulmadı, sadece hata dön
       return {
         success: false,
-        error: error.message || "İyzico bağlantı hatası. Lütfen tekrar deneyin.",
+        error: "Ödeme sistemine bağlanılamadı. Lütfen tekrar deneyin. Sepetiniz korundu.",
       };
     }
 
     if (paymentResult.status !== "success") {
       console.error("⚠️ İyzico başarısız status:", paymentResult);
-      // Delete order if payment initialization failed
-      await db.order.delete({ where: { id: order.id } });
+      
+      // Order henüz oluşturulmadı, sadece hata dön
       return {
         success: false,
-        error: paymentResult.errorMessage || "Ödeme başlatılamadı. Lütfen tekrar deneyin.",
+        error: paymentResult.errorMessage || "Ödeme başlatılamadı. Lütfen tekrar deneyin. Sepetiniz korundu.",
       };
     }
 
-    // Save payment token
-    await db.order.update({
-      where: { id: order.id },
+    // ✅ İyzico başarılı! ŞİMDİ order oluştur
+    console.log("✅ İyzico başarılı! Şimdi order oluşturuluyor...");
+    
+    const order = await db.order.create({
       data: {
+        user_id: session?.user?.id || null,
+        email: data.email,
+        shipping_name: data.shippingName,
+        shipping_phone: data.shippingPhone,
+        shipping_address_line1: data.shippingAddressLine1,
+        shipping_address_line2: data.shippingAddressLine2 || null,
+        city: data.city,
+        district: data.district,
+        postal_code: data.postalCode,
+        country: data.country,
+        subtotal,
+        discount_total: discountTotal,
+        shipping_fee: shippingFee,
+        total,
+        coupon_code: data.couponCode?.toUpperCase() || null,
+        status: "PENDING",
         payment_reference: paymentResult.token,
       },
     });
+
+    // Create order items (snapshot)
+    for (const item of cart.items) {
+      await db.orderItem.create({
+        data: {
+          order_id: order.id,
+          product_id: item.product.id,
+          title_snapshot: item.product.title,
+          unit_price_snapshot: item.product.price,
+          quantity: item.quantity,
+          line_total: item.product.price * item.quantity,
+        },
+      });
+    }
+
+    console.log("✅ Order oluşturuldu:", order.id);
 
     return {
       success: true,

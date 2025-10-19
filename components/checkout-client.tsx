@@ -195,21 +195,35 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses }: C
         window.location.href = result.paymentPageUrl;
       } else {
         console.error("❌ Sipariş hatası:", result.error);
+        
         toast({
-          title: "Ödeme Hatası",
-          description: result.error || "Sipariş oluşturulamadı. Lütfen tekrar deneyin.",
+          title: "Sipariş Oluşturulamadı",
+          description: result.error || "Ödeme sistemine bağlanılamadı. Sepetiniz korundu, lütfen tekrar deneyin.",
           variant: "destructive",
         });
+        
         setLoading(false);
+        
+        // 2 saniye sonra sepete yönlendir
+        setTimeout(() => {
+          router.push("/cart");
+        }, 2000);
       }
     } catch (error: any) {
       console.error("💥 Checkout error:", error);
+      
       toast({
-        title: error.message?.includes("zaman aşımı") ? "Bağlantı Zaman Aşımı" : "Bağlantı Hatası",
-        description: error.message || "Bir hata oluştu. Lütfen tekrar deneyin.",
+        title: "Bağlantı Hatası",
+        description: "Ödeme sistemine bağlanılamadı. Sepetiniz korundu, lütfen tekrar deneyin.",
         variant: "destructive",
       });
+      
       setLoading(false);
+      
+      // 2 saniye sonra sepete yönlendir
+      setTimeout(() => {
+        router.push("/cart");
+      }, 2000);
     }
   };
 
