@@ -107,6 +107,10 @@ export default function LoyaltyPage() {
                     <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                     <span>Doğum günü hediyesi</span>
                   </div>
+                  <div className="flex items-start gap-2 text-sm">
+                    <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                    <span>Yeni ürünlere erken erişim</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -135,10 +139,6 @@ export default function LoyaltyPage() {
                   <div className="flex items-start gap-2 text-sm">
                     <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                     <span className="font-medium">Ücretsiz kargo</span>
-                  </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Premium müşteri desteği</span>
                   </div>
                   <div className="flex items-start gap-2 text-sm">
                     <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
@@ -176,15 +176,11 @@ export default function LoyaltyPage() {
                   </div>
                   <div className="flex items-start gap-2 text-sm">
                     <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>VIP müşteri desteği</span>
-                  </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
                     <span>Sürpriz hediyeler</span>
                   </div>
                   <div className="flex items-start gap-2 text-sm">
                     <Check className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Özel etkinliklere davet</span>
+                    <span>Yeni ürünlere erken erişim</span>
                   </div>
                 </div>
               </CardContent>
@@ -298,20 +294,6 @@ export default function LoyaltyPage() {
                     <td className="text-center py-4 px-2 text-gray-400">✗</td>
                     <td className="text-center py-4 px-2 text-primary">✓</td>
                     <td className="text-center py-4 px-2 text-primary">✓</td>
-                    <td className="text-center py-4 px-2 text-primary">✓</td>
-                  </tr>
-                  <tr className="border-b border-gray-200">
-                    <td className="py-4 px-4 font-medium">Premium Destek</td>
-                    <td className="text-center py-4 px-2 text-gray-400">✗</td>
-                    <td className="text-center py-4 px-2 text-gray-400">✗</td>
-                    <td className="text-center py-4 px-2 text-primary">✓</td>
-                    <td className="text-center py-4 px-2 text-primary">✓</td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 font-medium">VIP Etkinlikler</td>
-                    <td className="text-center py-4 px-2 text-gray-400">✗</td>
-                    <td className="text-center py-4 px-2 text-gray-400">✗</td>
-                    <td className="text-center py-4 px-2 text-gray-400">✗</td>
                     <td className="text-center py-4 px-2 text-primary">✓</td>
                   </tr>
                 </tbody>
