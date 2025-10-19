@@ -71,7 +71,7 @@ export function CartItem({ item }: CartItemProps) {
   const itemTotal = item.product.price * quantity;
 
   return (
-    <Card className="overflow-hidden border-2 border-transparent hover:border-primary/20 transition-all duration-300 group">
+    <Card className="overflow-hidden border-2 border-gray-100 hover:border-primary/30 transition-all duration-300 group shadow-sm hover:shadow-md">
       <CardContent className="p-4 md:p-6">
         <div className="flex gap-4 md:gap-6">
           {/* Product Image */}
