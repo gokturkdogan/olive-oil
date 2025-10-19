@@ -15,7 +15,7 @@ export default async function CheckoutPage() {
   }
 
   // Get user data with loyalty tier if logged in
-  let addresses = [];
+  let addresses: any[] = [];
   let loyaltyTier = "STANDARD";
   
   if (session?.user?.id) {

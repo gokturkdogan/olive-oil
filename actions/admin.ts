@@ -143,7 +143,7 @@ export async function createProduct(data: {
         description: data.description,
         price: data.price,
         stock: data.stock,
-        image_url: data.imageUrl || null,
+        images: data.imageUrl ? [data.imageUrl] : [],
         active: data.active,
       },
     });
@@ -196,7 +196,7 @@ export async function updateProduct(
         description: data.description,
         price: data.price,
         stock: data.stock,
-        image_url: data.imageUrl || null,
+        images: data.imageUrl ? [data.imageUrl] : [],
         active: data.active,
       },
     });

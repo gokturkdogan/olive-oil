@@ -20,7 +20,7 @@ interface Product {
   description: string;
   price: number;
   stock: number;
-  image_url: string | null;
+  images: any; // Json field
   active: boolean;
 }
 
@@ -127,9 +127,9 @@ export function ProductList({ products }: ProductListProps) {
               <div className="flex items-start gap-6">
                 {/* Product Image */}
                 <div className="relative h-24 w-24 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
-                  {product.image_url ? (
+                  {product.images && (product.images as string[])[0] ? (
                     <Image
-                      src={product.image_url}
+                      src={(product.images as string[])[0]}
                       alt={product.title}
                       fill
                       className="object-cover"

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const Iyzipay = require("iyzipay");
     const { token } = await request.json();
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       timeout: 10000, // 10 saniye timeout
     });
 
-    return new Promise((resolve) => {
+    return new Promise<NextResponse>((resolve) => {
       iyzipay.checkoutForm.retrieve({ locale: "tr", token }, (err: any, result: any) => {
         if (err) {
           console.error("İyzico Retrieve Error:", err);

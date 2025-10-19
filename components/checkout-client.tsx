@@ -259,9 +259,9 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
                   {cart?.items?.map((item: any) => (
                     <div key={item.id} className="flex gap-3 pb-4 border-b last:border-0 last:pb-0">
                       <div className="relative h-16 w-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                        {item.product.image_url ? (
+                        {item.product.images && (item.product.images as string[])[0] ? (
                           <Image
-                            src={item.product.image_url}
+                            src={(item.product.images as string[])[0]}
                             alt={item.product.name}
                             fill
                             className="object-cover"

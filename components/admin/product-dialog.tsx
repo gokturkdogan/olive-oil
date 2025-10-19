@@ -24,7 +24,7 @@ interface ProductDialogProps {
     description: string;
     price: number;
     stock: number;
-    image_url: string | null;
+    images: any; // Json field
     active: boolean;
   };
   trigger?: React.ReactNode;
@@ -247,7 +247,7 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
               id="imageUrl"
               name="imageUrl"
               type="url"
-              defaultValue={product?.image_url || ""}
+              defaultValue={product?.images && (product.images as string[])[0] ? (product.images as string[])[0] : ""}
               placeholder="https://example.com/image.jpg"
             />
             <p className="text-xs text-gray-500 mt-1">
