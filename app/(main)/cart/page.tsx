@@ -26,20 +26,22 @@ export default async function CartPage() {
 
   if (!cart || cart.items.length === 0) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md mx-auto text-center">
-          <div className="relative mb-6">
-            <div className="absolute inset-0 bg-olive-gradient opacity-10 rounded-full blur-3xl"></div>
-            <div className="relative bg-gradient-to-br from-primary/10 to-primary/5 rounded-full p-8 inline-block">
-              <ShoppingBag className="h-20 w-20 text-primary" />
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-200/30 to-emerald-200/30 rounded-full blur-3xl"></div>
+            <div className="relative bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-12 inline-block shadow-lg">
+              <ShoppingBag className="h-24 w-24 text-green-600" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold mb-3 text-gradient">Sepetiniz Boş</h1>
-          <p className="text-muted-foreground mb-8 text-lg">
-            Premium zeytinyağı ürünlerimizi keşfetmeye hazır mısınız?
+          <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900">
+            Sepetiniz <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Boş</span>
+          </h1>
+          <p className="text-gray-600 mb-8 text-base leading-relaxed">
+            Premium zeytinyağı ürünlerimizi keşfetmeye başlayın
           </p>
           <Link href="/products">
-            <Button size="lg" className="bg-olive-gradient hover:opacity-90 transition-all duration-300 shadow-lg hover:shadow-xl group">
+            <Button size="lg" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group">
               <Leaf className="mr-2 h-5 w-5" />
               Ürünleri Keşfet
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -64,25 +66,28 @@ export default async function CartPage() {
   const total = subtotal + shippingCost;
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">Sepetim</h1>
-            <p className="text-muted-foreground flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              <span>{totalItems} ürün</span>
-            </p>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                Sepet<span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">im</span>
+              </h1>
+              <p className="text-gray-600 flex items-center gap-2">
+                <Package className="h-4 w-4 text-green-600" />
+                <span>{totalItems} ürün</span>
+              </p>
+            </div>
+            {shippingCost === 0 && subtotal > 0 && (
+              <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 shadow-lg px-4 py-2">
+                <Truck className="h-4 w-4 mr-2" />
+                Ücretsiz Kargo
+              </Badge>
+            )}
           </div>
-          {shippingCost === 0 && subtotal > 0 && (
-            <Badge variant="secondary" className="text-lg px-4 py-2 bg-green-100 text-green-700 border-green-300">
-              <Truck className="h-4 w-4 mr-2" />
-              Ücretsiz Kargo
-            </Badge>
-          )}
         </div>
-      </div>
 
       <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Cart Items */}
@@ -100,93 +105,105 @@ export default async function CartPage() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <Card className="sticky top-24 border-2 border-primary/10 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardHeader className="bg-gradient-to-br from-primary/5 to-primary/10">
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingBag className="h-5 w-5 text-primary" />
-                Sipariş Özeti
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              {/* Price Breakdown */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">Ara Toplam</span>
-                  <span className="font-medium">{formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <div className="flex items-center gap-1">
-                    <Truck className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Kargo</span>
+          <div className="sticky top-24">
+            <Card className="border-2 border-gray-200 shadow-xl overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-emerald-600 text-white pb-6">
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingBag className="h-5 w-5" />
+                  Sipariş Özeti
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-6 space-y-6">
+                {/* Price Breakdown */}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Ara Toplam</span>
+                    <span className="font-semibold text-gray-900">{formatPrice(subtotal)}</span>
                   </div>
-                  {shippingCost === 0 ? (
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100">
-                      Ücretsiz
-                    </Badge>
-                  ) : (
-                    <span className="font-medium">{formatPrice(shippingCost)}</span>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1.5">
+                      <Truck className="h-4 w-4 text-gray-600" />
+                      <span className="text-gray-600">Kargo</span>
+                    </div>
+                    {shippingCost === 0 ? (
+                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0">
+                        Ücretsiz
+                      </Badge>
+                    ) : (
+                      <span className="font-semibold text-gray-900">{formatPrice(shippingCost)}</span>
+                    )}
+                  </div>
+                  
+                  {/* Free shipping progress */}
+                  {remainingForFreeShipping !== null && remainingForFreeShipping > 0 && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                      <p className="text-xs text-amber-900 font-medium">
+                        ✨ Ücretsiz kargo için {formatPrice(remainingForFreeShipping)} daha!
+                      </p>
+                    </div>
                   )}
-                </div>
-                
-                {/* Free shipping progress */}
-                {remainingForFreeShipping !== null && remainingForFreeShipping > 0 && (
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg animate-fadeInUp">
-                    <p className="text-xs text-amber-800 font-medium">
-                      ✨ Ücretsiz kargo için sadece {formatPrice(remainingForFreeShipping)} daha ekleyin!
-                    </p>
+                  
+                  {shippingCost === 0 && subtotal > 0 && (
+                    <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                      <p className="text-xs text-green-900 font-medium flex items-center gap-1.5">
+                        <Truck className="h-3.5 w-3.5" />
+                        Ücretsiz kargo kazandınız! 🎉
+                      </p>
+                    </div>
+                  )}
+                  
+                  <div className="border-t-2 border-gray-200 pt-4 flex justify-between items-center">
+                    <span className="text-lg font-bold text-gray-900">Toplam</span>
+                    <span className="text-2xl font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{formatPrice(total)}</span>
                   </div>
-                )}
-                
-                {shippingCost === 0 && subtotal > 0 && (
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg animate-fadeInUp">
-                    <p className="text-xs text-green-800 font-medium flex items-center gap-1">
-                      <Truck className="h-4 w-4" />
-                      🎉 Ücretsiz kargo kazandınız!
-                    </p>
-                  </div>
-                )}
-                
-                <div className="border-t pt-3 flex justify-between items-center">
-                  <span className="text-lg font-semibold">Toplam</span>
-                  <span className="text-2xl font-bold text-gradient">{formatPrice(total)}</span>
                 </div>
-              </div>
 
-              {/* Actions */}
-              <div className="space-y-3">
-                <Link href="/checkout" className="block">
-                  <Button 
-                    size="lg" 
-                    className="w-full bg-olive-gradient hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg group"
-                  >
-                    Ödemeye Geç
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
+                {/* Actions */}
+                <div className="space-y-3">
+                  <Link href="/checkout" className="block">
+                    <Button 
+                      size="lg" 
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
+                    >
+                      Ödemeye Geç
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
 
-                <Link href="/products" className="block">
-                  <Button variant="outline" className="w-full hover:bg-primary/5 transition-all duration-300">
-                    <Leaf className="mr-2 h-4 w-4" />
-                    Alışverişe Devam Et
-                  </Button>
-                </Link>
-              </div>
+                  <Link href="/products" className="block">
+                    <Button variant="outline" className="w-full border-2 border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all duration-300">
+                      <Leaf className="mr-2 h-4 w-4" />
+                      Alışverişe Devam Et
+                    </Button>
+                  </Link>
+                </div>
 
-              {/* Info */}
-              <div className="pt-4 border-t space-y-2 text-xs text-muted-foreground">
-                <p className="flex items-center gap-2">
-                  ✓ Güvenli ödeme
-                </p>
-                <p className="flex items-center gap-2">
-                  ✓ Hızlı teslimat
-                </p>
-                <p className="flex items-center gap-2">
-                  ✓ 100% doğal ürünler
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                {/* Info */}
+                <div className="pt-4 border-t border-gray-200 grid grid-cols-3 gap-4 text-center">
+                  <div className="text-xs">
+                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-1.5">
+                      <span className="text-green-700 text-sm">✓</span>
+                    </div>
+                    <p className="text-gray-600">Güvenli</p>
+                  </div>
+                  <div className="text-xs">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-1.5">
+                      <Truck className="h-4 w-4 text-blue-700" />
+                    </div>
+                    <p className="text-gray-600">Hızlı</p>
+                  </div>
+                  <div className="text-xs">
+                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mx-auto mb-1.5">
+                      <Leaf className="h-4 w-4 text-emerald-700" />
+                    </div>
+                    <p className="text-gray-600">Doğal</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -18,66 +18,65 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-primary/10 glass shadow-sm">
+    <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-2 border-gray-200 shadow-lg">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 md:h-20 items-center justify-between">
+        <div className="flex h-16 md:h-18 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-olive-gradient p-1.5 md:p-2 rounded-xl shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-              <Leaf className="h-5 w-5 md:h-6 md:w-6 text-white" />
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl blur opacity-30 group-hover:opacity-50 transition-all duration-300"></div>
+              <div className="relative bg-gradient-to-r from-green-600 to-emerald-600 p-2 md:p-2.5 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-3">
+                <Leaf className="h-5 w-5 md:h-6 md:w-6 text-white" />
+              </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg md:text-2xl font-bold text-gradient">Zeytinyağı</span>
-              <span className="text-[10px] md:text-xs text-muted-foreground -mt-1">Premium Sızma</span>
+              <span className="text-lg md:text-xl font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Zeytinyağı</span>
+              <span className="text-[9px] md:text-[10px] text-gray-600 font-medium -mt-0.5 tracking-wider">PREMIUM SIZMA</span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-1">
             <Link
               href="/"
-              className={`relative text-sm font-medium transition-all duration-300 group ${
-                pathname === "/" ? "text-primary" : "text-foreground hover:text-primary"
+              className={`relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                pathname === "/" 
+                  ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
+                  : "text-gray-700 hover:bg-green-50 hover:text-green-700"
               }`}
             >
               Ana Sayfa
-              <span className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                pathname === "/" ? "w-full" : "w-0 group-hover:w-full"
-              }`}></span>
             </Link>
             <Link
               href="/products"
-              className={`relative text-sm font-medium transition-all duration-300 group ${
-                pathname.startsWith("/products") ? "text-primary" : "text-foreground hover:text-primary"
+              className={`relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                pathname.startsWith("/products")
+                  ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
+                  : "text-gray-700 hover:bg-green-50 hover:text-green-700"
               }`}
             >
               Ürünler
-              <span className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                pathname.startsWith("/products") ? "w-full" : "w-0 group-hover:w-full"
-              }`}></span>
             </Link>
             <Link
               href="/loyalty"
-              className={`relative text-sm font-medium transition-all duration-300 group ${
-                pathname === "/loyalty" ? "text-primary" : "text-foreground hover:text-primary"
+              className={`relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                pathname === "/loyalty"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
+                  : "text-gray-700 hover:bg-green-50 hover:text-green-700"
               }`}
             >
-              Sadakat Programı
-              <span className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                pathname === "/loyalty" ? "w-full" : "w-0 group-hover:w-full"
-              }`}></span>
+              Sadakat
             </Link>
             {session?.user?.role === "ADMIN" && (
               <Link
                 href="/admin"
-                className={`relative text-sm font-medium transition-all duration-300 group ${
-                  pathname.startsWith("/admin") ? "text-primary" : "text-foreground hover:text-primary"
+                className={`relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
+                  pathname.startsWith("/admin")
+                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
+                    : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                 }`}
               >
                 Admin
-                <span className={`absolute -bottom-1 left-0 h-0.5 bg-primary transition-all duration-300 ${
-                  pathname.startsWith("/admin") ? "w-full" : "w-0 group-hover:w-full"
-                }`}></span>
               </Link>
             )}
           </div>
@@ -88,15 +87,15 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className={`relative transition-all duration-300 ${
+                className={`relative rounded-xl transition-all duration-300 ${
                   pathname === "/cart"
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-primary/10 hover:text-primary"
+                    ? "bg-green-100 text-green-700"
+                    : "hover:bg-green-50 hover:text-green-700"
                 }`}
               >
                 <ShoppingCart className="h-5 w-5" />
                 {cartItemsCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-primary-foreground text-xs">
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs border-2 border-white shadow-lg">
                     {cartItemsCount}
                   </Badge>
                 )}
@@ -105,18 +104,18 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
             </Link>
 
             {session?.user ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Link href="/profile">
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className={`transition-all duration-300 ${
+                    className={`rounded-lg transition-all duration-300 ${
                       pathname === "/profile"
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-primary/10 hover:text-primary"
+                        ? "bg-green-100 text-green-700"
+                        : "hover:bg-green-50 hover:text-green-700"
                     }`}
                   >
-                    <User className="h-4 w-4 mr-2" />
+                    <User className="h-4 w-4 mr-1.5" />
                     {session.user.name}
                   </Button>
                 </Link>
@@ -124,10 +123,10 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className={`transition-all duration-300 ${
+                    className={`rounded-lg transition-all duration-300 ${
                       pathname === "/profile/orders"
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-primary/10 hover:text-primary"
+                        ? "bg-green-100 text-green-700"
+                        : "hover:bg-green-50 hover:text-green-700"
                     }`}
                   >
                     Siparişlerim
@@ -137,25 +136,25 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className={`transition-all duration-300 ${
+                    className={`rounded-lg transition-all duration-300 ${
                       pathname === "/profile/addresses"
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-primary/10 hover:text-primary"
+                        ? "bg-green-100 text-green-700"
+                        : "hover:bg-green-50 hover:text-green-700"
                     }`}
                   >
                     Adreslerim
                   </Button>
                 </Link>
                 <form action={handleLogout}>
-                  <Button variant="ghost" size="icon" type="submit" className="hover:bg-destructive/10 hover:text-destructive transition-all duration-300">
-                    <LogOut className="h-5 w-5" />
+                  <Button variant="ghost" size="icon" type="submit" className="rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-300">
+                    <LogOut className="h-4 w-4" />
                     <span className="sr-only">Çıkış</span>
                   </Button>
                 </form>
               </div>
             ) : (
               <Link href="/login">
-                <Button size="sm" className="bg-olive-gradient hover:opacity-90 transition-all duration-300 shadow-md hover:shadow-lg">
+                <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
                   <User className="h-4 w-4 mr-2" />
                   Giriş Yap
                 </Button>
@@ -169,15 +168,15 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className={`h-9 w-9 relative transition-all duration-300 ${
+                className={`h-9 w-9 rounded-lg relative transition-all duration-300 ${
                   pathname === "/cart"
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-primary/10 hover:text-primary"
+                    ? "bg-green-100 text-green-700"
+                    : "hover:bg-green-50 hover:text-green-700"
                 }`}
               >
                 <ShoppingCart className="h-5 w-5" />
                 {cartItemsCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-primary text-primary-foreground text-xs">
+                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs border-2 border-white">
                     {cartItemsCount}
                   </Badge>
                 )}
@@ -186,7 +185,7 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9"
+              className="h-9 w-9 rounded-lg hover:bg-green-50 hover:text-green-700"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -196,14 +195,14 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-primary/10 animate-fadeInUp">
-            <div className="flex flex-col space-y-3">
+          <div className="md:hidden py-4 border-t-2 border-gray-200 animate-fadeInUp bg-white/95 backdrop-blur-md">
+            <div className="flex flex-col space-y-2">
               <Link
                 href="/"
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                   pathname === "/" 
-                    ? "text-primary bg-primary/10" 
-                    : "text-foreground hover:text-primary hover:bg-primary/5"
+                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
+                    : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -211,10 +210,10 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
               </Link>
               <Link
                 href="/products"
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                   pathname.startsWith("/products")
-                    ? "text-primary bg-primary/10" 
-                    : "text-foreground hover:text-primary hover:bg-primary/5"
+                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
+                    : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
@@ -222,37 +221,37 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
               </Link>
               <Link
                 href="/loyalty"
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                   pathname === "/loyalty"
-                    ? "text-primary bg-primary/10" 
-                    : "text-foreground hover:text-primary hover:bg-primary/5"
+                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
+                    : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Sadakat Programı
+                Sadakat
               </Link>
               {session?.user?.role === "ADMIN" && (
                 <Link
                   href="/admin"
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                  className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                     pathname.startsWith("/admin")
-                      ? "text-primary bg-primary/10" 
-                      : "text-foreground hover:text-primary hover:bg-primary/5"
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
+                      : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                   }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Admin
                 </Link>
               )}
-              <div className="h-px bg-primary/10 my-2"></div>
+              <div className="h-px bg-gray-200 my-2"></div>
               {session?.user ? (
                 <>
                   <Link
                     href="/profile"
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center ${
+                    className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all flex items-center ${
                       pathname === "/profile"
-                        ? "text-primary bg-primary/10"
-                        : "text-foreground hover:text-primary hover:bg-primary/5"
+                        ? "bg-green-100 text-green-700"
+                        : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -261,10 +260,10 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                   </Link>
                   <Link
                     href="/profile/orders"
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                       pathname === "/profile/orders"
-                        ? "text-primary bg-primary/10"
-                        : "text-foreground hover:text-primary hover:bg-primary/5"
+                        ? "bg-green-100 text-green-700"
+                        : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -272,21 +271,21 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                   </Link>
                   <Link
                     href="/profile/addresses"
-                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
+                    className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
                       pathname === "/profile/addresses"
-                        ? "text-primary bg-primary/10"
-                        : "text-foreground hover:text-primary hover:bg-primary/5"
+                        ? "bg-green-100 text-green-700"
+                        : "text-gray-700 hover:bg-green-50 hover:text-green-700"
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Adreslerim
                   </Link>
-                  <form action={handleLogout} className="px-4">
+                  <form action={handleLogout} className="px-2">
                     <Button
                       variant="outline"
                       size="sm"
                       type="submit"
-                      className="w-full justify-start text-destructive border-destructive/30 hover:bg-destructive/10"
+                      className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
                       Çıkış Yap
@@ -294,9 +293,9 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                   </form>
                 </>
               ) : (
-                <div className="px-4">
+                <div className="px-2">
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button className="w-full bg-olive-gradient hover:opacity-90">
+                    <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg shadow-lg">
                       <User className="h-4 w-4 mr-2" />
                       Giriş Yap
                     </Button>
