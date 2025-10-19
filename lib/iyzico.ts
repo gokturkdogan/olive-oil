@@ -69,6 +69,7 @@ export interface CreateCheckoutFormParams {
   currency?: string;
   basketId: string;
   paymentGroup?: string;
+  paymentChannel?: string;
   callbackUrl: string;
   enabledInstallments?: number[];
   buyer: {
@@ -116,26 +117,45 @@ export interface CreateCheckoutFormParams {
 export async function createCheckoutForm(
   params: CreateCheckoutFormParams
 ): Promise<any> {
+  const startTime = Date.now();
+  
   try {
-    console.log("İyzico Request Params:", JSON.stringify(params, null, 2));
+    console.log("\n📤 createCheckoutForm() başladı");
+    console.log("Request Params:", JSON.stringify(params, null, 2));
     
     const baseUrl = typeof window === 'undefined' 
       ? (process.env.NEXTAUTH_URL || "http://localhost:3000")
       : '';
-    const response = await fetch(`${baseUrl}/api/iyzico/init`, {
+    
+    const apiUrl = `${baseUrl}/api/iyzico/init`;
+    console.log("🌐 API URL:", apiUrl);
+    console.log("🔄 Fetch başlıyor...");
+    
+    const fetchStartTime = Date.now();
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(params),
     });
+    const fetchElapsed = Date.now() - fetchStartTime;
+    
+    console.log(`📥 Fetch tamamlandı (${fetchElapsed}ms)`);
+    console.log("Response status:", response.status);
+    console.log("Response ok:", response.ok);
 
     const result = await response.json();
-    console.log("İyzico Response:", JSON.stringify(result, null, 2));
+    const totalElapsed = Date.now() - startTime;
+    
+    console.log(`✅ createCheckoutForm tamamlandı (${totalElapsed}ms)`);
+    console.log("Response:", JSON.stringify(result, null, 2));
     
     return result;
-  } catch (error) {
-    console.error("İyzico createCheckoutForm error:", error);
+  } catch (error: any) {
+    const elapsed = Date.now() - startTime;
+    console.error(`❌ createCheckoutForm error (${elapsed}ms):`, error.message);
+    console.error("Error stack:", error.stack);
     throw error;
   }
 }

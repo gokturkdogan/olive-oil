@@ -179,14 +179,19 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses }: C
 
     try {
       console.log("🛒 Sipariş oluşturuluyor...");
+      console.log("⏰ Başlangıç:", new Date().toISOString());
       
-      // 15 saniye timeout
+      // 60 saniye timeout (daha uzun)
       const orderPromise = createOrder(data);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("İstek zaman aşımına uğradı (15s)")), 15000)
+        setTimeout(() => {
+          console.error("⏱️ Frontend timeout! 60 saniye doldu");
+          reject(new Error("İstek zaman aşımına uğradı (60s)"));
+        }, 60000)
       );
       
       const result = await Promise.race([orderPromise, timeoutPromise]) as any;
+      console.log("✅ Sipariş yanıt aldı:", new Date().toISOString());
 
       console.log("Order result:", result);
 

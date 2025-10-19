@@ -26,8 +26,18 @@ interface CreateOrderData {
  * Sipariş oluşturur ve iyzico ödeme formunu başlatır
  */
 export async function createOrder(data: CreateOrderData) {
+  const startTime = Date.now();
+  console.log("\n🎯 ========================================");
+  console.log("🎯 createOrder() BAŞLADI");
+  console.log("🎯 Timestamp:", new Date().toISOString());
+  console.log("🎯 ========================================\n");
+  
   try {
+    console.log("🔐 Auth kontrol ediliyor...");
     const session = await auth();
+    console.log("👤 User:", session?.user?.email || "Guest");
+    
+    console.log("🛒 Cart alınıyor...");
     const cart = await getCart();
 
     if (!cart || cart.items.length === 0) {
@@ -109,6 +119,18 @@ export async function createOrder(data: CreateOrderData) {
     const [name, ...surnameParts] = data.shippingName.split(" ");
     const surname = surnameParts.join(" ") || name;
 
+    // Format phone number with +90 if not present
+    let formattedPhone = data.shippingPhone.replace(/\s/g, ""); // Remove spaces
+    if (!formattedPhone.startsWith("+90") && !formattedPhone.startsWith("90")) {
+      if (formattedPhone.startsWith("0")) {
+        formattedPhone = "+90" + formattedPhone.substring(1);
+      } else {
+        formattedPhone = "+90" + formattedPhone;
+      }
+    } else if (formattedPhone.startsWith("90")) {
+      formattedPhone = "+" + formattedPhone;
+    }
+
     const iyzicoParams = {
       locale: "tr",
       conversationId: tempConversationId, // Geçici ID kullan
@@ -117,12 +139,14 @@ export async function createOrder(data: CreateOrderData) {
       currency: "TRY",
       basketId: cart.id,
       paymentGroup: "PRODUCT",
+      paymentChannel: "WEB", // ZORUNLU: Ödeme kanalı
       callbackUrl,
+      enabledInstallments: [1, 2, 3, 6, 9], // Taksit seçenekleri
       buyer: {
         id: session?.user?.id || tempConversationId,
         name,
         surname,
-        gsmNumber: data.shippingPhone,
+        gsmNumber: formattedPhone,
         email: data.email,
         identityNumber: "11111111111", // MVP: dummy identity number
         registrationAddress: data.shippingAddressLine1,
@@ -154,14 +178,23 @@ export async function createOrder(data: CreateOrderData) {
       })),
     };
 
+    console.log("\n========================================");
     console.log("🚀 ÖNCE İyzico API test ediliyor (order henüz oluşturulmadı)...");
+    console.log("⏰ Server Time:", new Date().toISOString());
+    console.log("========================================");
     
     let paymentResult;
     try {
+      const startTime = Date.now();
+      console.log("🔄 createCheckoutForm() çağrılıyor...");
+      
       paymentResult = await createCheckoutForm(iyzicoParams);
-      console.log("📥 İyzico yanıt aldı:", paymentResult);
+      
+      const elapsed = Date.now() - startTime;
+      console.log(`📥 İyzico yanıt aldı (${elapsed}ms):`, paymentResult);
     } catch (error: any) {
       console.error("❌ İyzico API hatası:", error.message);
+      console.error("❌ Error stack:", error.stack);
       
       // Order henüz oluşturulmadı, sadece hata dön
       return {
@@ -221,14 +254,27 @@ export async function createOrder(data: CreateOrderData) {
 
     console.log("✅ Order oluşturuldu:", order.id);
 
+    const totalElapsed = Date.now() - startTime;
+    console.log(`\n🎉 ========================================`);
+    console.log(`🎉 createOrder() BAŞARILI (${totalElapsed}ms)`);
+    console.log(`🎉 Order ID:`, order.id);
+    console.log(`🎉 Payment URL:`, paymentResult.paymentPageUrl);
+    console.log(`🎉 ========================================\n`);
+
     return {
       success: true,
       orderId: order.id,
       paymentPageUrl: paymentResult.paymentPageUrl,
       paymentToken: paymentResult.token,
     };
-  } catch (error) {
-    console.error("Create order error:", error);
+  } catch (error: any) {
+    const totalElapsed = Date.now() - startTime;
+    console.error(`\n💥 ========================================`);
+    console.error(`💥 createOrder() HATA (${totalElapsed}ms)`);
+    console.error("💥 Error message:", error.message);
+    console.error("💥 Error stack:", error.stack);
+    console.error(`💥 ========================================\n`);
+    
     return {
       success: false,
       error: "Sipariş oluşturulurken bir hata oluştu",
