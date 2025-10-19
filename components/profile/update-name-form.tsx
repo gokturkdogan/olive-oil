@@ -24,8 +24,9 @@ export function UpdateNameForm({ currentName }: { currentName: string }) {
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: "İsminiz güncellendi",
+        variant: "success" as any,
       });
       router.refresh();
     } else {
@@ -77,7 +78,7 @@ export function UpdateNameForm({ currentName }: { currentName: string }) {
       <Button 
         type="submit" 
         disabled={loading || !isChanged}
-        className="w-full h-11 bg-olive-gradient hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-50"
+        className="w-full h-11 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? (
           <>
