@@ -45,6 +45,8 @@ model User {
   email         String    @unique
   password_hash String?   // nullable for magic link auth
   role          Role      @default(CUSTOMER)
+  loyalty_tier  String    @default("STANDARD") // STANDARD, GOLD, PLATINUM, DIAMOND
+  total_spent   Int       @default(0) // Toplam harcama (kuruş) - sadece DELIVERED siparişler
   created_at    DateTime  @default(now())
   updated_at    DateTime  @default(now()) @updatedAt
   
