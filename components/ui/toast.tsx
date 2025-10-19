@@ -122,7 +122,7 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>;
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>;
 
-const ToastIcon = ({ variant }: { variant?: string }) => {
+const ToastIcon = ({ variant }: { variant?: "default" | "destructive" | "success" | null }) => {
   if (variant === "success") {
     return (
       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
