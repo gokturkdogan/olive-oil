@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { signIn } from "@/auth";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function register(formData: FormData) {
   const name = formData.get("name") as string;
@@ -39,6 +40,12 @@ export async function register(formData: FormData) {
       password_hash,
       role: "CUSTOMER",
     },
+  });
+
+  // Send welcome email (async, don't wait for it)
+  sendWelcomeEmail(email, name).catch((error) => {
+    console.error("Welcome email failed:", error);
+    // Don't fail registration if email fails
   });
 
   // Auto sign in after registration

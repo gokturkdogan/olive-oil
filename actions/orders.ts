@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { getCart } from "@/actions/cart";
 import { validateCoupon, incrementCouponUsage } from "@/lib/coupons";
 import { calculateShippingFee } from "@/lib/shipping";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 import { redirect } from "next/navigation";
 import { createCheckoutForm } from "@/lib/iyzico";
 
@@ -144,11 +145,24 @@ export async function createOrder(data: CreateOrderData) {
       formattedPhone = "+" + formattedPhone;
     }
 
+    // İyzico için toplam hesaplama
+    // NOT: İyzico'da price = basketItems toplamı olmalı (indirim öncesi)
+    // paidPrice = gerçekte ödenen tutar (indirim sonrası)
+    const iyzicoPrice = subtotal + shippingFee; // İndirim öncesi toplam
+    const iyzicoPaidPrice = total; // İndirim sonrası ödenecek tutar
+    
+    console.log("💰 İyzico Fiyat Hesaplaması:");
+    console.log("  Subtotal:", subtotal / 100, "TL");
+    console.log("  Shipping:", shippingFee / 100, "TL");
+    console.log("  Discount:", discountTotal / 100, "TL");
+    console.log("  Price (basketItems toplamı):", iyzicoPrice / 100, "TL");
+    console.log("  PaidPrice (ödenecek):", iyzicoPaidPrice / 100, "TL");
+
     const iyzicoParams = {
       locale: "tr",
       conversationId: tempConversationId, // Geçici ID kullan
-      price: (total / 100).toFixed(2),
-      paidPrice: (total / 100).toFixed(2),
+      price: (iyzicoPrice / 100).toFixed(2), // İndirim öncesi toplam
+      paidPrice: (iyzicoPaidPrice / 100).toFixed(2), // İndirim sonrası toplam
       currency: "TRY",
       basketId: cart.id,
       paymentGroup: "PRODUCT",
@@ -182,14 +196,35 @@ export async function createOrder(data: CreateOrderData) {
         address: `${data.shippingAddressLine1} ${data.shippingAddressLine2 || ""}`.trim(),
         zipCode: data.postalCode,
       },
-      basketItems: cart.items.map((item) => ({
-        id: item.product.id,
-        name: item.product.title,
-        category1: "Zeytinyağı",
-        itemType: "PHYSICAL",
-        price: ((item.product.price * item.quantity) / 100).toFixed(2),
-      })),
+      basketItems: [
+        // Ürünler
+        ...cart.items.map((item) => ({
+          id: item.product.id,
+          name: item.product.title,
+          category1: "Zeytinyağı",
+          itemType: "PHYSICAL",
+          price: ((item.product.price * item.quantity) / 100).toFixed(2),
+        })),
+        // Kargo ücreti (eğer varsa)
+        ...(shippingFee > 0 ? [{
+          id: "SHIPPING",
+          name: "Kargo",
+          category1: "Kargo",
+          itemType: "PHYSICAL",
+          price: (shippingFee / 100).toFixed(2),
+        }] : []),
+      ],
     };
+
+    console.log("\n📦 Basket Items:");
+    iyzicoParams.basketItems.forEach((item: any, index: number) => {
+      console.log(`  ${index + 1}. ${item.name}: ${item.price} TL`);
+    });
+    const basketItemsTotal = iyzicoParams.basketItems.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
+    console.log(`  Basket Items Toplamı: ${basketItemsTotal.toFixed(2)} TL`);
+    console.log(`  İyzico Price: ${iyzicoParams.price} TL`);
+    console.log(`  İyzico PaidPrice: ${iyzicoParams.paidPrice} TL`);
+    console.log(`  ✅ Toplamlar ${basketItemsTotal.toFixed(2) === iyzicoParams.price ? 'EŞİT' : '❌ EŞİT DEĞİL!'}`);
 
     console.log("\n========================================");
     console.log("🚀 ÖNCE İyzico API test ediliyor (order henüz oluşturulmadı)...");
@@ -266,6 +301,27 @@ export async function createOrder(data: CreateOrderData) {
     }
 
     console.log("✅ Order oluşturuldu:", order.id);
+
+    // Send order confirmation email (async, don't wait for it)
+    const shippingAddressText = `${data.shippingName}\n${data.shippingAddressLine1}${data.shippingAddressLine2 ? '\n' + data.shippingAddressLine2 : ''}\n${data.district}, ${data.city} ${data.postalCode}\n${data.country}`;
+    
+    sendOrderConfirmationEmail(data.email, {
+      orderId: order.id,
+      name: data.shippingName,
+      total,
+      subtotal,
+      shippingFee,
+      discount: discountTotal,
+      shippingAddress: shippingAddressText,
+      items: cart.items.map(item => ({
+        title: item.product.title,
+        quantity: item.quantity,
+        price: item.product.price,
+      })),
+    }).catch((error) => {
+      console.error("Order confirmation email failed:", error);
+      // Don't fail order if email fails
+    });
 
     const totalElapsed = Date.now() - startTime;
     console.log(`\n🎉 ========================================`);
