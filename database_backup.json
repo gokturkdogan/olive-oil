@@ -1,0 +1,228 @@
+{
+  "users": [
+    {
+      "id": "2557a5d1-5b85-47ab-b055-e07f863eac7f",
+      "name": "Admin User",
+      "email": "admin@zeytinyagi.com",
+      "password_hash": "$2a$10$5u3bpIagtsGuKsUwlVVDgedy6t4ExCjFO6H2WLB.aE6bBWLsIH.8S",
+      "role": "ADMIN",
+      "loyalty_tier": "STANDARD",
+      "total_spent": 0,
+      "created_at": "2025-10-16T16:06:37.275Z",
+      "updated_at": "2025-10-16T16:06:37.275Z"
+    },
+    {
+      "id": "d61a6e95-a8b8-432c-9200-508d7d53bcd4",
+      "name": "standart kullanıcı",
+      "email": "standart@hotmail.com",
+      "password_hash": "$2a$10$v.X/kGncRO6YbEPpPffHNuUTdQgtctVAgSQcifKVmXOMYetVwC3.i",
+      "role": "CUSTOMER",
+      "loyalty_tier": "STANDARD",
+      "total_spent": 56000,
+      "created_at": "2025-10-18T15:50:42.595Z",
+      "updated_at": "2025-10-19T13:28:05.215Z"
+    },
+    {
+      "id": "4dd155c1-75f4-4457-bccd-6d79aa11296b",
+      "name": "göktürk doğan",
+      "email": "gokturk.dogan@hotmail.com",
+      "password_hash": "$2a$10$vTnNR9sxJ2YTqoQbFttEL.g4jZ/mw23w/nb.6ZtpfYXQTDTZ0JJwS",
+      "role": "CUSTOMER",
+      "loyalty_tier": "STANDARD",
+      "total_spent": 390000,
+      "created_at": "2025-10-19T13:51:14.075Z",
+      "updated_at": "2025-10-25T07:00:16.673Z"
+    }
+  ],
+  "addresses": [
+    {
+      "id": "e989e7d3-3138-4396-a1d0-152e2bcbee45",
+      "user_id": "d61a6e95-a8b8-432c-9200-508d7d53bcd4",
+      "title": "Ev",
+      "name": "Göktürk DOĞAN",
+      "phone": "5398226918",
+      "address_line1": "Millet Caddesi",
+      "address_line2": "B Blok 14",
+      "city": "Pendik",
+      "district": "Pendik",
+      "postal_code": "00034",
+      "country": "TR",
+      "is_default": true,
+      "created_at": "2025-10-19T07:23:28.396Z",
+      "updated_at": "2025-10-19T07:23:28.396Z"
+    },
+    {
+      "id": "1ee79778-5a07-49d4-a010-f6a8824c5527",
+      "user_id": "4dd155c1-75f4-4457-bccd-6d79aa11296b",
+      "title": "Ev",
+      "name": "Gokturk Dogan",
+      "phone": "+905534815110",
+      "address_line1": "Millet Caddesi",
+      "address_line2": "B Blok 14",
+      "city": "Pendik",
+      "district": "Pendik",
+      "postal_code": "00034",
+      "country": "TR",
+      "is_default": true,
+      "created_at": "2025-10-19T13:55:10.700Z",
+      "updated_at": "2025-10-19T13:55:10.700Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "e7246e17-c71f-462b-be7d-fdcfb8d1f19a",
+      "slug": "sizma-zeytinyagi-5l",
+      "title": "Sızma Zeytinyağı 5L",
+      "description": "Toplu alım için en uygun seçenek. 5 litrelik teneke ambalajda, uzun süre taze kalır. Restoran, otel ve toplu tüketim için idealdir. Aynı kalitede, daha ekonomik fiyat.",
+      "images": [],
+      "price": 125000,
+      "active": true,
+      "stock": 20,
+      "created_at": "2025-10-16T16:06:40.614Z",
+      "updated_at": "2025-10-25T16:24:30.429Z"
+    },
+    {
+      "id": "48200498-f776-439b-9bdf-e12fd881ce25",
+      "slug": "sizma-zeytinyagi-1l",
+      "title": "Sızma Zeytinyağı 1L",
+      "description": "Ekonomik 1 litrelik şişede premium kalite sızma zeytinyağı. Ailenizin günlük ihtiyaçları için ideal boyut. Soğuk sıkım, %100 doğal, laboratuvar testli. Salatalarda, yemeklerde ve kahvaltıda güvenle kullanabilirsiniz.",
+      "images": [],
+      "price": 28000,
+      "active": true,
+      "stock": 66,
+      "created_at": "2025-10-16T16:06:39.987Z",
+      "updated_at": "2025-10-25T08:59:12.261Z"
+    },
+    {
+      "id": "5fea5200-ba42-48ef-b653-e9b232870284",
+      "slug": "sizma-zeytinyagi-500ml",
+      "title": "Sızma Zeytinyağı 500ml",
+      "description": "Ege bölgesinin verimli topraklarında yetişen zeytinlerden, soğuk sıkım yöntemiyle elde edilen birinci sınıf sızma zeytinyağı. %0.5'den düşük asit oranı ile sağlığınız için en iyi seçim. Antioksidan bakımından zengin, kalp dostu, tamamen doğal ve katkısız. Cam şişede, ışık geçirmez ambalajda.",
+      "images": [],
+      "price": 15000,
+      "active": true,
+      "stock": 98,
+      "created_at": "2025-10-16T16:06:38.982Z",
+      "updated_at": "2025-10-25T08:59:12.646Z"
+    }
+  ],
+  "coupons": [
+    {
+      "id": "130665c5-91e5-4908-8988-c49a82a84c1c",
+      "code": "HOSGELDIN20",
+      "type": "PERCENTAGE",
+      "value": 20,
+      "usage_limit": 100,
+      "used_count": 0,
+      "min_order_amount": 10000,
+      "starts_at": "2025-01-01T00:00:00.000Z",
+      "ends_at": "2025-12-31T00:00:00.000Z",
+      "active": true,
+      "created_at": "2025-10-16T16:06:41.243Z"
+    },
+    {
+      "id": "f0469bcb-8d39-4417-aa83-bc443c9c4e45",
+      "code": "YILBASI50",
+      "type": "FIXED",
+      "value": 5000,
+      "usage_limit": 50,
+      "used_count": 0,
+      "min_order_amount": 20000,
+      "starts_at": "2024-12-01T00:00:00.000Z",
+      "ends_at": "2025-01-31T00:00:00.000Z",
+      "active": true,
+      "created_at": "2025-10-16T16:06:42.249Z"
+    }
+  ],
+  "carts": [
+    {
+      "id": "7e2eb8cd-b837-4e18-b604-85800a439dd6",
+      "user_id": "d61a6e95-a8b8-432c-9200-508d7d53bcd4",
+      "guest_id": null,
+      "created_at": "2025-10-19T07:22:55.288Z",
+      "updated_at": "2025-10-19T07:22:55.288Z"
+    },
+    {
+      "id": "8bd10f03-7447-4c12-96fa-b4c50dd89a39",
+      "user_id": null,
+      "guest_id": "27d0162c-025a-4368-9afd-c677bd45a6c1",
+      "created_at": "2025-10-19T09:28:25.171Z",
+      "updated_at": "2025-10-19T09:28:25.171Z"
+    },
+    {
+      "id": "dad9e234-feb4-4365-b9cc-b69787687521",
+      "user_id": "4dd155c1-75f4-4457-bccd-6d79aa11296b",
+      "guest_id": null,
+      "created_at": "2025-10-19T13:54:53.952Z",
+      "updated_at": "2025-10-19T13:54:53.952Z"
+    },
+    {
+      "id": "bd3fa5f9-9ae8-4263-a98f-3de13ecf9f5e",
+      "user_id": null,
+      "guest_id": "884e0779-faa3-4645-b324-37d73c9b615a",
+      "created_at": "2025-10-19T18:03:52.460Z",
+      "updated_at": "2025-10-19T18:03:52.460Z"
+    }
+  ],
+  "cartItems": [
+    {
+      "id": "130ad6e2-79ed-4135-a6e4-d67827ef7d3f",
+      "cart_id": "dad9e234-feb4-4365-b9cc-b69787687521",
+      "product_id": "e7246e17-c71f-462b-be7d-fdcfb8d1f19a",
+      "quantity": 1
+    }
+  ],
+  "orders": [
+    {
+      "id": "66233f13-9462-4695-b8eb-1aaae30c67ad",
+      "user_id": "4dd155c1-75f4-4457-bccd-6d79aa11296b",
+      "email": "gokturk.dogan@hotmail.com",
+      "shipping_name": "Gokturk Dogan",
+      "shipping_phone": "+905534815110",
+      "shipping_address_line1": "Millet Caddesi",
+      "shipping_address_line2": "B Blok 14",
+      "city": "Pendik",
+      "district": "Pendik",
+      "postal_code": "00034",
+      "country": "TR",
+      "subtotal": 125000,
+      "discount_total": 0,
+      "shipping_fee": 5000,
+      "total": 130000,
+      "coupon_code": null,
+      "status": "CANCELLED",
+      "payment_provider": "IYZICO",
+      "payment_reference": "27504852",
+      "payment_transaction_ids": "[{\"itemId\":\"SHIPPING\",\"paymentTransactionId\":\"29470816\",\"price\":50,\"paidPrice\":50},{\"itemId\":\"e7246e17-c71f-462b-be7d-fdcfb8d1f19a\",\"paymentTransactionId\":\"29470815\",\"price\":1250,\"paidPrice\":1250}]",
+      "refund_status": "MANUAL_COMPLETED",
+      "shipping_provider": null,
+      "tracking_code": null,
+      "created_at": "2025-10-25T16:21:08.502Z",
+      "updated_at": "2025-10-25T16:26:51.550Z"
+    }
+  ],
+  "orderItems": [
+    {
+      "id": "682bbee5-dee4-47d4-8e0d-c2362419f445",
+      "order_id": "66233f13-9462-4695-b8eb-1aaae30c67ad",
+      "product_id": "e7246e17-c71f-462b-be7d-fdcfb8d1f19a",
+      "title_snapshot": "Sızma Zeytinyağı 5L",
+      "unit_price_snapshot": 125000,
+      "quantity": 1,
+      "line_total": 125000
+    }
+  ],
+  "webhooks": [],
+  "backupDate": "2025-10-25T16:36:39.311Z",
+  "totalRecords": {
+    "users": 3,
+    "addresses": 2,
+    "products": 3,
+    "coupons": 2,
+    "carts": 4,
+    "cartItems": 1,
+    "orders": 1,
+    "orderItems": 1,
+    "webhooks": 0
+  }
+}

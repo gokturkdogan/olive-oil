@@ -1,5 +1,3 @@
-// Zeytinyağı E-Ticaret Projesi - Prisma Schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,211 +7,185 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Kullanıcı Rolleri
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password_hash String?
+  role          Role      @default(CUSTOMER)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @default(now()) @updatedAt
+  loyalty_tier  String    @default("STANDARD")
+  total_spent   Int       @default(0)
+  addresses     Address[]
+  carts         Cart[]
+  orders        Order[]
+
+  @@map("users")
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  user_id       String
+  title         String
+  name          String
+  phone         String
+  address_line1 String
+  address_line2 String?
+  city          String
+  district      String
+  postal_code   String
+  country       String   @default("TR")
+  is_default    Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+model Product {
+  id          String      @id @default(uuid())
+  slug        String      @unique
+  title       String
+  description String
+  images      Json
+  price       Int
+  active      Boolean     @default(true)
+  stock       Int         @default(0)
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+  cart_items  CartItem[]
+  order_items OrderItem[]
+
+  @@map("products")
+}
+
+model Coupon {
+  id               String     @id @default(uuid())
+  code             String     @unique
+  type             CouponType
+  value            Int
+  usage_limit      Int?
+  used_count       Int        @default(0)
+  min_order_amount Int?
+  starts_at        DateTime
+  ends_at          DateTime
+  active           Boolean    @default(true)
+  created_at       DateTime   @default(now())
+
+  @@map("coupons")
+}
+
+model Cart {
+  id         String     @id @default(uuid())
+  user_id    String?
+  guest_id   String?
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  items      CartItem[]
+  user       User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("carts")
+}
+
+model CartItem {
+  id         String  @id @default(uuid())
+  cart_id    String
+  product_id String
+  quantity   Int     @default(1)
+  cart       Cart    @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  product    Product @relation(fields: [product_id], references: [id])
+
+  @@unique([cart_id, product_id])
+  @@map("cart_items")
+}
+
+model Order {
+  id                      String          @id @default(uuid())
+  user_id                 String?
+  email                   String
+  shipping_name           String
+  shipping_phone          String
+  shipping_address_line1  String
+  shipping_address_line2  String?
+  city                    String
+  district                String
+  postal_code             String
+  country                 String          @default("TR")
+  subtotal                Int
+  discount_total          Int             @default(0)
+  shipping_fee            Int             @default(0)
+  total                   Int
+  coupon_code             String?
+  status                  OrderStatus     @default(PENDING)
+  payment_provider        PaymentProvider @default(IYZICO)
+  payment_reference       String?
+  shipping_provider       String?
+  tracking_code           String?
+  created_at              DateTime        @default(now())
+  updated_at              DateTime        @updatedAt
+  payment_transaction_ids String?
+  refund_status           RefundStatus?
+  items                   OrderItem[]
+  user                    User?           @relation(fields: [user_id], references: [id])
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String  @id @default(uuid())
+  order_id            String
+  product_id          String
+  title_snapshot      String
+  unit_price_snapshot Int
+  quantity            Int
+  line_total          Int
+  order               Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product             Product @relation(fields: [product_id], references: [id])
+
+  @@map("order_items")
+}
+
+model Webhook {
+  id         String   @id @default(uuid())
+  provider   String
+  event_type String
+  payload    Json
+  processed  Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@map("webhooks")
+}
+
 enum Role {
   CUSTOMER
   ADMIN
 }
 
-// Kupon Tipleri
 enum CouponType {
   PERCENTAGE
   FIXED
 }
 
-// Sipariş Durumları
 enum OrderStatus {
-  PENDING      // Ödeme bekleniyor
-  PAID         // Ödeme alındı (Sipariş Alındı)
-  FAILED       // Ödeme başarısız
-  CANCELLED    // İptal edildi
-  PROCESSING   // Hazırlanıyor
-  SHIPPED      // Kargoya verildi
-  DELIVERED    // Teslim edildi
-  FULFILLED    // Eski durum (geriye uyumluluk)
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  FULFILLED
 }
 
-// Ödeme Sağlayıcıları
 enum PaymentProvider {
   IYZICO
 }
 
-// Refund Durumları
 enum RefundStatus {
-  NOT_APPLICABLE    // refund gerekmez (PENDING, FAILED)
-  AUTOMATIC_SUCCESS  // otomatik refund başarılı
-  MANUAL_REQUIRED    // manuel refund gerekli
-  MANUAL_COMPLETED   // manuel refund tamamlandı
+  NOT_APPLICABLE
+  AUTOMATIC_SUCCESS
+  MANUAL_REQUIRED
+  MANUAL_COMPLETED
 }
-
-// Kullanıcılar
-model User {
-  id            String    @id @default(uuid())
-  name          String
-  email         String    @unique
-  password_hash String?   // nullable for magic link auth
-  role          Role      @default(CUSTOMER)
-  loyalty_tier  String    @default("STANDARD") // STANDARD, GOLD, PLATINUM, DIAMOND
-  total_spent   Int       @default(0) // Toplam harcama (kuruş) - sadece DELIVERED siparişler
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @default(now()) @updatedAt
-  
-  carts         Cart[]
-  orders        Order[]
-  addresses     Address[]
-  
-  @@map("users")
-}
-
-// Kullanıcı Adresleri
-model Address {
-  id           String   @id @default(uuid())
-  user_id      String
-  title        String   // Örn: "Ev", "İş"
-  name         String
-  phone        String
-  address_line1 String
-  address_line2 String?
-  city         String
-  district     String
-  postal_code  String
-  country      String   @default("TR")
-  is_default   Boolean  @default(false)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-  
-  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  
-  @@map("addresses")
-}
-
-// Ürünler
-model Product {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  description String   @db.Text
-  images      Json     // array of image URLs
-  price       Int      // kuruş bazında (100 = 1 TL)
-  active      Boolean  @default(true)
-  stock       Int      @default(0)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  
-  cart_items  CartItem[]
-  order_items OrderItem[]
-  
-  @@map("products")
-}
-
-// Kuponlar
-model Coupon {
-  id               String     @id @default(uuid())
-  code             String     @unique
-  type             CouponType
-  value            Int        // % için 0-100, sabit indirim için kuruş
-  usage_limit      Int?       // nullable, null = sınırsız
-  used_count       Int        @default(0)
-  min_order_amount Int?       // nullable, minimum sepet tutarı (kuruş)
-  starts_at        DateTime
-  ends_at          DateTime
-  active           Boolean    @default(true)
-  created_at       DateTime   @default(now())
-  
-  @@map("coupons")
-}
-
-// Sepetler
-model Cart {
-  id         String   @id @default(uuid())
-  user_id    String?  // nullable for guest carts
-  guest_id   String?  // cookie-based UUID for guests
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  
-  user       User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  items      CartItem[]
-  
-  @@map("carts")
-}
-
-// Sepet Ürünleri
-model CartItem {
-  id         String @id @default(uuid())
-  cart_id    String
-  product_id String
-  quantity   Int    @default(1)
-  
-  cart    Cart    @relation(fields: [cart_id], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [product_id], references: [id])
-  
-  @@unique([cart_id, product_id]) // bir sepette aynı ürün tekrar eklenemez
-  @@map("cart_items")
-}
-
-// Siparişler
-model Order {
-  id                     String          @id @default(uuid())
-  user_id                String?         // nullable for guest orders
-  email                  String
-  shipping_name          String
-  shipping_phone         String
-  shipping_address_line1 String
-  shipping_address_line2 String?
-  city                   String
-  district               String
-  postal_code            String
-  country                String          @default("TR")
-  
-  subtotal               Int             // kuruş
-  discount_total         Int             @default(0) // kuruş
-  shipping_fee           Int             @default(0) // kuruş
-  total                  Int             // kuruş
-  
-  coupon_code            String?
-  status                 OrderStatus     @default(PENDING)
-  payment_provider       PaymentProvider @default(IYZICO)
-  payment_reference      String?         // iyzico paymentId/transactionId
-  payment_transaction_ids String?        // JSON array of payment transaction IDs for refunds
-  refund_status          RefundStatus?   // refund durumu
-  
-  shipping_provider      String?
-  tracking_code          String?
-  
-  created_at             DateTime        @default(now())
-  updated_at             DateTime        @updatedAt
-  
-  user                   User?           @relation(fields: [user_id], references: [id])
-  items                  OrderItem[]
-  
-  @@map("orders")
-}
-
-// Sipariş Ürünleri (snapshot)
-model OrderItem {
-  id                 String @id @default(uuid())
-  order_id           String
-  product_id         String // snapshot reference
-  title_snapshot     String
-  unit_price_snapshot Int   // kuruş
-  quantity           Int
-  line_total         Int    // kuruş (unit_price * quantity)
-  
-  order   Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [product_id], references: [id])
-  
-  @@map("order_items")
-}
-
-// Webhooks (iyzico callbacks)
-model Webhook {
-  id          String   @id @default(uuid())
-  provider    String   // "IYZICO"
-  event_type  String   // "payment.success", "payment.failed", etc.
-  payload     Json     // raw webhook data
-  processed   Boolean  @default(false)
-  created_at  DateTime @default(now())
-  
-  @@map("webhooks")
-}
-
