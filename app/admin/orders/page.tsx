@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/money";
 import Link from "next/link";
-import { ShoppingCart, Package, Clock, CheckCircle, Truck, XCircle, AlertCircle } from "lucide-react";
+import { ShoppingCart, Package, Clock, CheckCircle, Truck, XCircle, AlertCircle, AlertTriangle } from "lucide-react";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg",
@@ -104,7 +104,11 @@ export default async function AdminOrdersPage() {
                 const StatusIcon = statusIcons[order.status];
                 return (
                   <Link href={`/admin/orders/${order.id}`} key={order.id}>
-                    <Card className="hover:shadow-xl transition-all duration-300 border-2 border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-2xl hover:border-green-300 cursor-pointer group">
+                    <Card className={`hover:shadow-xl transition-all duration-300 border-2 shadow-lg bg-white hover:shadow-2xl cursor-pointer group ${
+                      order.refund_status === "MANUAL_REQUIRED" 
+                        ? "border-red-300 shadow-red-500/20 hover:border-red-400 ring-2 ring-red-200 ring-opacity-50" 
+                        : "border-green-200 shadow-green-500/10 hover:border-green-300"
+                    }`}>
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
@@ -116,6 +120,12 @@ export default async function AdminOrdersPage() {
                                 <StatusIcon className="w-3 h-3 mr-1" />
                                 {statusLabels[order.status]}
                               </Badge>
+                              {order.refund_status === "MANUAL_REQUIRED" && (
+                                <Badge className="bg-gradient-to-r from-red-600 to-red-700 text-white border-2 border-red-400 shadow-xl shadow-red-500/50 animate-pulse ring-2 ring-red-300 ring-opacity-50">
+                                  <AlertTriangle className="w-4 h-4 mr-2 animate-bounce" />
+                                  <span className="font-bold text-sm">MANUEL İADE GEREKLİ!</span>
+                                </Badge>
+                              )}
                             </div>
                             <p className="text-sm text-gray-600">
                               {new Date(order.created_at).toLocaleDateString("tr-TR", {

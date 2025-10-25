@@ -1,7 +1,8 @@
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/money";
-import { Package, ShoppingCart, Tag, Users, Clock, TruckIcon, CheckCircle, XCircle, TrendingUp, BarChart3, Shield } from "lucide-react";
+import { Package, ShoppingCart, Tag, Users, Clock, TruckIcon, CheckCircle, XCircle, TrendingUp, BarChart3, Shield, Trash2, AlertTriangle } from "lucide-react";
 
 export default async function AdminDashboard() {
   const now = new Date();
@@ -27,6 +28,9 @@ export default async function AdminDashboard() {
     activeOrders,
     completedOrders,
     failedOrders,
+    cancelledOrders,
+    manualRefundOrders,
+    oldPendingOrders,
   ] = await Promise.all([
     db.product.count(),
     db.order.count({ 
@@ -80,6 +84,26 @@ export default async function AdminDashboard() {
     // İptal/Başarısız (CANCELLED, FAILED)
     db.order.count({
       where: { status: { in: ["CANCELLED", "FAILED"] as const } }
+    }),
+    // Sadece CANCELLED siparişler
+    db.order.count({
+      where: { status: "CANCELLED" }
+    }),
+    // Manuel iade gereken siparişler (CANCELLED + refund_status = MANUAL_REQUIRED)
+    db.order.count({
+      where: { 
+        status: "CANCELLED",
+        refund_status: "MANUAL_REQUIRED"
+      }
+    }),
+    // 30 dakikadan eski PENDING order'lar
+    db.order.count({
+      where: { 
+        status: "PENDING",
+        created_at: {
+          lt: new Date(Date.now() - 30 * 60 * 1000) // 30 dakika önce
+        }
+      }
     }),
   ]);
 
@@ -304,7 +328,7 @@ export default async function AdminDashboard() {
                 </CardContent>
               </Card>
 
-              {/* İptal/Başarısız */}
+              {/* İptal Edilen */}
               <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-white hover:shadow-xl hover:border-red-300 transition-all duration-300">
                 <CardContent className="pt-6">
                   <div className="flex items-center justify-between mb-4">
@@ -312,17 +336,85 @@ export default async function AdminDashboard() {
                       <XCircle className="h-8 w-8 text-red-600" />
                     </div>
                     <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-lg px-3 py-1 rounded-full font-bold">
-                      {failedOrders}
+                      {cancelledOrders}
                     </div>
                   </div>
-                  <h4 className="font-semibold text-gray-800 mb-1">İptal/Başarısız</h4>
+                  <h4 className="font-semibold text-gray-800 mb-1">İptal Edilen</h4>
                   <p className="text-xs text-gray-600">
-                    İptal edildi veya başarısız oldu
+                    Kullanıcı tarafından iptal edildi
                   </p>
                 </CardContent>
               </Card>
+
+              {/* Manuel İade Gereken */}
+              {manualRefundOrders > 0 && (
+                <Card className="border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white hover:shadow-xl hover:border-orange-300 transition-all duration-300">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="bg-gradient-to-r from-orange-100 to-amber-100 p-3 rounded-xl border border-orange-200">
+                        <AlertTriangle className="h-8 w-8 text-orange-600" />
+                      </div>
+                      <div className="bg-gradient-to-r from-orange-500 to-amber-500 text-white text-lg px-3 py-1 rounded-full font-bold">
+                        {manualRefundOrders}
+                      </div>
+                    </div>
+                    <h4 className="font-semibold text-gray-800 mb-1">Manuel İade</h4>
+                    <p className="text-xs text-gray-600">
+                      Otomatik iade yapılamadı
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
+
+          {/* PENDING Order Cleanup Section */}
+          {oldPendingOrders > 0 && (
+            <div className="mt-8">
+              <Card className="border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 hover:shadow-xl hover:border-amber-300 transition-all duration-300">
+                <CardHeader className="bg-gradient-to-br from-amber-50/50 to-orange-50/50">
+                  <CardTitle className="text-gray-800 flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-amber-600" />
+                    PENDING Order Temizleme
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-700 mb-2">
+                        <span className="font-semibold text-amber-700">{oldPendingOrders}</span> adet 30 dakikadan eski PENDING order bulundu.
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        Bu order'lar muhtemelen ödeme yapılmadan kalmış. Temizlenebilir.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={async () => {
+                          try {
+                            const response = await fetch("/api/admin/cleanup-pending-orders", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                              window.location.reload();
+                            }
+                          } catch (error) {
+                            console.error("Cleanup error:", error);
+                          }
+                        }}
+                        className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-300 font-semibold px-4 py-2"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Temizle ({oldPendingOrders})
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </div>

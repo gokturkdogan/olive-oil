@@ -263,6 +263,14 @@ export async function createOrder(data: CreateOrderData) {
 
     // ✅ İyzico başarılı! ŞİMDİ order oluştur
     console.log("✅ İyzico başarılı! Şimdi order oluşturuluyor...");
+    console.log("🔑 Payment Result Debug:");
+    console.log("  Token:", paymentResult.token);
+    console.log("  Token Type:", typeof paymentResult.token);
+    console.log("  Token Length:", paymentResult.token?.length);
+    console.log("  ConversationId:", paymentResult.conversationId);
+    console.log("  PaymentId:", paymentResult.paymentId);
+    console.log("  TransactionId:", paymentResult.transactionId);
+    console.log("  Full Response:", JSON.stringify(paymentResult, null, 2));
     
     const order = await db.order.create({
       data: {
@@ -285,6 +293,15 @@ export async function createOrder(data: CreateOrderData) {
         payment_reference: paymentResult.token,
       },
     });
+    
+    console.log("📝 Order oluşturuldu:");
+    console.log("  Order ID:", order.id);
+    console.log("  Payment Reference:", order.payment_reference);
+    
+    console.log("📋 Order Created:");
+    console.log("  ID:", order.id);
+    console.log("  Payment Reference:", order.payment_reference);
+    console.log("  Status:", order.status);
 
     // Create order items (snapshot)
     for (const item of cart.items) {
@@ -375,12 +392,20 @@ export async function completeOrder(orderId: string, paymentData: any) {
       return { success: false, error: "Sipariş zaten işlenmiş" };
     }
 
-    // Update order status
+    // Update order status and payment details
     await db.order.update({
       where: { id: orderId },
       data: {
         status: paymentData.status === "success" ? "PAID" : "FAILED",
         payment_reference: paymentData.paymentId || order.payment_reference,
+        // Store payment transaction IDs for refund purposes
+        payment_transaction_ids: paymentData.itemTransactions ? 
+          JSON.stringify(paymentData.itemTransactions.map((item: any) => ({
+            itemId: item.itemId,
+            paymentTransactionId: item.paymentTransactionId,
+            price: item.price,
+            paidPrice: item.paidPrice
+          }))) : null,
       },
     });
 
@@ -430,6 +455,282 @@ export async function completeOrder(orderId: string, paymentData: any) {
   } catch (error) {
     console.error("Complete order error:", error);
     return { success: false, error: "Sipariş tamamlanamadı" };
+  }
+}
+
+/**
+ * Kullanıcı siparişi iptal eder (kargoya verilmeden önce)
+ */
+export async function cancelOrder(orderId: string) {
+  try {
+    console.log("🔄 Sipariş iptal ediliyor:", orderId);
+    
+    const session = await auth();
+    if (!session?.user) {
+      return { success: false, error: "Oturum açmanız gerekiyor" };
+    }
+
+    // Get order with items
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      return { success: false, error: "Sipariş bulunamadı" };
+    }
+
+    // Check if user owns this order
+    if (order.user_id !== session.user.id) {
+      return { success: false, error: "Bu siparişi iptal etme yetkiniz yok" };
+    }
+
+    // Check if order can be cancelled (not shipped yet)
+    if (order.status === "SHIPPED" || order.status === "DELIVERED" || order.status === "FULFILLED") {
+      return { success: false, error: "Kargoya verilmiş siparişler iptal edilemez" };
+    }
+
+    if (order.status === "CANCELLED") {
+      return { success: false, error: "Sipariş zaten iptal edilmiş" };
+    }
+
+    // Check if order was paid (has payment reference and status is PAID)
+    if (order.status === "PAID" && order.payment_reference) {
+      console.log("💳 Ödeme yapılmış sipariş, refund işlemi başlatılıyor...");
+      
+      try {
+        // Import refundPayment function
+        const { refundPayment } = await import("@/lib/iyzico");
+        
+        // Check if payment_reference is a paymentId, conversationId, or token
+        let paymentId = order.payment_reference;
+        let isConversationId = false;
+        
+        // If it's a short numeric value, it's likely a PaymentId (not a token)
+        if (paymentId && paymentId.length < 20 && /^\d+$/.test(paymentId)) {
+          console.log("🔍 Numeric PaymentId detected:", paymentId);
+          // This is already a PaymentId, no need to convert
+          console.log("✅ Using PaymentId directly:", paymentId);
+        } else if (paymentId && paymentId.startsWith('test-')) {
+          console.log("🔍 Conversation ID detected:", paymentId);
+          isConversationId = true;
+          // Conversation ID ile refund yapamayız, manuel iade gerekir
+          throw new Error("Conversation ID - Manual refund required");
+        } else if (paymentId && paymentId.length > 20 && !/^\d+$/.test(paymentId)) {
+          console.log("🔍 UUID token detected, trying to get paymentId from İyzico...");
+          try {
+            const { retrieveCheckoutForm } = await import("@/lib/iyzico");
+            const paymentDetails = await retrieveCheckoutForm(paymentId);
+            
+            if (paymentDetails.status === "success" && paymentDetails.paymentId) {
+              paymentId = paymentDetails.paymentId;
+              console.log("✅ PaymentId found from token:", paymentId);
+            } else {
+              console.error("❌ PaymentId not found from token:", paymentDetails);
+              throw new Error("PaymentId not found");
+            }
+          } catch (error) {
+            console.error("❌ Token to PaymentId conversion failed:", error);
+            throw error;
+          }
+        }
+        
+        if (paymentId && order.payment_transaction_ids) {
+          console.log("🔄 İyzico refund işlemi başlatılıyor...");
+          console.log("💳 Using PaymentId:", paymentId);
+          
+          try {
+            // Parse payment transaction IDs
+            const transactionIds = JSON.parse(order.payment_transaction_ids);
+            console.log("📋 Payment Transaction IDs:", transactionIds);
+            
+            // Debug: Check transaction amounts
+            console.log("🔍 Transaction Amount Debug:");
+            transactionIds.forEach((tx: any, index: number) => {
+              console.log(`  ${index + 1}. ${tx.itemId}:`);
+              console.log(`     Price: ${tx.price} TL`);
+              console.log(`     PaidPrice: ${tx.paidPrice} TL`);
+              console.log(`     Refund Amount: ${tx.paidPrice} TL`);
+            });
+            
+            // Process refunds for each transaction (but show as full refund)
+            for (const transaction of transactionIds) {
+              console.log(`🔄 Refunding transaction ${transaction.paymentTransactionId} (${transaction.itemId})...`);
+              console.log(`💰 Refund Amount: ${transaction.paidPrice} TL`);
+              
+              // İyzico'dan gelen paidPrice zaten TL cinsinden
+              const refundResult = await refundPayment(transaction.paymentTransactionId, transaction.paidPrice);
+              
+              if (refundResult.status === "success") {
+                console.log(`✅ Refund başarılı for ${transaction.itemId}:`, refundResult);
+              } else {
+                console.error(`❌ Refund başarısız for ${transaction.itemId}:`, refundResult);
+                throw new Error(`Refund failed for ${transaction.itemId}: ${refundResult.errorMessage || "Bilinmeyen hata"}`);
+              }
+            }
+            
+            console.log("✅ Tüm refund'lar başarılı! (Full refund completed)");
+          } catch (refundError: any) {
+            console.error("❌ Refund error:", refundError);
+            throw refundError;
+          }
+        } else {
+          console.error("❌ PaymentId bulunamadı:", paymentId);
+          
+          // Token bulunamadı veya expire oldu - siparişi yine de iptal et ama manuel iade gerektiğini belirt
+          console.log("⚠️ Token expire oldu, sipariş iptal ediliyor ama manuel iade gerekebilir");
+          
+          // Update order status to CANCELLED with special note
+          await db.order.update({
+            where: { id: orderId },
+            data: {
+              status: "CANCELLED",
+              refund_status: "MANUAL_REQUIRED",
+            },
+          });
+
+          // Restore stock for cancelled items
+          for (const item of order.items) {
+            await db.product.update({
+              where: { id: item.product_id },
+              data: {
+                stock: {
+                  increment: item.quantity,
+                },
+              },
+            });
+          }
+
+          // Decrement coupon usage if it was used
+          if (order.coupon_code) {
+            const coupon = await db.coupon.findUnique({
+              where: { code: order.coupon_code },
+            });
+            if (coupon) {
+              await db.coupon.update({
+                where: { id: coupon.id },
+                data: {
+                  used_count: {
+                    decrement: 1,
+                  },
+                },
+              });
+            }
+          }
+
+          console.log("✅ Sipariş iptal edildi (manuel iade gerekebilir):", orderId);
+          return { 
+            success: true, 
+            message: "Sipariş iptal edildi. Ödeme bilgileri expire olduğu için otomatik iade yapılamadı. Paranız 1-3 iş günü içinde hesabınıza iade edilecektir."
+          };
+        }
+      } catch (refundError: any) {
+        console.error("❌ Refund error:", refundError);
+        
+        // Refund hatası durumunda da siparişi iptal et ama manuel iade gerektiğini belirt
+        console.log("⚠️ Refund hatası, sipariş iptal ediliyor ama manuel iade gerekebilir");
+        
+        // Update order status to CANCELLED
+        await db.order.update({
+          where: { id: orderId },
+          data: {
+            status: "CANCELLED",
+            refund_status: "MANUAL_REQUIRED",
+          },
+        });
+
+        // Restore stock for cancelled items
+        for (const item of order.items) {
+          await db.product.update({
+            where: { id: item.product_id },
+            data: {
+              stock: {
+                increment: item.quantity,
+              },
+            },
+          });
+        }
+
+        // Decrement coupon usage if it was used
+        if (order.coupon_code) {
+          const coupon = await db.coupon.findUnique({
+            where: { code: order.coupon_code },
+          });
+          if (coupon) {
+            await db.coupon.update({
+              where: { id: coupon.id },
+              data: {
+                used_count: {
+                  decrement: 1,
+                },
+              },
+            });
+          }
+        }
+
+        console.log("✅ Sipariş iptal edildi (manuel iade gerekebilir):", orderId);
+        return { 
+          success: true, 
+          message: "Sipariş iptal edildi. İade işlemi sırasında teknik sorun oluştu. Paranız 1-3 iş günü içinde hesabınıza iade edilecektir.",
+          requiresManualRefund: true
+        };
+      }
+    } else if (order.status === "PENDING") {
+      console.log("⏳ PENDING sipariş, refund gerekmez, sadece iptal ediliyor...");
+    }
+
+    // Update order status to CANCELLED
+    await db.order.update({
+      where: { id: orderId },
+      data: {
+        status: "CANCELLED",
+        refund_status: "AUTOMATIC_SUCCESS",
+      },
+    });
+
+    // Restore stock for cancelled items
+    for (const item of order.items) {
+      await db.product.update({
+        where: { id: item.product_id },
+        data: {
+          stock: {
+            increment: item.quantity,
+          },
+        },
+      });
+    }
+
+    // Decrement coupon usage if it was used
+    if (order.coupon_code) {
+      const coupon = await db.coupon.findUnique({
+        where: { code: order.coupon_code },
+      });
+      if (coupon) {
+        await db.coupon.update({
+          where: { id: coupon.id },
+          data: {
+            used_count: {
+              decrement: 1,
+            },
+          },
+        });
+      }
+    }
+
+    console.log("✅ Sipariş başarıyla iptal edildi:", orderId);
+    return { 
+      success: true, 
+      message: "Sipariş başarıyla iptal edildi"
+    };
+  } catch (error: any) {
+    console.error("❌ Cancel order error:", error);
+    return { success: false, error: "Sipariş iptal edilemedi: " + error.message };
   }
 }
 

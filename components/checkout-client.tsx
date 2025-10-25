@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,8 +51,66 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
   const [addingAddress, setAddingAddress] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const isLoggedIn = !!session?.user;
+
+  // Check if user came back from payment (URL has payment_return parameter)
+  useEffect(() => {
+    const paymentReturn = searchParams.get('payment_return');
+    const error = searchParams.get('error');
+    
+    if (paymentReturn === 'true') {
+      console.log("🔄 Kullanıcı ödeme sayfasından geri döndü, PENDING order'lar temizleniyor...");
+      
+      // Clean up user's PENDING orders
+      const cleanupPendingOrders = async () => {
+        try {
+          const response = await fetch("/api/admin/cleanup-pending-orders", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userEmail: session?.user?.email,
+              userId: session?.user?.id,
+              cleanupUser: true
+            })
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            console.log("🧹 PENDING order'lar temizlendi:", result.deletedCount);
+            
+            // Show appropriate toast based on error
+            if (error) {
+              toast({
+                title: "Ödeme İptal Edildi",
+                description: "Ödeme işlemi iptal edildi. Sepetiniz korundu, yeni sipariş verebilirsiniz.",
+                variant: "default",
+              });
+            } else {
+              toast({
+                title: "Bilgi",
+                description: "Önceki sipariş işlemi temizlendi. Yeni sipariş verebilirsiniz.",
+                variant: "default",
+              });
+            }
+          }
+        } catch (error) {
+          console.error("❌ PENDING order temizleme hatası:", error);
+        }
+      };
+      
+      cleanupPendingOrders();
+      
+      // Remove the parameters from URL
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete('payment_return');
+      newUrl.searchParams.delete('error');
+      window.history.replaceState({}, '', newUrl.toString());
+    }
+  }, [searchParams, session?.user?.email, session?.user?.id, toast]);
 
   // Calculate totals
   const subtotal = cart?.items?.reduce(

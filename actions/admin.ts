@@ -280,3 +280,42 @@ export async function toggleProductActive(productId: string) {
   }
 }
 
+/**
+ * Manuel iadeyi tamamlandı olarak işaretler (Admin)
+ */
+export async function markRefundCompleted(orderId: string) {
+  try {
+    const session = await auth();
+
+    if (!session || session.user.role !== "ADMIN") {
+      return { success: false, error: "Yetkisiz erişim" };
+    }
+
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      select: { id: true, refund_status: true },
+    });
+
+    if (!order) {
+      return { success: false, error: "Sipariş bulunamadı" };
+    }
+
+    if (order.refund_status !== "MANUAL_REQUIRED") {
+      return { success: false, error: "Bu sipariş için manuel iade gerekmiyor" };
+    }
+
+    await db.order.update({
+      where: { id: orderId },
+      data: { refund_status: "MANUAL_COMPLETED" },
+    });
+
+    revalidatePath(`/admin/orders/${orderId}`);
+    revalidatePath("/admin/orders");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Mark refund completed error:", error);
+    return { success: false, error: "İade durumu güncellenemedi" };
+  }
+}
+

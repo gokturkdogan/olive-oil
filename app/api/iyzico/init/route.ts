@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
     // API key yoksa hemen hata dön
     if (!IYZICO_API_KEY || !IYZICO_SECRET_KEY) {
       console.error("❌ İyzico API credentials eksik!");
+      console.error("  IYZICO_API_KEY:", IYZICO_API_KEY ? "Var" : "YOK");
+      console.error("  IYZICO_SECRET_KEY:", IYZICO_SECRET_KEY ? "Var" : "YOK");
       return NextResponse.json(
         { 
           success: false, 

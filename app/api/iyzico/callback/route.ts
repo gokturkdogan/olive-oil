@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': '/cart?error=invalid_payment',
+          'Location': '/checkout?payment_return=true&error=invalid_payment',
         },
       });
     }
@@ -43,13 +43,45 @@ export async function POST(request: NextRequest) {
     // Verify payment with iyzico
     const paymentResult = await retrieveCheckoutForm(token);
     console.log("Payment Result:", JSON.stringify(paymentResult, null, 2));
+    
+    console.log("🔍 Callback Payment Debug:");
+    console.log("  Token:", token);
+    console.log("  Payment Status:", paymentResult.paymentStatus);
+    console.log("  Payment ID:", paymentResult.paymentId);
+    console.log("  Conversation ID:", paymentResult.conversationId);
+    console.log("  Transaction ID:", paymentResult.transactionId);
 
     if (paymentResult.status !== "success") {
       console.error("Payment not successful:", paymentResult.status);
+      
+      // Find the PENDING order and clean it up
+      const order = await db.order.findFirst({
+        where: {
+          payment_reference: token,
+          status: "PENDING",
+        }
+      });
+      
+      if (order) {
+        console.log("🧹 Ödeme başarısız, PENDING order temizleniyor:", order.id);
+        
+        // Delete order items first
+        await db.orderItem.deleteMany({
+          where: { order_id: order.id }
+        });
+        
+        // Delete the order
+        await db.order.delete({
+          where: { id: order.id }
+        });
+        
+        console.log("✅ PENDING order temizlendi");
+      }
+      
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': '/cart?error=payment_failed',
+          'Location': '/checkout?payment_return=true&error=payment_failed',
         },
       });
     }
@@ -79,6 +111,7 @@ export async function POST(request: NextRequest) {
     const result = await completeOrder(orderId, {
       status: paymentResult.paymentStatus === "SUCCESS" ? "success" : "failure",
       paymentId: paymentResult.paymentId,
+      itemTransactions: paymentResult.itemTransactions,
     });
 
     console.log("Complete order result:", result);

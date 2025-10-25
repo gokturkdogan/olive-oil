@@ -1,8 +1,15 @@
 import crypto from "crypto";
 
+// Environment değişkenlerini manuel yükle
 const IYZICO_API_KEY = process.env.IYZICO_API_KEY || "";
 const IYZICO_SECRET_KEY = process.env.IYZICO_SECRET_KEY || "";
 const IYZICO_BASE_URL = process.env.IYZICO_BASE_URL || "https://sandbox-api.iyzipay.com";
+
+// Debug: Environment değişkenlerini kontrol et
+console.log("🔧 İyzico Environment Check:");
+console.log("  API Key:", IYZICO_API_KEY ? `✅ Var (${IYZICO_API_KEY.substring(0, 10)}...)` : "❌ YOK!");
+console.log("  Secret Key:", IYZICO_SECRET_KEY ? `✅ Var (${IYZICO_SECRET_KEY.substring(0, 10)}...)` : "❌ YOK!");
+console.log("  Base URL:", IYZICO_BASE_URL);
 
 /**
  * JSON stringify without whitespace (İyzico requirement)
@@ -161,13 +168,18 @@ export async function createCheckoutForm(
 }
 
 /**
- * İyzico ödeme sonucunu doğrular
+ * İyzico ödeme sonucunu doğrular (SDK kullanarak)
  */
 export async function retrieveCheckoutForm(token: string): Promise<any> {
+  const startTime = Date.now();
+  console.log("🔄 İyzico retrieveCheckoutForm başlatılıyor (SDK)...");
+  console.log("Token:", token);
+
   try {
     const baseUrl = typeof window === 'undefined'
       ? (process.env.NEXTAUTH_URL || "http://localhost:3000")
       : '';
+    
     const response = await fetch(`${baseUrl}/api/iyzico/retrieve`, {
       method: "POST",
       headers: {
@@ -177,9 +189,53 @@ export async function retrieveCheckoutForm(token: string): Promise<any> {
     });
 
     const result = await response.json();
+    
+    const elapsed = Date.now() - startTime;
+    console.log(`✅ retrieveCheckoutForm tamamlandı (${elapsed}ms)`);
+    console.log("Retrieve Result:", JSON.stringify(result, null, 2));
+    
     return result;
-  } catch (error) {
-    console.error("İyzico retrieveCheckoutForm error:", error);
+  } catch (error: any) {
+    const elapsed = Date.now() - startTime;
+    console.error(`❌ retrieveCheckoutForm error (${elapsed}ms):`, error.message);
+    console.error("Error stack:", error.stack);
+    throw error;
+  }
+}
+
+/**
+ * İyzico refund işlemi (SDK kullanarak)
+ */
+export async function refundPayment(paymentTransactionId: string, amount?: number): Promise<any> {
+  const startTime = Date.now();
+  console.log("🔄 İyzico refund başlatılıyor (SDK)...");
+  console.log("Payment Transaction ID:", paymentTransactionId);
+  console.log("Amount:", amount || "Full refund");
+
+  try {
+    const baseUrl = typeof window === 'undefined'
+      ? (process.env.NEXTAUTH_URL || "http://localhost:3000")
+      : '';
+    
+    const response = await fetch(`${baseUrl}/api/iyzico/refund`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ paymentTransactionId, amount }),
+    });
+
+    const result = await response.json();
+    
+    const elapsed = Date.now() - startTime;
+    console.log(`✅ Refund tamamlandı (${elapsed}ms)`);
+    console.log("Refund Result:", JSON.stringify(result, null, 2));
+    
+    return result;
+  } catch (error: any) {
+    const elapsed = Date.now() - startTime;
+    console.error(`❌ Refund error (${elapsed}ms):`, error.message);
+    console.error("Error stack:", error.stack);
     throw error;
   }
 }

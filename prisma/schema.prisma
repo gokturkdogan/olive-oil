@@ -38,6 +38,14 @@ enum PaymentProvider {
   IYZICO
 }
 
+// Refund Durumları
+enum RefundStatus {
+  NOT_APPLICABLE    // refund gerekmez (PENDING, FAILED)
+  AUTOMATIC_SUCCESS  // otomatik refund başarılı
+  MANUAL_REQUIRED    // manuel refund gerekli
+  MANUAL_COMPLETED   // manuel refund tamamlandı
+}
+
 // Kullanıcılar
 model User {
   id            String    @id @default(uuid())
@@ -166,6 +174,8 @@ model Order {
   status                 OrderStatus     @default(PENDING)
   payment_provider       PaymentProvider @default(IYZICO)
   payment_reference      String?         // iyzico paymentId/transactionId
+  payment_transaction_ids String?        // JSON array of payment transaction IDs for refunds
+  refund_status          RefundStatus?   // refund durumu
   
   shipping_provider      String?
   tracking_code          String?

@@ -3,8 +3,12 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/money";
-import { Package, Calendar, ChevronDown, ChevronUp, MapPin, CreditCard, Truck } from "lucide-react";
+import { Package, Calendar, ChevronDown, ChevronUp, MapPin, CreditCard, Truck, XCircle, AlertTriangle, CheckCircle, Clock, RefreshCw, Phone } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { cancelOrder } from "@/actions/orders";
 
 interface OrderCardProps {
   order: {
@@ -25,6 +29,7 @@ interface OrderCardProps {
     tracking_code: string | null;
     shipping_provider: string | null;
     coupon_code: string | null;
+    refund_status: string | null;
     items: Array<{
       id: string;
       title_snapshot: string;
@@ -39,6 +44,48 @@ interface OrderCardProps {
 
 export function OrderCard({ order, statusColors, statusLabels }: OrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  // Check if order can be cancelled
+  const canCancel = order.status === "PENDING" || order.status === "PAID" || order.status === "PROCESSING";
+
+  const handleCancelOrder = async () => {
+    setIsCancelling(true);
+    
+    try {
+      const result = await cancelOrder(order.id);
+      
+      if (result.success) {
+        toast({
+          title: "Başarılı! ✓",
+          description: result.message || "Sipariş başarıyla iptal edildi",
+          variant: result.requiresManualRefund ? "default" : "success",
+        });
+        
+        // Refresh the page to show updated status
+        router.refresh();
+      } else {
+        toast({
+          title: "Hata",
+          description: result.error || "Sipariş iptal edilemedi",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Cancel order error:", error);
+      toast({
+        title: "Hata",
+        description: "Sipariş iptal edilemedi",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCancelling(false);
+      setShowCancelDialog(false);
+    }
+  };
 
   return (
     <Card className="border-2 border-gray-200 hover:border-green-300 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden bg-white">
@@ -192,6 +239,146 @@ export function OrderCard({ order, statusColors, statusLabels }: OrderCardProps)
                   </p>
                 </div>
               )}
+            </div>
+
+        {/* Refund Information for Cancelled Orders */}
+        {order.status === "CANCELLED" && (
+          <div className={`rounded-xl p-4 border-2 mb-4 ${
+            order.refund_status === "MANUAL_REQUIRED" 
+              ? "bg-orange-50 border-orange-200" 
+              : "bg-blue-50 border-blue-200"
+          }`}>
+            <div className="flex items-start gap-3">
+              <div className={`p-2 rounded-xl ${
+                order.refund_status === "MANUAL_REQUIRED"
+                  ? "bg-gradient-to-r from-orange-100 to-amber-100" 
+                  : "bg-gradient-to-r from-blue-100 to-indigo-100"
+              }`}>
+                <CreditCard className={`h-5 w-5 ${
+                  order.refund_status === "MANUAL_REQUIRED" ? "text-orange-600" : "text-blue-600"
+                }`} />
+              </div>
+              <div>
+                <h4 className={`text-sm font-semibold mb-2 ${
+                  order.refund_status === "MANUAL_REQUIRED" ? "text-orange-800" : "text-blue-800"
+                }`}>
+                  Para İadesi Bilgisi
+                </h4>
+                <div className={`space-y-2 text-xs ${
+                  order.refund_status === "MANUAL_REQUIRED" ? "text-orange-700" : "text-blue-700"
+                }`}>
+                  {order.refund_status === "MANUAL_REQUIRED" ? (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                        <p>İade işlemi sırasında teknik sorun oluştu.</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3 w-3 flex-shrink-0" />
+                        <p>Paranız <strong>1-3 iş günü</strong> içinde hesabınıza iade edilecektir.</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="h-3 w-3 flex-shrink-0" />
+                        <p>İade işlemi manuel olarak gerçekleştirilecektir.</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-3 w-3 flex-shrink-0" />
+                        <p>Sorularınız için müşteri hizmetlerimizle iletişime geçebilirsiniz.</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 flex-shrink-0" />
+                        <p>Para iadeniz ödeme yaptığınız kartınıza gönderilmiştir.</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3 w-3 flex-shrink-0" />
+                        <p>Bankanıza göre <strong>1-3 iş günü</strong> içinde hesabınıza yansıyabilir.</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-3 w-3 flex-shrink-0" />
+                        <p>İade işlemi otomatik olarak gerçekleştirilmiştir.</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-3 w-3 flex-shrink-0" />
+                        <p>Sorularınız için müşteri hizmetlerimizle iletişime geçebilirsiniz.</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Cancel Order Button */}
+        {canCancel && (
+          <div className="bg-red-50 rounded-xl p-4 border-2 border-red-200">
+            <div className="flex items-start gap-3 mb-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-red-800 mb-1">Siparişi İptal Et</p>
+                <p className="text-xs text-red-700">
+                  Bu sipariş henüz kargoya verilmedi. İptal edebilirsiniz.
+                </p>
+              </div>
+            </div>
+                
+                <Button
+                  onClick={() => setShowCancelDialog(true)}
+                  disabled={isCancelling}
+                  className="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 font-semibold"
+                >
+                  {isCancelling ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      İptal Ediliyor...
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Siparişi İptal Et
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Cancel Confirmation Dialog */}
+        {showCancelDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full border-2 border-red-200 shadow-2xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-gradient-to-r from-red-100 to-rose-100 p-2 rounded-xl">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Siparişi İptal Et</h3>
+              </div>
+              
+              <p className="text-gray-700 mb-6">
+                Bu siparişi iptal etmek istediğinizden emin misiniz? 
+                {order.status === "PAID" && " Ödeme yapılmışsa, paranız iade edilecektir."}
+              </p>
+              
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => setShowCancelDialog(false)}
+                  variant="outline"
+                  className="flex-1 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-800 transition-all duration-300"
+                >
+                  Vazgeç
+                </Button>
+                <Button
+                  onClick={handleCancelOrder}
+                  disabled={isCancelling}
+                  className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-300 font-semibold"
+                >
+                  {isCancelling ? "İptal Ediliyor..." : "Evet, İptal Et"}
+                </Button>
+              </div>
             </div>
           </div>
         )}

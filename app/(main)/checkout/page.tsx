@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { getCart } from "@/actions/cart";
 import { getUserAddresses } from "@/actions/addresses";
 import { CheckoutClient } from "@/components/checkout-client";
+import { CheckoutProtection } from "@/components/checkout-protection";
 import { db } from "@/lib/db";
 
 export default async function CheckoutPage() {
@@ -31,11 +32,17 @@ export default async function CheckoutPage() {
   }
 
   return (
-    <CheckoutClient
-      session={session}
-      cart={cart}
-      addresses={addresses}
-      loyaltyTier={loyaltyTier}
-    />
+    <>
+      <CheckoutProtection 
+        userEmail={session?.user?.email}
+        userId={session?.user?.id}
+      />
+      <CheckoutClient
+        session={session}
+        cart={cart}
+        addresses={addresses}
+        loyaltyTier={loyaltyTier}
+      />
+    </>
   );
 }
