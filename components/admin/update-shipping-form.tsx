@@ -44,8 +44,9 @@ export function UpdateShippingForm({
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: "Kargo bilgileri güncellendi",
+        variant: "success",
       });
       router.refresh();
     } else {
@@ -73,7 +74,7 @@ export function UpdateShippingForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="shippingProvider" className="flex items-center gap-2">
-          <Truck className="h-4 w-4 text-primary" />
+          <Truck className="h-4 w-4 text-green-600" />
           Kargo Şirketi
         </Label>
         <Input
@@ -81,7 +82,7 @@ export function UpdateShippingForm({
           value={shippingProvider}
           onChange={(e) => setShippingProvider(e.target.value)}
           placeholder="Örn: Aras Kargo, Yurtiçi Kargo, MNG Kargo"
-          className="mt-1.5"
+          className="mt-1.5 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10"
         />
         <p className="text-xs text-gray-500 mt-1">
           Kargo şirketinin tam adını girin
@@ -90,7 +91,7 @@ export function UpdateShippingForm({
 
       <div>
         <Label htmlFor="trackingCode" className="flex items-center gap-2">
-          <Package className="h-4 w-4 text-primary" />
+          <Package className="h-4 w-4 text-green-600" />
           Takip Kodu
         </Label>
         <Input
@@ -98,18 +99,18 @@ export function UpdateShippingForm({
           value={trackingCode}
           onChange={(e) => setTrackingCode(e.target.value)}
           placeholder="Takip numarası"
-          className="mt-1.5 font-mono"
+          className="mt-1.5 font-mono border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10"
         />
         <p className="text-xs text-gray-500 mt-1">
           Kargo takip numarasını girin
         </p>
       </div>
 
-      <div className="flex gap-2 pt-2">
+      <div className="flex gap-3 pt-2">
         <Button 
           type="submit" 
           disabled={loading || !hasChanges}
-          className="bg-olive-gradient"
+          className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 font-semibold px-6"
         >
           {loading ? "Kaydediliyor..." : "Kargo Bilgilerini Güncelle"}
         </Button>
@@ -120,6 +121,7 @@ export function UpdateShippingForm({
             variant="outline"
             onClick={handleClearClick}
             disabled={loading}
+            className="border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-800 transition-all duration-300 font-semibold"
           >
             Temizle
           </Button>

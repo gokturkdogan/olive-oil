@@ -107,8 +107,9 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: "Sipariş durumu güncellendi",
+        variant: "success",
       });
       router.refresh();
     } else {
@@ -193,7 +194,7 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
                 variant="outline"
                 onClick={() => handleStatusClick(prevStatus as OrderStatus)}
                 disabled={loading}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-800 transition-all duration-300"
               >
                 <ChevronLeft className="h-4 w-4" />
                 {statusFlow[prevStatus as keyof typeof statusFlow].label}
@@ -203,7 +204,7 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
               <Button
                 onClick={() => handleStatusClick(nextStatus as OrderStatus)}
                 disabled={loading}
-                className="flex items-center gap-2 bg-olive-gradient"
+                className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 font-semibold"
               >
                 {statusFlow[nextStatus as keyof typeof statusFlow].label}
                 <ChevronRight className="h-4 w-4" />
@@ -227,9 +228,9 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
                 disabled={loading || currentStatus === status.value}
                 className={`${
                   currentStatus === status.value 
-                    ? status.color 
-                    : "hover:bg-primary/5"
-                } transition-all`}
+                    ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40" 
+                    : "border-2 border-gray-200 hover:border-green-300 hover:bg-green-50 text-gray-700 hover:text-green-800"
+                } transition-all duration-300 font-semibold`}
               >
                 {status.label}
               </Button>
@@ -243,10 +244,11 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
         <div className="pt-4 border-t space-y-2">
           <p className="text-sm font-medium">Hızlı İşlemler</p>
           <Button
-            variant="destructive"
+            variant="outline"
             size="sm"
             onClick={() => handleStatusClick("CANCELLED")}
             disabled={loading}
+            className="border-2 border-red-200 hover:border-red-500 hover:bg-red-50 text-red-700 hover:text-red-800 transition-all duration-300 font-semibold"
           >
             Siparişi İptal Et
           </Button>

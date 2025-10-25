@@ -104,8 +104,9 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: isEdit ? "Ürün güncellendi" : "Ürün eklendi",
+        variant: "success",
       });
       // Don't reset slug here, handleOpenChange will do it
       setOpen(false);
@@ -138,15 +139,15 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button className="bg-olive-gradient">
+          <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 font-semibold px-6 py-3">
             <Plus className="h-4 w-4 mr-2" />
             Yeni Ürün Ekle
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Ürün Düzenle" : "Yeni Ürün Ekle"}</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-green-200 shadow-2xl">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-2xl font-bold text-gray-800">{isEdit ? "Ürün Düzenle" : "Yeni Ürün Ekle"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -158,6 +159,7 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
               onChange={handleTitleChange}
               placeholder="Örn: Premium Sızma Zeytinyağı 1L"
               required
+              className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10"
             />
           </div>
 
@@ -184,7 +186,9 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
               required
               pattern="[a-z0-9-]+"
               title="Sadece küçük harf, rakam ve tire kullanın"
-              className={manualSlugEdit ? "border-amber-300 bg-amber-50/30" : ""}
+              className={`mt-1 border-2 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 ${
+                manualSlugEdit ? "border-amber-300 bg-amber-50/30" : "border-gray-200"
+              }`}
             />
             <p className="text-xs text-gray-500 mt-1">
               {manualSlugEdit ? (
@@ -208,7 +212,7 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
               placeholder="Ürün açıklaması"
               required
               rows={4}
-              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full rounded-xl border-2 border-gray-200 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:border-green-500 focus:ring-4 focus:ring-green-500/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
@@ -224,6 +228,7 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
                 defaultValue={product?.price}
                 placeholder="99.90"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10"
               />
             </div>
 
@@ -237,6 +242,7 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
                 defaultValue={product?.stock}
                 placeholder="100"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10"
               />
             </div>
           </div>
@@ -249,35 +255,43 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
               type="url"
               defaultValue={product?.images && (product.images as string[])[0] ? (product.images as string[])[0] : ""}
               placeholder="https://example.com/image.jpg"
+              className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10"
             />
             <p className="text-xs text-gray-500 mt-1">
               Ürün görseli URL'si. Boş bırakılırsa varsayılan görsel kullanılır.
             </p>
           </div>
 
-          <div className="flex items-center space-x-2 pt-4 border-t">
-            <input
-              type="checkbox"
-              id="active"
-              name="active"
-              defaultChecked={product?.active ?? true}
-              className="h-4 w-4 rounded border-gray-300"
-            />
-            <Label htmlFor="active" className="font-normal cursor-pointer">
-              Ürün aktif (Müşteriler görebilir)
-            </Label>
+          <div className="bg-green-50 rounded-xl border border-green-200 p-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="active"
+                name="active"
+                defaultChecked={product?.active ?? true}
+                className="h-4 w-4 rounded border-green-300 text-green-600 focus:ring-green-500"
+              />
+              <Label htmlFor="active" className="font-normal cursor-pointer text-gray-800">
+                Ürün aktif (Müşteriler görebilir)
+              </Label>
+            </div>
           </div>
 
-          <div className="flex gap-2 justify-end pt-4 border-t">
+          <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
             <Button
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
               disabled={loading}
+              className="border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 hover:text-gray-800 transition-all duration-300"
             >
               İptal
             </Button>
-            <Button type="submit" disabled={loading} className="bg-olive-gradient">
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 font-semibold px-6"
+            >
               {loading ? "Kaydediliyor..." : isEdit ? "Güncelle" : "Ürün Ekle"}
             </Button>
           </div>

@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/money";
-import { Package, ShoppingCart, Tag, Users, Clock, TruckIcon, CheckCircle, XCircle } from "lucide-react";
+import { Package, ShoppingCart, Tag, Users, Clock, TruckIcon, CheckCircle, XCircle, TrendingUp, BarChart3, Shield } from "lucide-react";
 
 export default async function AdminDashboard() {
   const now = new Date();
@@ -89,183 +89,242 @@ export default async function AdminDashboard() {
       value: productCount,
       icon: Package,
       color: "text-blue-600",
+      bgColor: "bg-gradient-to-br from-blue-50 to-blue-100",
+      borderColor: "border-blue-200",
     },
     {
       title: "Başarılı Siparişler",
       value: orderCount,
       icon: ShoppingCart,
       color: "text-green-600",
+      bgColor: "bg-gradient-to-br from-green-50 to-green-100",
+      borderColor: "border-green-200",
     },
     {
       title: "Aktif Kuponlar",
       value: couponCount,
       icon: Tag,
       color: "text-purple-600",
+      bgColor: "bg-gradient-to-br from-purple-50 to-purple-100",
+      borderColor: "border-purple-200",
     },
     {
       title: "Kayıtlı Kullanıcı",
       value: userCount,
       icon: Users,
       color: "text-orange-600",
+      bgColor: "bg-gradient-to-br from-orange-50 to-orange-100",
+      borderColor: "border-orange-200",
     },
   ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Genel Bakış</h2>
-        <p className="text-gray-600">E-ticaret platformunuzun özet bilgileri</p>
-      </div>
-
-      {/* Stats */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-                  <p className="text-3xl font-bold">{stat.value}</p>
-                </div>
-                <stat.icon className={`h-10 w-10 ${stat.color}`} />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Revenue Cards */}
-      <div>
-        <h3 className="text-xl font-bold mb-4">Gelir Raporları</h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Haftalık Gelir */}
-          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base text-gray-700">Bu Hafta</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-blue-600">
-                {formatPrice(weekRevenue._sum.total || 0)}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">Son 7 günlük gelir</p>
-            </CardContent>
-          </Card>
-
-          {/* Aylık Gelir */}
-          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-white hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base text-gray-700">Bu Ay</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-green-600">
-                {formatPrice(monthRevenue._sum.total || 0)}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">
-                {new Date().toLocaleDateString("tr-TR", { month: "long", year: "numeric" })}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Yıllık Gelir */}
-          <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base text-gray-700">Bu Yıl</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-purple-600">
-                {formatPrice(yearRevenue._sum.total || 0)}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">
-                {new Date().getFullYear()} yılı geliri
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Toplam Gelir */}
-          <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-white hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base text-gray-700">Tüm Zamanlar</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold text-primary">
-                {formatPrice(totalRevenue._sum.total || 0)}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">Toplam gelir</p>
-            </CardContent>
-          </Card>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+      {/* Header Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 py-8 md:py-12 px-4">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-5 right-5 w-64 h-64 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-5 left-5 w-80 h-80 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        <div className="container mx-auto relative z-10">
+          <div className="max-w-6xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-4 py-2 mb-4">
+              <Shield className="w-4 h-4 text-white" />
+              <span className="text-white text-sm font-semibold">Admin Panel</span>
+            </div>
+            
+            {/* Icon */}
+            <div className="bg-white/20 backdrop-blur-sm w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border border-white/30">
+              <BarChart3 className="h-7 w-7 text-white" />
+            </div>
+            
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-white leading-tight">
+              Genel Bakış
+            </h1>
+            
+            {/* Subtitle */}
+            <p className="text-sm sm:text-base text-white/90 font-medium max-w-2xl mx-auto">
+              E-ticaret platformunuzun özet bilgileri
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Order Status Breakdown */}
-      <div>
-        <h3 className="text-xl font-bold mb-4">Sipariş Durumu</h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Bekleyen Siparişler */}
-          <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-white hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <Clock className="h-10 w-10 text-yellow-600" />
-                <div className="bg-yellow-100 text-yellow-800 text-lg px-3 py-1 rounded-full font-bold">
-                  {pendingOrders}
-                </div>
-              </div>
-              <h4 className="font-semibold text-gray-800 mb-1">Bekleyen</h4>
-              <p className="text-xs text-gray-600">
-                Ödeme bekleniyor veya sipariş alındı
-              </p>
-            </CardContent>
-          </Card>
+      {/* Content */}
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* Stats */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {stats.map((stat) => (
+              <Card key={stat.title} className={`border-2 ${stat.borderColor} shadow-lg hover:shadow-xl transition-all duration-300 ${stat.bgColor}`}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-1 font-semibold">{stat.title}</p>
+                      <p className="text-3xl font-bold text-gray-800">{stat.value}</p>
+                    </div>
+                    <div className={`p-3 rounded-xl ${stat.bgColor} border ${stat.borderColor}`}>
+                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-          {/* Aktif Siparişler */}
-          <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <TruckIcon className="h-10 w-10 text-blue-600" />
-                <div className="bg-blue-100 text-blue-800 text-lg px-3 py-1 rounded-full font-bold">
-                  {activeOrders}
-                </div>
+          {/* Revenue Cards */}
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-2 rounded-xl">
+                <TrendingUp className="h-5 w-5 text-white" />
               </div>
-              <h4 className="font-semibold text-gray-800 mb-1">Aktif</h4>
-              <p className="text-xs text-gray-600">
-                Hazırlanıyor veya kargoda
-              </p>
-            </CardContent>
-          </Card>
+              <h3 className="text-xl font-bold text-gray-800">Gelir Raporları</h3>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Haftalık Gelir */}
+              <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white hover:shadow-xl hover:border-blue-300 transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base text-gray-700 font-semibold">Bu Hafta</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-blue-600">
+                    {formatPrice(weekRevenue._sum.total || 0)}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">Son 7 günlük gelir</p>
+                </CardContent>
+              </Card>
 
-          {/* Tamamlanan Siparişler */}
-          <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-white hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <CheckCircle className="h-10 w-10 text-green-600" />
-                <div className="bg-green-100 text-green-800 text-lg px-3 py-1 rounded-full font-bold">
-                  {completedOrders}
-                </div>
-              </div>
-              <h4 className="font-semibold text-gray-800 mb-1">Tamamlandı</h4>
-              <p className="text-xs text-gray-600">
-                Başarıyla teslim edildi
-              </p>
-            </CardContent>
-          </Card>
+              {/* Aylık Gelir */}
+              <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base text-gray-700 font-semibold">Bu Ay</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-green-600">
+                    {formatPrice(monthRevenue._sum.total || 0)}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {new Date().toLocaleDateString("tr-TR", { month: "long", year: "numeric" })}
+                  </p>
+                </CardContent>
+              </Card>
 
-          {/* İptal/Başarısız */}
-          <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-white hover:shadow-lg transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-4">
-                <XCircle className="h-10 w-10 text-red-600" />
-                <div className="bg-red-100 text-red-800 text-lg px-3 py-1 rounded-full font-bold">
-                  {failedOrders}
-                </div>
+              {/* Yıllık Gelir */}
+              <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white hover:shadow-xl hover:border-purple-300 transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base text-gray-700 font-semibold">Bu Yıl</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-purple-600">
+                    {formatPrice(yearRevenue._sum.total || 0)}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {new Date().getFullYear()} yılı geliri
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Toplam Gelir */}
+              <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base text-gray-700 font-semibold">Tüm Zamanlar</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold text-green-600">
+                    {formatPrice(totalRevenue._sum.total || 0)}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">Toplam gelir</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Order Status Breakdown */}
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-2 rounded-xl">
+                <ShoppingCart className="h-5 w-5 text-white" />
               </div>
-              <h4 className="font-semibold text-gray-800 mb-1">İptal/Başarısız</h4>
-              <p className="text-xs text-gray-600">
-                İptal edildi veya başarısız oldu
-              </p>
-            </CardContent>
-          </Card>
+              <h3 className="text-xl font-bold text-gray-800">Sipariş Durumu</h3>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Bekleyen Siparişler */}
+              <Card className="border-2 border-yellow-200 bg-gradient-to-br from-yellow-50 to-white hover:shadow-xl hover:border-yellow-300 transition-all duration-300">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-gradient-to-r from-yellow-100 to-amber-100 p-3 rounded-xl border border-yellow-200">
+                      <Clock className="h-8 w-8 text-yellow-600" />
+                    </div>
+                    <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-lg px-3 py-1 rounded-full font-bold">
+                      {pendingOrders}
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-gray-800 mb-1">Bekleyen</h4>
+                  <p className="text-xs text-gray-600">
+                    Ödeme bekleniyor veya sipariş alındı
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Aktif Siparişler */}
+              <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white hover:shadow-xl hover:border-blue-300 transition-all duration-300">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-gradient-to-r from-blue-100 to-indigo-100 p-3 rounded-xl border border-blue-200">
+                      <TruckIcon className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-lg px-3 py-1 rounded-full font-bold">
+                      {activeOrders}
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-gray-800 mb-1">Aktif</h4>
+                  <p className="text-xs text-gray-600">
+                    Hazırlanıyor veya kargoda
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Tamamlanan Siparişler */}
+              <Card className="border-2 border-green-200 bg-gradient-to-br from-green-50 to-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 p-3 rounded-xl border border-green-200">
+                      <CheckCircle className="h-8 w-8 text-green-600" />
+                    </div>
+                    <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-lg px-3 py-1 rounded-full font-bold">
+                      {completedOrders}
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-gray-800 mb-1">Tamamlandı</h4>
+                  <p className="text-xs text-gray-600">
+                    Başarıyla teslim edildi
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* İptal/Başarısız */}
+              <Card className="border-2 border-red-200 bg-gradient-to-br from-red-50 to-white hover:shadow-xl hover:border-red-300 transition-all duration-300">
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="bg-gradient-to-r from-red-100 to-rose-100 p-3 rounded-xl border border-red-200">
+                      <XCircle className="h-8 w-8 text-red-600" />
+                    </div>
+                    <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white text-lg px-3 py-1 rounded-full font-bold">
+                      {failedOrders}
+                    </div>
+                  </div>
+                  <h4 className="font-semibold text-gray-800 mb-1">İptal/Başarısız</h4>
+                  <p className="text-xs text-gray-600">
+                    İptal edildi veya başarısız oldu
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

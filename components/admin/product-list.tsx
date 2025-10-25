@@ -10,7 +10,7 @@ import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
 import { deleteProduct, toggleProductActive } from "@/actions/admin";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { Edit, Trash2, Power, Package, ImageIcon } from "lucide-react";
+import { Edit, Trash2, Power, Package, ImageIcon, Plus, Zap } from "lucide-react";
 import Image from "next/image";
 
 interface Product {
@@ -56,8 +56,9 @@ export function ProductList({ products }: ProductListProps) {
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: "Ürün silindi",
+        variant: "success",
       });
       router.refresh();
     } else {
@@ -77,8 +78,9 @@ export function ProductList({ products }: ProductListProps) {
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: `Ürün ${result.newStatus ? "aktif" : "pasif"} yapıldı`,
+        variant: "success",
       });
       router.refresh();
     } else {
@@ -93,13 +95,13 @@ export function ProductList({ products }: ProductListProps) {
 
   if (products.length === 0) {
     return (
-      <Card className="border-2 border-dashed border-primary/20">
+      <Card className="border-2 border-dashed border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
         <CardContent className="py-16 text-center">
-          <div className="bg-primary/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Package className="h-10 w-10 text-primary" />
+          <div className="bg-gradient-to-r from-green-100 to-emerald-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-green-200">
+            <Package className="h-10 w-10 text-green-600" />
           </div>
-          <p className="text-lg font-semibold text-gray-700 mb-2">Henüz ürün eklenmemiş</p>
-          <p className="text-gray-500 mb-6">İlk ürününüzü ekleyerek başlayın</p>
+          <p className="text-lg font-bold text-gray-800 mb-2">Henüz ürün eklenmemiş</p>
+          <p className="text-gray-600 mb-6">İlk ürününüzü ekleyerek başlayın</p>
           <ProductDialog />
         </CardContent>
       </Card>
@@ -108,25 +110,27 @@ export function ProductList({ products }: ProductListProps) {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* Add Product Button */}
         <div className="flex justify-end">
           <ProductDialog />
         </div>
 
         {/* Products Grid */}
-        <div className="grid gap-4">
+        <div className="grid gap-6">
         {products.map((product) => (
           <Card 
             key={product.id} 
-            className={`hover:shadow-lg transition-all duration-300 border-2 ${
-              product.active ? "border-primary/20" : "border-gray-200 opacity-75"
+            className={`hover:shadow-xl transition-all duration-300 border-2 ${
+              product.active 
+                ? "border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-2xl hover:border-green-300" 
+                : "border-gray-200 opacity-75 bg-gray-50"
             }`}
           >
             <CardContent className="p-6">
               <div className="flex items-start gap-6">
                 {/* Product Image */}
-                <div className="relative h-24 w-24 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center">
+                <div className="relative h-24 w-24 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center border-2 border-green-200">
                   {product.images && (product.images as string[])[0] ? (
                     <Image
                       src={(product.images as string[])[0]}
@@ -136,8 +140,8 @@ export function ProductList({ products }: ProductListProps) {
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center">
-                      <ImageIcon className="h-8 w-8 text-gray-400 mb-1" />
-                      <span className="text-xs text-gray-400">Görsel yok</span>
+                      <ImageIcon className="h-8 w-8 text-green-600 mb-1" />
+                      <span className="text-xs text-green-600 font-semibold">Görsel yok</span>
                     </div>
                   )}
                 </div>
@@ -147,26 +151,27 @@ export function ProductList({ products }: ProductListProps) {
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-bold text-lg truncate">{product.title}</h3>
+                        <h3 className="font-bold text-lg truncate text-gray-800">{product.title}</h3>
                         {product.active ? (
-                          <Badge className="bg-green-100 text-green-800 border-green-300">
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg">
+                            <Zap className="w-3 h-3 mr-1" />
                             Aktif
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="bg-gray-100 text-gray-600">
+                          <Badge variant="outline" className="bg-gray-100 text-gray-600 border-gray-300">
                             Pasif
                           </Badge>
                         )}
                       </div>
                       <p className="text-sm text-gray-600 mb-1">
-                        <span className="font-medium">Slug:</span> /{product.slug}
+                        <span className="font-semibold">Slug:</span> /{product.slug}
                       </p>
                       <p className="text-sm text-gray-600 line-clamp-2">{product.description}</p>
                     </div>
 
                     {/* Price */}
                     <div className="text-right flex-shrink-0">
-                      <p className="text-2xl font-bold text-primary">
+                      <p className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                         {formatPrice(product.price)}
                       </p>
                       <p className="text-sm text-gray-600 mt-1">
@@ -178,14 +183,14 @@ export function ProductList({ products }: ProductListProps) {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 flex-wrap pt-3 border-t">
+                  <div className="flex gap-2 flex-wrap pt-4 border-t border-gray-200">
                     <ProductDialog 
                       product={product}
                       trigger={
                         <Button 
                           variant="outline" 
                           size="sm"
-                          className="hover:bg-primary/10 hover:text-primary hover:border-primary transition-colors"
+                          className="border-2 border-green-200 hover:border-green-500 hover:bg-green-50 text-green-700 hover:text-green-800 transition-all duration-300"
                         >
                           <Edit className="h-4 w-4 mr-1" />
                           Düzenle
@@ -198,10 +203,10 @@ export function ProductList({ products }: ProductListProps) {
                       size="sm"
                       onClick={() => handleToggleActive(product.id)}
                       disabled={loadingId === product.id}
-                      className={`transition-colors ${
+                      className={`border-2 transition-all duration-300 ${
                         product.active
-                          ? "hover:bg-amber-50 hover:text-amber-600 hover:border-amber-300"
-                          : "hover:bg-green-50 hover:text-green-600 hover:border-green-300"
+                          ? "border-amber-200 hover:border-amber-500 hover:bg-amber-50 text-amber-700 hover:text-amber-800"
+                          : "border-green-200 hover:border-green-500 hover:bg-green-50 text-green-700 hover:text-green-800"
                       }`}
                     >
                       <Power className="h-4 w-4 mr-1" />
@@ -209,11 +214,11 @@ export function ProductList({ products }: ProductListProps) {
                     </Button>
 
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDeleteClick(product.id, product.title)}
                       disabled={loadingId === product.id}
-                      className="ml-auto"
+                      className="ml-auto border-2 border-red-200 hover:border-red-500 hover:bg-red-50 text-red-700 hover:text-red-800 transition-all duration-300"
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Sil
@@ -241,4 +246,3 @@ export function ProductList({ products }: ProductListProps) {
   </>
   );
 }
-

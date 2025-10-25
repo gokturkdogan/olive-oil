@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, ShoppingCart, Tag, Menu, X } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tag, Menu, X, BarChart3 } from "lucide-react";
 
 const navItems = [
   {
@@ -57,14 +57,14 @@ export function AdminNav() {
               <Button
                 variant={active ? "default" : "ghost"}
                 size="sm"
-                className={`flex items-center gap-2 transition-all duration-300 ${
+                className={`flex items-center gap-2 transition-all duration-300 rounded-lg ${
                   active
-                    ? "bg-olive-gradient text-white shadow-md"
-                    : "hover:bg-primary/10 hover:text-primary"
+                    ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30"
+                    : "hover:bg-green-50 hover:text-green-700 text-gray-700"
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="hidden lg:inline">{item.label}</span>
+                <span className="hidden lg:inline font-semibold">{item.label}</span>
               </Button>
             </Link>
           );
@@ -77,7 +77,7 @@ export function AdminNav() {
           variant="ghost"
           size="icon"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="h-9 w-9"
+          className="h-9 w-9 rounded-lg hover:bg-green-50 hover:text-green-700"
         >
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
@@ -85,7 +85,7 @@ export function AdminNav() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="absolute top-16 left-0 right-0 bg-white border-b shadow-lg md:hidden z-50">
+        <div className="absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-md border-b-2 border-green-200 shadow-lg md:hidden z-50">
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col gap-2">
               {navItems.map((item) => {
@@ -96,10 +96,10 @@ export function AdminNav() {
                   <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant={active ? "default" : "ghost"}
-                      className={`w-full justify-start gap-2 transition-all duration-300 ${
+                      className={`w-full justify-start gap-2 transition-all duration-300 rounded-lg ${
                         active
-                          ? "bg-olive-gradient text-white shadow-md"
-                          : "hover:bg-primary/10 hover:text-primary"
+                          ? "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30"
+                          : "hover:bg-green-50 hover:text-green-700 text-gray-700"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -115,4 +115,3 @@ export function AdminNav() {
     </>
   );
 }
-
