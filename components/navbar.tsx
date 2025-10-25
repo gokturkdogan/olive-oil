@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { handleLogout } from "@/actions/logout";
+import { CategoryDropdown } from "@/components/category-dropdown";
 
 interface NavbarProps {
   session: any;
@@ -47,16 +48,7 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
             >
               Ana Sayfa
             </Link>
-            <Link
-              href="/products"
-              className={`relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
-                pathname.startsWith("/products")
-                  ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
-                  : "text-gray-700 hover:bg-green-50 hover:text-green-700"
-              }`}
-            >
-              Ürünler
-            </Link>
+            <CategoryDropdown pathname={pathname} />
             <Link
               href="/loyalty"
               className={`relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${

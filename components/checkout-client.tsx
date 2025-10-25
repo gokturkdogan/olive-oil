@@ -19,7 +19,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ShoppingBag, Package, Plus, MapPin, CheckCircle2, Home, Truck } from "lucide-react";
 import { formatPrice } from "@/lib/money";
 import { calculateShippingFee, getRemainingForFreeShipping } from "@/lib/shipping";
-import Image from "next/image";
 
 interface Address {
   id: string;
@@ -352,11 +351,10 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
                         <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
                           <div className="relative h-16 w-16 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-emerald-100">
                             {item.product.images && (item.product.images as string[])[0] ? (
-                              <Image
+                              <img
                                 src={(item.product.images as string[])[0]}
                                 alt={item.product.name}
-                                fill
-                                className="object-cover"
+                                className="w-full h-full object-cover rounded-xl"
                               />
                             ) : (
                               <div className="flex items-center justify-center h-full">

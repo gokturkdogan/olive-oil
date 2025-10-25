@@ -4,8 +4,8 @@ import * as React from "react";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva, type VariantProps } from "class-variance-authority";
 import { X, CheckCircle2, AlertCircle, Info } from "lucide-react";
-
-import { cn } from "@/lib/utils";
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 const ToastProvider = ToastPrimitives.Provider;
 
@@ -15,10 +15,10 @@ const ToastViewport = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Viewport
     ref={ref}
-    className={cn(
+    className={twMerge(clsx(
       "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
       className
-    )}
+    ))}
     {...props}
   />
 ));
@@ -50,7 +50,7 @@ const Toast = React.forwardRef<
   return (
     <ToastPrimitives.Root
       ref={ref}
-      className={cn(toastVariants({ variant }), className)}
+      className={twMerge(clsx(toastVariants({ variant }), className))}
       duration={3000}
       {...props}
     />
@@ -64,10 +64,10 @@ const ToastAction = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Action
     ref={ref}
-    className={cn(
+    className={twMerge(clsx(
       "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm font-medium ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground group-[.destructive]:focus:ring-destructive",
       className
-    )}
+    ))}
     {...props}
   />
 ));
@@ -79,13 +79,13 @@ const ToastClose = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Close
     ref={ref}
-    className={cn(
+    className={twMerge(clsx(
       "absolute right-2 top-2 rounded-lg p-1 transition-all duration-200 focus:outline-none focus:ring-2 opacity-0 group-hover:opacity-100",
       "text-gray-400 hover:text-gray-900 hover:bg-gray-100 focus:ring-gray-300",
       "group-[.destructive]:text-white/70 group-[.destructive]:hover:text-white group-[.destructive]:hover:bg-white/20 group-[.destructive]:focus:ring-white/50",
       "group-[.success]:text-white/70 group-[.success]:hover:text-white group-[.success]:hover:bg-white/20 group-[.success]:focus:ring-white/50",
       className
-    )}
+    ))}
     toast-close=""
     {...props}
   >
@@ -100,7 +100,7 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-bold text-gray-900 group-[.destructive]:text-white group-[.success]:text-white", className)}
+    className={twMerge(clsx("text-sm font-bold text-gray-900 group-[.destructive]:text-white group-[.success]:text-white", className))}
     {...props}
   />
 ));
@@ -112,7 +112,7 @@ const ToastDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Description
     ref={ref}
-    className={cn("text-xs text-gray-600 leading-relaxed group-[.destructive]:text-white/90 group-[.success]:text-white/90", className)}
+    className={twMerge(clsx("text-xs text-gray-600 leading-relaxed group-[.destructive]:text-white/90 group-[.success]:text-white/90", className))}
     {...props}
   />
 ));

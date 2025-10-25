@@ -45,18 +45,22 @@ model Address {
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  slug        String      @unique
-  title       String
-  description String
-  images      Json
-  price       Int
-  active      Boolean     @default(true)
-  stock       Int         @default(0)
-  created_at  DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
-  cart_items  CartItem[]
-  order_items OrderItem[]
+  id            String      @id @default(uuid())
+  slug          String      @unique
+  title         String
+  description   String
+  images        Json
+  price         Int
+  active        Boolean     @default(true)
+  stock         Int         @default(0)
+  category_id   String?
+  subcategory_id String?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+  cart_items    CartItem[]
+  order_items   OrderItem[]
+  category      Category?    @relation(fields: [category_id], references: [id])
+  subcategory   SubCategory? @relation(fields: [subcategory_id], references: [id])
 
   @@map("products")
 }
@@ -158,6 +162,41 @@ model Webhook {
   @@map("webhooks")
 }
 
+// Kategoriler
+model Category {
+  id            String         @id @default(uuid())
+  name          String
+  slug          String         @unique
+  description   String?
+  image         String?
+  status        CategoryStatus @default(ACTIVE)
+  sort_order    Int            @default(0)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  products      Product[]
+  subcategories SubCategory[]
+
+  @@map("categories")
+}
+
+// Alt Kategoriler
+model SubCategory {
+  id          String         @id @default(uuid())
+  name        String
+  slug        String         @unique
+  description String?
+  image       String?
+  status      CategoryStatus @default(ACTIVE)
+  sort_order  Int            @default(0)
+  category_id String
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  products    Product[]
+  category    Category       @relation(fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@map("subcategories")
+}
+
 enum Role {
   CUSTOMER
   ADMIN
@@ -188,4 +227,9 @@ enum RefundStatus {
   AUTOMATIC_SUCCESS
   MANUAL_REQUIRED
   MANUAL_COMPLETED
+}
+
+enum CategoryStatus {
+  ACTIVE
+  INACTIVE
 }

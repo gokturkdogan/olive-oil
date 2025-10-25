@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/money";
+import { extractProductImages } from "@/lib/image-utils";
 import { addToCart } from "@/actions/cart";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Check } from "lucide-react";
@@ -18,6 +19,7 @@ interface ProductCardProps {
     description: string;
     price: number;
     stock: number;
+    images: any; // Json field
   };
 }
 
@@ -81,16 +83,45 @@ export function ProductCard({ product }: ProductCardProps) {
               </Badge>
             )}
 
-            <div className="text-center relative z-10">
-              <div className="text-7xl mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
-                🫒
-              </div>
-              {product.stock < 10 && product.stock > 0 && (
-                <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 text-xs">
-                  Son {product.stock} adet
-                </Badge>
-              )}
-            </div>
+            {/* Product Image */}
+            {(() => {
+              const imageArray = extractProductImages(product.images);
+              return imageArray.length > 0 ? (
+                <div className="relative w-full h-full">
+                  <img
+                    src={imageArray[0]}
+                    alt={product.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    onError={(e) => {
+                      // Fallback to emoji if image fails to load
+                      e.currentTarget.style.display = 'none';
+                      const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (nextElement) {
+                        nextElement.style.display = 'flex';
+                      }
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center" style={{ display: 'none' }}>
+                    <div className="text-7xl mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
+                      🫒
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center relative z-10">
+                  <div className="text-7xl mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
+                    🫒
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Stock warning badge */}
+            {product.stock < 10 && product.stock > 0 && (
+              <Badge variant="outline" className="absolute bottom-4 left-4 bg-amber-50 text-amber-700 border-amber-300 text-xs">
+                Son {product.stock} adet
+              </Badge>
+            )}
           </div>
 
           {/* Product Info */}

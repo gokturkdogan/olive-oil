@@ -2,8 +2,10 @@ import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/actions/products";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/money";
+import { extractProductImages } from "@/lib/image-utils";
 import { Check, Truck, Shield, RefreshCw, Award, Leaf, Package, Zap } from "lucide-react";
 import { AddToCartForm } from "@/components/add-to-cart-form";
+import { ProductImageSlider } from "@/components/product-image-slider";
 
 export default async function ProductDetailPage({
   params,
@@ -69,9 +71,7 @@ export default async function ProductDetailPage({
             <div className="group relative">
               <div className="absolute -inset-0.5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl opacity-0 group-hover:opacity-10 blur-xl transition-all duration-500"></div>
               
-              <div className="relative bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-2xl border-2 border-green-200 hover:border-green-400 shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                
+              <div className="relative rounded-2xl overflow-hidden">
                 {/* Badges */}
                 <div className="absolute top-4 left-4 right-4 flex items-start justify-between z-10">
                   <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg border-0 text-xs font-semibold">
@@ -90,19 +90,11 @@ export default async function ProductDetailPage({
                   )}
                 </div>
 
-                <div className="relative h-[400px] flex items-center justify-center p-6">
-                  <div className="text-center">
-                    <div className="text-8xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                      🫒
-                    </div>
-                    {product.stock < 10 && product.stock > 0 && (
-                      <Badge variant="outline" className="bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-300 text-xs font-semibold">
-                        <Zap className="w-3 h-3 mr-1" />
-                        Son {product.stock} adet!
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+                {/* Product Image Slider */}
+                <ProductImageSlider 
+                  images={extractProductImages(product.images)} 
+                  title={product.title} 
+                />
 
                 {/* Quick Info Icons */}
                 <div className="border-t border-green-200 p-4 bg-white/80 backdrop-blur-sm">

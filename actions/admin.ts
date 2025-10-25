@@ -117,8 +117,10 @@ export async function createProduct(data: {
   description: string;
   price: number;
   stock: number;
-  imageUrl?: string;
+  imageUrl?: string | string[];
   active: boolean;
+  category_id?: string;
+  subcategory_id?: string;
 }) {
   try {
     const session = await auth();
@@ -143,8 +145,10 @@ export async function createProduct(data: {
         description: data.description,
         price: data.price,
         stock: data.stock,
-        images: data.imageUrl ? [data.imageUrl] : [],
+        images: data.imageUrl ? (Array.isArray(data.imageUrl) ? data.imageUrl : [data.imageUrl]) : [],
         active: data.active,
+        category_id: data.category_id || undefined,
+        subcategory_id: data.subcategory_id || undefined,
       },
     });
 
@@ -168,8 +172,10 @@ export async function updateProduct(
     description: string;
     price: number;
     stock: number;
-    imageUrl?: string;
+    imageUrl?: string | string[];
     active: boolean;
+    category_id?: string;
+    subcategory_id?: string;
   }
 ) {
   try {
@@ -196,8 +202,10 @@ export async function updateProduct(
         description: data.description,
         price: data.price,
         stock: data.stock,
-        images: data.imageUrl ? [data.imageUrl] : [],
+        images: data.imageUrl ? (Array.isArray(data.imageUrl) ? data.imageUrl : [data.imageUrl]) : [],
         active: data.active,
+        category_id: data.category_id || undefined,
+        subcategory_id: data.subcategory_id || undefined,
       },
     });
 

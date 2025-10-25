@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatPrice } from "@/lib/money";
+import { extractProductImages } from "@/lib/image-utils";
 import { Minus, Plus, Trash2, Leaf } from "lucide-react";
 import { removeFromCart, updateCartItemQuantity } from "@/actions/cart";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +21,7 @@ interface CartItemProps {
       title: string;
       price: number;
       stock: number;
+      images: any; // Json field
     };
   };
 }
@@ -81,8 +83,26 @@ export function CartItem({ item }: CartItemProps) {
           <div className="flex gap-4">
             {/* Product Image */}
             <div className="relative flex-shrink-0">
-              <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-xl h-20 w-20 md:h-24 md:w-24 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-500">
-                <div className="text-4xl md:text-5xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+              <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-xl h-20 w-20 md:h-24 md:w-24 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-500 overflow-hidden">
+                {(() => {
+                  const imageArray = extractProductImages(item.product.images);
+                  return imageArray.length > 0 ? (
+                    <img
+                      src={imageArray[0]}
+                      alt={item.product.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        // Fallback to emoji if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (nextElement) {
+                          nextElement.style.display = 'flex';
+                        }
+                      }}
+                    />
+                  ) : null;
+                })()}
+                <div className="text-4xl md:text-5xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" style={{ display: 'flex' }}>
                   🫒
                 </div>
               </div>

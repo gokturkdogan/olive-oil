@@ -16,7 +16,6 @@ import { createProduct, updateProduct } from "@/actions/admin";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { tlToKurus, kurusToTl } from "@/lib/money";
-import { extractProductImages } from "@/lib/image-utils";
 
 interface ProductDialogProps {
   product?: {
@@ -72,7 +71,7 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
   const [manualSlugEdit, setManualSlugEdit] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>(
-    product ? extractProductImages(product.images) : []
+    product?.images && Array.isArray(product.images) ? product.images : []
   );
   const [newImageUrl, setNewImageUrl] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
@@ -204,7 +203,7 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
       // Reset form when dialog closes
       setSlug(product?.slug || "");
       setManualSlugEdit(false);
-      setImageUrls(product ? extractProductImages(product.images) : []);
+      setImageUrls(product?.images && Array.isArray(product.images) ? product.images : []);
       setNewImageUrl("");
       setSelectedCategoryId(product?.category_id || "");
       setSelectedSubcategoryId(product?.subcategory_id || "");

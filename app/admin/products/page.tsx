@@ -4,6 +4,22 @@ import { Package, Plus, BarChart3 } from "lucide-react";
 
 export default async function AdminProductsPage() {
   const products = await db.product.findMany({
+    include: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        }
+      },
+      subcategory: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        }
+      }
+    },
     orderBy: { created_at: "desc" },
   });
 
