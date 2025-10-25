@@ -91,8 +91,9 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: "Adres eklendi",
+        variant: "success",
       });
       
       // Refresh addresses
@@ -239,436 +240,497 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Ödeme</h1>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Right Side - Order Summary (Mobile First) */}
-        <div className="lg:col-span-1 lg:order-last order-first">
-          <div className="lg:sticky lg:top-24">
-            <Card className="border-2 border-primary/20">
-              <CardHeader className="bg-gradient-to-br from-primary/5 to-primary/10">
-                <CardTitle className="flex items-center gap-2">
-                  <ShoppingBag className="h-5 w-5 text-primary" />
-                  Sipariş Özeti
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                {/* Cart Items */}
-                <div className="space-y-4 mb-6">
-                  {cart?.items?.map((item: any) => (
-                    <div key={item.id} className="flex gap-3 pb-4 border-b last:border-0 last:pb-0">
-                      <div className="relative h-16 w-16 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                        {item.product.images && (item.product.images as string[])[0] ? (
-                          <Image
-                            src={(item.product.images as string[])[0]}
-                            alt={item.product.name}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full">
-                            <Package className="h-8 w-8 text-gray-400" />
-                          </div>
-                        )}
-                        <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                          {item.quantity}
-                        </Badge>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{item.product.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {item.quantity} x {formatPrice(item.product.price)}
-                        </p>
-                        <p className="text-sm font-semibold mt-1">
-                          {formatPrice(item.product.price * item.quantity)}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Price Summary */}
-                <div className="space-y-3 pt-4 border-t">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Ara Toplam</span>
-                    <span className="font-medium">{formatPrice(subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <div className="flex items-center gap-1">
-                      <Truck className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Kargo</span>
-                    </div>
-                    <span className={`font-medium ${shippingCost === 0 ? 'text-green-600' : ''}`}>
-                      {shippingCost === 0 ? 'Ücretsiz' : formatPrice(shippingCost)}
-                    </span>
-                  </div>
-                  
-                  {/* Free shipping progress */}
-                  {remainingForFreeShipping !== null && remainingForFreeShipping > 0 && (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                      <p className="text-xs text-amber-800 font-medium">
-                        ✨ Ücretsiz kargo için sadece {formatPrice(remainingForFreeShipping)} daha ekleyin!
-                      </p>
-                    </div>
-                  )}
-                  
-                  {shippingCost === 0 && subtotal > 0 && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="text-xs text-green-800 font-medium flex items-center gap-1">
-                        <Truck className="h-4 w-4" />
-                        🎉 Ücretsiz kargo kazandınız!
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-between text-lg font-bold pt-3 border-t">
-                    <span>Toplam</span>
-                    <span className="text-primary">{formatPrice(total)}</span>
-                  </div>
-                </div>
-
-                {/* Info */}
-                <div className="mt-6 p-3 bg-primary/5 rounded-lg">
-                  <p className="text-xs text-muted-foreground text-center">
-                    🔒 Güvenli ödeme ile korunan alışveriş
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+      {/* Header Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 py-12 md:py-16 px-4">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-10 right-10 w-72 h-72 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        <div className="container mx-auto relative z-10">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-4 py-2 mb-4">
+              <ShoppingBag className="w-4 h-4 text-white" />
+              <span className="text-white text-sm font-semibold">Güvenli Ödeme</span>
+            </div>
+            
+            {/* Icon */}
+            <div className="bg-white/20 backdrop-blur-sm w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border border-white/30">
+              <CheckCircle2 className="h-8 w-8 text-white" />
+            </div>
+            
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-white leading-tight">
+              Ödeme
+            </h1>
+            
+            {/* Subtitle */}
+            <p className="text-base sm:text-lg text-white/90 font-medium">
+              Siparişinizi tamamlayın
+            </p>
           </div>
         </div>
+      </div>
 
-        {/* Left Side - Form */}
-        <div className="lg:col-span-2 order-last lg:order-first">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Contact Info - Only for guests */}
-            {!isLoggedIn && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>İletişim Bilgileri</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">E-posta</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      placeholder="ornek@email.com"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Addresses for logged-in users */}
-            {isLoggedIn && (
-              <Card>
-                <CardHeader className="bg-gradient-to-br from-primary/5 to-primary/10">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-primary" />
-                      Teslimat Adresi
+      {/* Content */}
+      <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Right Side - Order Summary (Mobile First) */}
+            <div className="lg:col-span-1 lg:order-last order-first">
+              <div className="lg:sticky lg:top-24">
+                <Card className="border-2 border-green-200 shadow-2xl shadow-green-500/10 bg-white hover:shadow-3xl hover:border-green-300 transition-all duration-500">
+                  <CardHeader className="bg-gradient-to-br from-green-50/50 to-emerald-50/50">
+                    <CardTitle className="flex items-center gap-2 text-gray-800">
+                      <ShoppingBag className="h-5 w-5 text-green-600" />
+                      Sipariş Özeti
                     </CardTitle>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowAddressDialog(true)}
-                      className="flex items-center gap-2"
-                    >
-                      <Plus className="h-4 w-4" />
-                      Yeni Adres
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3 pt-6">
-                  {addresses.length > 0 ? (
-                    <div className="grid gap-3">
-                      {addresses.map((address) => (
-                        <div
-                          key={address.id}
-                          onClick={() => handleAddressSelect(address.id)}
-                          className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${
-                            selectedAddressId === address.id
-                              ? "border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md"
-                              : "border-muted hover:border-primary/50"
-                          }`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <p className="font-semibold">{address.title}</p>
-                                {address.is_default && (
-                                  <Badge variant="secondary" className="text-xs">
-                                    Varsayılan
-                                  </Badge>
-                                )}
-                              </div>
-                              <p className="text-sm text-gray-600">{address.name}</p>
-                              <p className="text-sm text-gray-600">{address.phone}</p>
-                              <p className="text-sm text-gray-600">
-                                {address.address_line1}
-                                {address.address_line2 && `, ${address.address_line2}`}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                {address.district}, {address.city} {address.postal_code}
-                              </p>
-                            </div>
-                            {selectedAddressId === address.id && (
-                              <div className="flex-shrink-0">
-                                <div className="w-6 h-6 rounded-full bg-olive-gradient flex items-center justify-center shadow-md">
-                                  <CheckCircle2 className="w-4 h-4 text-white" />
-                                </div>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    {/* Cart Items */}
+                    <div className="space-y-4 mb-6">
+                      {cart?.items?.map((item: any) => (
+                        <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                          <div className="relative h-16 w-16 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-emerald-100">
+                            {item.product.images && (item.product.images as string[])[0] ? (
+                              <Image
+                                src={(item.product.images as string[])[0]}
+                                alt={item.product.name}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full">
+                                <Package className="h-8 w-8 text-green-600" />
                               </div>
                             )}
+                            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+                              {item.quantity}
+                            </Badge>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm truncate text-gray-800">{item.product.name}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {item.quantity} x {formatPrice(item.product.price)}
+                            </p>
+                            <p className="text-sm font-bold mt-1 text-green-600">
+                              {formatPrice(item.product.price * item.quantity)}
+                            </p>
                           </div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Home className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                      <p className="text-muted-foreground mb-4">Henüz kayıtlı adresiniz yok</p>
-                      <Button
-                        type="button"
-                        onClick={() => setShowAddressDialog(true)}
-                        className="bg-olive-gradient"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        İlk Adresinizi Ekleyin
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
 
-            {/* Shipping Address Form - Only for guests */}
-            {!isLoggedIn && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Teslimat Adresi</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="shippingName">Ad Soyad</Label>
-                    <Input
-                      id="shippingName"
-                      name="shippingName"
-                      type="text"
-                      required
-                      placeholder="Ahmet Yılmaz"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="shippingPhone">Telefon</Label>
-                    <Input
-                      id="shippingPhone"
-                      name="shippingPhone"
-                      type="tel"
-                      required
-                      placeholder="+90 555 123 4567"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="shippingAddressLine1">Adres</Label>
-                    <Input
-                      id="shippingAddressLine1"
-                      name="shippingAddressLine1"
-                      type="text"
-                      required
-                      placeholder="Sokak, No, Daire"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="shippingAddressLine2">
-                      Adres Devamı (Opsiyonel)
-                    </Label>
-                    <Input
-                      id="shippingAddressLine2"
-                      name="shippingAddressLine2"
-                      type="text"
-                      placeholder="Apartman, Kat, vb."
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="city">Şehir</Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        type="text"
-                        required
-                        placeholder="İstanbul"
-                      />
+                    {/* Price Summary */}
+                    <div className="space-y-3 pt-4 border-t border-gray-200">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Ara Toplam</span>
+                        <span className="font-semibold text-gray-800">{formatPrice(subtotal)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <div className="flex items-center gap-1">
+                          <Truck className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">Kargo</span>
+                        </div>
+                        <span className={`font-semibold ${shippingCost === 0 ? 'text-green-600' : 'text-gray-800'}`}>
+                          {shippingCost === 0 ? 'Ücretsiz' : formatPrice(shippingCost)}
+                        </span>
+                      </div>
+                      
+                      {/* Free shipping progress */}
+                      {remainingForFreeShipping !== null && remainingForFreeShipping > 0 && (
+                        <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+                          <p className="text-xs text-amber-800 font-semibold">
+                            Ücretsiz kargo için sadece {formatPrice(remainingForFreeShipping)} daha ekleyin!
+                          </p>
+                        </div>
+                      )}
+                      
+                      {shippingCost === 0 && subtotal > 0 && (
+                        <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                          <p className="text-xs text-green-800 font-semibold flex items-center gap-1">
+                            <Truck className="h-4 w-4" />
+                            Ücretsiz kargo kazandınız!
+                          </p>
+                        </div>
+                      )}
+                      
+                      <div className="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
+                        <span className="text-gray-800">Toplam</span>
+                        <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">{formatPrice(total)}</span>
+                      </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="district">İlçe</Label>
-                      <Input
-                        id="district"
-                        name="district"
-                        type="text"
-                        required
-                        placeholder="Kadıköy"
-                      />
+                    {/* Info */}
+                    <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                      <p className="text-xs text-gray-600 text-center font-medium">
+                        Güvenli ödeme ile korunan alışveriş
+                      </p>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
 
-                  <div>
-                    <Label htmlFor="postalCode">Posta Kodu</Label>
+            {/* Left Side - Form */}
+            <div className="lg:col-span-2 order-last lg:order-first">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Contact Info - Only for guests */}
+                {!isLoggedIn && (
+                  <Card className="border-2 border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                    <CardHeader className="bg-gradient-to-br from-green-50/50 to-emerald-50/50">
+                      <CardTitle className="text-gray-800">İletişim Bilgileri</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 pt-6">
+                      <div>
+                        <Label htmlFor="email" className="text-sm font-semibold text-gray-700">E-posta</Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          required
+                          placeholder="ornek@email.com"
+                          className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Addresses for logged-in users */}
+                {isLoggedIn && (
+                  <Card className="border-2 border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                    <CardHeader className="bg-gradient-to-br from-green-50/50 to-emerald-50/50">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2 text-gray-800">
+                          <MapPin className="h-5 w-5 text-green-600" />
+                          Teslimat Adresi
+                        </CardTitle>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowAddressDialog(true)}
+                          className="flex items-center gap-2 border-2 border-green-200 hover:border-green-500 hover:bg-green-50 text-green-700 transition-all duration-300"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Yeni Adres
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3 pt-6">
+                      {addresses.length > 0 ? (
+                        <div className="grid gap-3">
+                          {addresses.map((address) => (
+                            <div
+                              key={address.id}
+                              onClick={() => handleAddressSelect(address.id)}
+                              className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${
+                                selectedAddressId === address.id
+                                  ? "border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg shadow-green-500/20"
+                                  : "border-gray-200 hover:border-green-300 hover:bg-green-50/50"
+                              }`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <p className="font-semibold">{address.title}</p>
+                                    {address.is_default && (
+                                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs font-semibold">
+                                        Varsayılan
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-gray-600">{address.name}</p>
+                                  <p className="text-sm text-gray-600">{address.phone}</p>
+                                  <p className="text-sm text-gray-600">
+                                    {address.address_line1}
+                                    {address.address_line2 && `, ${address.address_line2}`}
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    {address.district}, {address.city} {address.postal_code}
+                                  </p>
+                                </div>
+                                {selectedAddressId === address.id && (
+                                  <div className="flex-shrink-0">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center shadow-lg">
+                                      <CheckCircle2 className="w-4 h-4 text-white" />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Home className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                          <p className="text-gray-600 mb-4 font-medium">Henüz kayıtlı adresiniz yok</p>
+                          <Button
+                            type="button"
+                            onClick={() => setShowAddressDialog(true)}
+                            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 font-semibold"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            İlk Adresinizi Ekleyin
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Shipping Address Form - Only for guests */}
+                {!isLoggedIn && (
+                  <Card className="border-2 border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                    <CardHeader className="bg-gradient-to-br from-green-50/50 to-emerald-50/50">
+                      <CardTitle className="text-gray-800">Teslimat Adresi</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 pt-6">
+                      <div>
+                        <Label htmlFor="shippingName" className="text-sm font-semibold text-gray-700">Ad Soyad</Label>
+                        <Input
+                          id="shippingName"
+                          name="shippingName"
+                          type="text"
+                          required
+                          placeholder="Ahmet Yılmaz"
+                          className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="shippingPhone" className="text-sm font-semibold text-gray-700">Telefon</Label>
+                        <Input
+                          id="shippingPhone"
+                          name="shippingPhone"
+                          type="tel"
+                          required
+                          placeholder="+90 555 123 4567"
+                          className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="shippingAddressLine1" className="text-sm font-semibold text-gray-700">Adres</Label>
+                        <Input
+                          id="shippingAddressLine1"
+                          name="shippingAddressLine1"
+                          type="text"
+                          required
+                          placeholder="Sokak, No, Daire"
+                          className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="shippingAddressLine2" className="text-sm font-semibold text-gray-700">
+                          Adres Devamı (Opsiyonel)
+                        </Label>
+                        <Input
+                          id="shippingAddressLine2"
+                          name="shippingAddressLine2"
+                          type="text"
+                          placeholder="Apartman, Kat, vb."
+                          className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="city" className="text-sm font-semibold text-gray-700">Şehir</Label>
+                          <Input
+                            id="city"
+                            name="city"
+                            type="text"
+                            required
+                            placeholder="İstanbul"
+                            className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="district" className="text-sm font-semibold text-gray-700">İlçe</Label>
+                          <Input
+                            id="district"
+                            name="district"
+                            type="text"
+                            required
+                            placeholder="Kadıköy"
+                            className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="postalCode" className="text-sm font-semibold text-gray-700">Posta Kodu</Label>
+                        <Input
+                          id="postalCode"
+                          name="postalCode"
+                          type="text"
+                          required
+                          placeholder="34000"
+                          className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Coupon Code */}
+                <Card className="border-2 border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-br from-green-50/50 to-emerald-50/50">
+                    <CardTitle className="text-gray-800">İndirim Kodu (Opsiyonel)</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
                     <Input
-                      id="postalCode"
-                      name="postalCode"
+                      id="couponCode"
+                      name="couponCode"
                       type="text"
-                      required
-                      placeholder="34000"
+                      placeholder="KUPON KODUNUZ"
+                      className="uppercase border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
                     />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
 
-            {/* Coupon Code */}
-            <Card>
-              <CardHeader>
-                <CardTitle>İndirim Kodu (Opsiyonel)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Input
-                  id="couponCode"
-                  name="couponCode"
-                  type="text"
-                  placeholder="KUPON KODUNUZ"
-                  className="uppercase"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Submit */}
-            <Button type="submit" size="lg" className="w-full bg-olive-gradient" disabled={loading}>
-              {loading ? "İşleniyor..." : "Ödemeye Geç"}
-            </Button>
-          </form>
+                {/* Submit */}
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 font-semibold py-4 text-lg" 
+                  disabled={loading}
+                >
+                  {loading ? "İşleniyor..." : "Ödemeye Geç"}
+                </Button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Add Address Dialog */}
       <Dialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Yeni Adres Ekle</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-green-200 shadow-2xl">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-2xl font-bold text-gray-800">Yeni Adres Ekle</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleAddAddress} className="space-y-4">
+          <form onSubmit={handleAddAddress} className="space-y-5">
             <div>
-              <Label htmlFor="title">Adres Başlığı</Label>
+              <Label htmlFor="title" className="text-sm font-semibold text-gray-700">Adres Başlığı</Label>
               <Input
                 id="title"
                 name="title"
                 placeholder="Ev, İş, vb."
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div>
-              <Label htmlFor="name">Ad Soyad</Label>
+              <Label htmlFor="name" className="text-sm font-semibold text-gray-700">Ad Soyad</Label>
               <Input
                 id="name"
                 name="name"
                 placeholder="Alıcı adı"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div>
-              <Label htmlFor="phone">Telefon</Label>
+              <Label htmlFor="phone" className="text-sm font-semibold text-gray-700">Telefon</Label>
               <Input
                 id="phone"
                 name="phone"
                 type="tel"
                 placeholder="+90 555 123 4567"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div>
-              <Label htmlFor="addressLine1">Adres</Label>
+              <Label htmlFor="addressLine1" className="text-sm font-semibold text-gray-700">Adres</Label>
               <Input
                 id="addressLine1"
                 name="addressLine1"
                 placeholder="Sokak, No, Daire"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div>
-              <Label htmlFor="addressLine2">Adres Devamı (Opsiyonel)</Label>
+              <Label htmlFor="addressLine2" className="text-sm font-semibold text-gray-700">Adres Devamı (Opsiyonel)</Label>
               <Input
                 id="addressLine2"
                 name="addressLine2"
                 placeholder="Apartman, Kat, vb."
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="city">Şehir</Label>
+                <Label htmlFor="city" className="text-sm font-semibold text-gray-700">Şehir</Label>
                 <Input
                   id="city"
                   name="city"
                   placeholder="İstanbul"
                   required
+                  className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
                 />
               </div>
               <div>
-                <Label htmlFor="district">İlçe</Label>
+                <Label htmlFor="district" className="text-sm font-semibold text-gray-700">İlçe</Label>
                 <Input
                   id="district"
                   name="district"
                   placeholder="Kadıköy"
                   required
+                  className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="postalCode">Posta Kodu</Label>
+              <Label htmlFor="postalCode" className="text-sm font-semibold text-gray-700">Posta Kodu</Label>
               <Input
                 id="postalCode"
                 name="postalCode"
                 placeholder="34000"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
               <input
                 type="checkbox"
                 id="isDefault"
                 name="isDefault"
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-green-300 text-green-600 focus:ring-green-500"
               />
-              <Label htmlFor="isDefault" className="font-normal cursor-pointer">
+              <Label htmlFor="isDefault" className="font-semibold text-gray-700 cursor-pointer">
                 Varsayılan adres olarak ayarla
               </Label>
             </div>
 
-            <div className="flex gap-2 justify-end pt-4">
+            <div className="flex gap-3 justify-end pt-6 border-t border-gray-200">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowAddressDialog(false)}
+                className="border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-300"
               >
                 İptal
               </Button>
-              <Button type="submit" disabled={addingAddress} className="bg-olive-gradient">
+              <Button 
+                type="submit" 
+                disabled={addingAddress} 
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 font-semibold"
+              >
                 {addingAddress ? "Ekleniyor..." : "Adres Ekle"}
               </Button>
             </div>

@@ -4,7 +4,7 @@ import { getUserAddresses } from "@/actions/addresses";
 import { Card, CardContent } from "@/components/ui/card";
 import { AddressCard } from "@/components/profile/address-card";
 import { AddAddressDialog } from "@/components/profile/add-address-dialog";
-import { MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Sparkles } from "lucide-react";
 
 export default async function AddressesPage() {
   const session = await auth();
@@ -16,52 +16,74 @@ export default async function AddressesPage() {
   const addresses = await getUserAddresses();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-olive-gradient-soft to-white">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Header Section */}
-      <div className="relative overflow-hidden bg-olive-gradient-soft py-12 md:py-16 lg:py-20 px-4 border-b border-primary/10">
-        <div className="absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96 bg-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-52 h-52 md:w-80 md:h-80 bg-primary/10 rounded-full blur-3xl"></div>
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 py-12 md:py-16 px-4">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-10 right-10 w-72 h-72 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-10 left-10 w-96 h-96 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
         
         <div className="container mx-auto relative z-10">
           <div className="max-w-5xl mx-auto">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
               <div className="text-center sm:text-left">
-                <div className="bg-white/90 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mx-auto sm:mx-0 mb-4 shadow-xl border-2 border-primary/20">
-                  <MapPin className="h-8 w-8 md:h-10 md:w-10 text-primary" />
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-4 py-2 mb-4">
+                  <Sparkles className="w-4 h-4 text-white" />
+                  <span className="text-white text-sm font-semibold">Adres Yönetimi</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 md:mb-3 text-gray-900 leading-tight">
+                
+                {/* Icon */}
+                <div className="bg-white/20 backdrop-blur-sm w-16 h-16 rounded-2xl flex items-center justify-center mx-auto sm:mx-0 mb-4 shadow-xl border border-white/30">
+                  <MapPin className="h-8 w-8 text-white" />
+                </div>
+                
+                {/* Title */}
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-white leading-tight">
                   Adreslerim
                 </h1>
-                <p className="text-base sm:text-lg md:text-xl text-gray-600">
+                
+                {/* Subtitle */}
+                <p className="text-base sm:text-lg text-white/90 font-medium">
                   Teslimat adreslerinizi yönetin
                 </p>
               </div>
-              <AddAddressDialog />
+              
+              {/* Add Address Button */}
+              <div className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+                <AddAddressDialog />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
+      <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
         <div className="max-w-5xl mx-auto">
           {addresses.length === 0 ? (
-            <Card className="border-2 border-primary/20 shadow-xl">
-              <CardContent className="py-12 md:py-16 text-center">
-                <div className="bg-primary/10 w-20 h-20 md:w-24 md:h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <MapPin className="h-10 w-10 md:h-12 md:w-12 text-primary" />
+            <Card className="border-2 border-green-200 shadow-2xl shadow-green-500/10 bg-white hover:shadow-3xl hover:border-green-300 transition-all duration-500 animate-fadeInUp">
+              <CardContent className="py-16 md:py-20 text-center">
+                <div className="bg-gradient-to-br from-green-100 to-emerald-100 w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+                  <MapPin className="h-12 w-12 md:h-14 md:h-14 text-green-600" />
                 </div>
-                <p className="text-lg md:text-xl text-gray-700 mb-2 font-semibold">Henüz kayıtlı adresiniz yok</p>
-                <p className="text-sm md:text-base text-gray-500 mb-6">
+                <h2 className="text-xl md:text-2xl text-gray-800 mb-3 font-bold">Henüz kayıtlı adresiniz yok</h2>
+                <p className="text-base md:text-lg text-gray-600 mb-8 font-medium">
                   Hızlı teslimat için adres ekleyin
                 </p>
                 <AddAddressDialog />
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-              {addresses.map((address) => (
-                <AddressCard key={address.id} address={address} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+              {addresses.map((address, index) => (
+                <div 
+                  key={address.id} 
+                  className="animate-fadeInUp" 
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <AddressCard address={address} />
+                </div>
               ))}
             </div>
           )}

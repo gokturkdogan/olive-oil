@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/actions/products";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { formatPrice } from "@/lib/money";
-import { Check, Truck, Shield, RefreshCw, Sparkles, Award, Leaf } from "lucide-react";
+import { Check, Truck, Shield, RefreshCw, Award, Leaf, Package, Zap } from "lucide-react";
 import { AddToCartForm } from "@/components/add-to-cart-form";
 
 export default async function ProductDetailPage({
@@ -20,132 +18,123 @@ export default async function ProductDetailPage({
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="grid md:grid-cols-[1fr,1.2fr] gap-6 lg:gap-8 max-w-6xl mx-auto">
-          {/* Product Image - Left */}
-          <div className="group relative">
-            <div className="absolute -inset-0.5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl opacity-0 group-hover:opacity-10 blur-xl transition-all duration-500"></div>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+      {/* Header Section */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 py-8 md:py-12 px-4">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-5 right-5 w-64 h-64 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-5 left-5 w-80 h-80 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        
+        <div className="container mx-auto relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full px-4 py-2 mb-4">
+              <Package className="w-4 h-4 text-white" />
+              <span className="text-white text-sm font-semibold">Ürün Detayı</span>
+            </div>
             
-            <div className="relative bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-2xl border-2 border-gray-200 hover:border-green-400 shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              
-              {/* Badges */}
-              <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-10">
-                <Badge className="bg-green-700 text-white shadow-lg border-0 text-xs">
-                  <Award className="w-3 h-3 mr-1" />
-                  Premium
-                </Badge>
-                {product.stock > 0 ? (
-                  <Badge className="bg-emerald-600 text-white shadow-lg border-0 text-xs">
-                    Stokta
-                  </Badge>
-                ) : (
-                  <Badge className="bg-red-600 text-white shadow-lg border-0 text-xs">
-                    Tükendi
-                  </Badge>
-                )}
-              </div>
+            {/* Icon */}
+            <div className="bg-white/20 backdrop-blur-sm w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl border border-white/30">
+              <Leaf className="h-7 w-7 text-white" />
+            </div>
+            
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-white leading-tight">
+              {product.title}
+            </h1>
+            
+            {/* Price */}
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <p className="text-2xl sm:text-3xl font-black text-white">
+                {formatPrice(product.price)}
+              </p>
+              <Badge className="bg-white/20 backdrop-blur-sm text-white border border-white/30 text-xs font-semibold">
+                KDV Dahil
+              </Badge>
+            </div>
+            
+            {/* Subtitle */}
+            <p className="text-sm sm:text-base text-white/90 font-medium max-w-2xl mx-auto">
+              {product.description}
+            </p>
+          </div>
+        </div>
+      </div>
 
-              <div className="relative h-[350px] flex items-center justify-center p-6">
-                <div className="text-center">
-                  <div className="text-8xl mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                    🫒
-                  </div>
-                  {product.stock < 10 && product.stock > 0 && (
-                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 text-xs">
-                      Son {product.stock} adet!
+      {/* Content */}
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-[1fr,1fr] gap-6 lg:gap-8">
+            {/* Product Image - Left */}
+            <div className="group relative">
+              <div className="absolute -inset-0.5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl opacity-0 group-hover:opacity-10 blur-xl transition-all duration-500"></div>
+              
+              <div className="relative bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-2xl border-2 border-green-200 hover:border-green-400 shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                {/* Badges */}
+                <div className="absolute top-4 left-4 right-4 flex items-start justify-between z-10">
+                  <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg border-0 text-xs font-semibold">
+                    <Award className="w-3 h-3 mr-1" />
+                    Premium
+                  </Badge>
+                  {product.stock > 0 ? (
+                    <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg border-0 text-xs font-semibold">
+                      <Check className="w-3 h-3 mr-1" />
+                      Stokta
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg border-0 text-xs font-semibold">
+                      Tükendi
                     </Badge>
                   )}
                 </div>
-              </div>
 
-              {/* Quick Info Icons */}
-              <div className="border-t border-gray-200 p-3 bg-white/80 backdrop-blur-sm">
-                <div className="flex items-center justify-around text-xs">
-                  <div className="flex items-center gap-1 text-green-700">
-                    <Truck className="w-3.5 h-3.5" />
-                    <span>Hızlı Kargo</span>
+                <div className="relative h-[400px] flex items-center justify-center p-6">
+                  <div className="text-center">
+                    <div className="text-8xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      🫒
+                    </div>
+                    {product.stock < 10 && product.stock > 0 && (
+                      <Badge variant="outline" className="bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-300 text-xs font-semibold">
+                        <Zap className="w-3 h-3 mr-1" />
+                        Son {product.stock} adet!
+                      </Badge>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1 text-blue-700">
-                    <Shield className="w-3.5 h-3.5" />
-                    <span>Güvenli</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-amber-700">
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    <span>14 Gün İade</span>
+                </div>
+
+                {/* Quick Info Icons */}
+                <div className="border-t border-green-200 p-4 bg-white/80 backdrop-blur-sm">
+                  <div className="flex items-center justify-around text-xs">
+                    <div className="flex items-center gap-1 text-green-700 font-semibold">
+                      <Truck className="w-3.5 h-3.5" />
+                      <span>Hızlı Kargo</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-blue-700 font-semibold">
+                      <Shield className="w-3.5 h-3.5" />
+                      <span>Güvenli</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-amber-700 font-semibold">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>14 Gün İade</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Product Info - Right */}
-          <div className="space-y-4">
-            {/* Title & Price */}
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                {product.title}
-              </h1>
-              <div className="flex items-baseline gap-2 mb-3">
-                <p className="text-3xl font-black text-green-700">
-                  {formatPrice(product.price)}
-                </p>
-                <Badge className="bg-green-100 text-green-800 border border-green-300 text-xs">
-                  KDV Dahil
-                </Badge>
+            {/* Add to Cart - Right */}
+            <div className="flex items-center justify-center">
+              <div className="w-full max-w-md">
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200 p-8">
+                  <AddToCartForm productId={product.id} inStock={product.stock > 0} />
+                </div>
               </div>
-              <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
             </div>
-
-            {/* Features - Compact */}
-            <Card className="border border-gray-200 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Leaf className="h-4 w-4 text-green-700" />
-                  <h3 className="font-semibold text-sm text-gray-900">Özellikler</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-2">
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="bg-green-100 p-1 rounded flex-shrink-0">
-                      <Check className="h-3 w-3 text-green-700" />
-                    </div>
-                    <span className="text-gray-700">Soğuk sıkım</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="bg-green-100 p-1 rounded flex-shrink-0">
-                      <Check className="h-3 w-3 text-green-700" />
-                    </div>
-                    <span className="text-gray-700">Düşük asit</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="bg-green-100 p-1 rounded flex-shrink-0">
-                      <Check className="h-3 w-3 text-green-700" />
-                    </div>
-                    <span className="text-gray-700">Cam şişe</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs">
-                    <div className="bg-green-100 p-1 rounded flex-shrink-0">
-                      <Check className="h-3 w-3 text-green-700" />
-                    </div>
-                    <span className="text-gray-700">%100 doğal</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs col-span-2">
-                    <div className="bg-green-100 p-1 rounded flex-shrink-0">
-                      <Check className="h-3 w-3 text-green-700" />
-                    </div>
-                    <span className="text-gray-700">Laboratuvar testli</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Add to Cart */}
-            <AddToCartForm productId={product.id} inStock={product.stock > 0} />
           </div>
         </div>
       </div>
     </div>
   );
 }
-

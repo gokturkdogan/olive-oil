@@ -13,7 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DeleteConfirmationDialog } from "@/components/admin/delete-confirmation-dialog";
-import { MapPin, Trash2, Star, Edit } from "lucide-react";
+import { MapPin, Trash2, Star, Edit, Phone, Building, Globe } from "lucide-react";
 import { deleteAddress, setDefaultAddress, updateAddress } from "@/actions/addresses";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -52,8 +52,9 @@ export function AddressCard({ address }: AddressCardProps) {
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: "Adres silindi",
+        variant: "success",
       });
       router.refresh();
     } else {
@@ -73,8 +74,9 @@ export function AddressCard({ address }: AddressCardProps) {
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: "Varsayılan adres ayarlandı",
+        variant: "success",
       });
       router.refresh();
     } else {
@@ -108,8 +110,9 @@ export function AddressCard({ address }: AddressCardProps) {
 
     if (result.success) {
       toast({
-        title: "Başarılı",
+        title: "Başarılı! ✓",
         description: "Adres güncellendi",
+        variant: "success",
       });
       setShowEditDialog(false);
       router.refresh();
@@ -126,31 +129,43 @@ export function AddressCard({ address }: AddressCardProps) {
 
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow duration-300 border-2 border-primary/10">
+      <Card className="hover:shadow-xl hover:border-green-300 transition-all duration-300 border-2 border-gray-200 shadow-lg bg-white group">
         <CardContent className="p-6">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-lg">{address.title}</h3>
+          <div className="flex justify-between items-start mb-5">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-2 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="h-5 w-5 text-green-600" />
+              </div>
+              <h3 className="font-bold text-lg text-gray-800 group-hover:text-green-700 transition-colors duration-300">{address.title}</h3>
             </div>
             {address.is_default && (
-              <Badge variant="secondary" className="bg-primary/10 text-primary">
+              <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg shadow-green-500/30 px-3 py-1 text-xs font-semibold">
                 Varsayılan
               </Badge>
             )}
           </div>
 
-          <div className="space-y-1 text-sm mb-4">
-            <p className="font-medium">{address.name}</p>
-            <p className="text-gray-600">{address.phone}</p>
-            <p className="text-gray-600">
-              {address.address_line1}
-              {address.address_line2 && `, ${address.address_line2}`}
+          <div className="space-y-2 text-sm mb-6">
+            <p className="font-semibold text-gray-800">{address.name}</p>
+            <p className="text-gray-600 flex items-center gap-2">
+              <Phone className="h-4 w-4 text-green-600" />
+              {address.phone}
             </p>
-            <p className="text-gray-600">
+            <p className="text-gray-600 flex items-start gap-2">
+              <MapPin className="h-4 w-4 text-green-600 mt-0.5" />
+              <span>
+                {address.address_line1}
+                {address.address_line2 && `, ${address.address_line2}`}
+              </span>
+            </p>
+            <p className="text-gray-600 flex items-center gap-2">
+              <Building className="h-4 w-4 text-green-600" />
               {address.district}, {address.city} {address.postal_code}
             </p>
-            <p className="text-gray-600">{address.country}</p>
+            <p className="text-gray-600 flex items-center gap-2">
+              <Globe className="h-4 w-4 text-green-600" />
+              {address.country}
+            </p>
           </div>
 
           <div className="flex gap-2 flex-wrap">
@@ -159,7 +174,7 @@ export function AddressCard({ address }: AddressCardProps) {
               size="sm"
               onClick={() => setShowEditDialog(true)}
               disabled={loading}
-              className="hover:bg-primary/10 hover:text-primary transition-colors"
+              className="hover:bg-green-50 hover:text-green-700 hover:border-green-300 transition-all duration-300 border-2"
             >
               <Edit className="h-4 w-4 mr-1" />
               Düzenle
@@ -170,7 +185,7 @@ export function AddressCard({ address }: AddressCardProps) {
                 size="sm"
                 onClick={handleSetDefault}
                 disabled={loading}
-                className="hover:bg-amber-50 hover:text-amber-600 hover:border-amber-300 transition-colors"
+                className="hover:bg-amber-50 hover:text-amber-700 hover:border-amber-300 transition-all duration-300 border-2"
               >
                 <Star className="h-4 w-4 mr-1" />
                 Varsayılan Yap
@@ -181,7 +196,7 @@ export function AddressCard({ address }: AddressCardProps) {
               size="sm"
               onClick={handleDeleteClick}
               disabled={loading}
-              className="ml-auto"
+              className="ml-auto hover:bg-red-600 hover:shadow-lg transition-all duration-300"
             >
               <Trash2 className="h-4 w-4 mr-1" />
               Sil
@@ -192,35 +207,37 @@ export function AddressCard({ address }: AddressCardProps) {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Adresi Düzenle</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-green-200 shadow-2xl">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-2xl font-bold text-gray-800">Adresi Düzenle</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleUpdate} className="space-y-4">
+          <form onSubmit={handleUpdate} className="space-y-5">
             <div>
-              <Label htmlFor="edit-title">Adres Başlığı</Label>
+              <Label htmlFor="edit-title" className="text-sm font-semibold text-gray-700">Adres Başlığı</Label>
               <Input
                 id="edit-title"
                 name="title"
                 defaultValue={address.title}
                 placeholder="Ev, İş, vb."
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div>
-              <Label htmlFor="edit-name">Ad Soyad</Label>
+              <Label htmlFor="edit-name" className="text-sm font-semibold text-gray-700">Ad Soyad</Label>
               <Input
                 id="edit-name"
                 name="name"
                 defaultValue={address.name}
                 placeholder="Alıcı adı"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div>
-              <Label htmlFor="edit-phone">Telefon</Label>
+              <Label htmlFor="edit-phone" className="text-sm font-semibold text-gray-700">Telefon</Label>
               <Input
                 id="edit-phone"
                 name="phone"
@@ -228,86 +245,97 @@ export function AddressCard({ address }: AddressCardProps) {
                 defaultValue={address.phone}
                 placeholder="+90 555 123 4567"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div>
-              <Label htmlFor="edit-addressLine1">Adres</Label>
+              <Label htmlFor="edit-addressLine1" className="text-sm font-semibold text-gray-700">Adres</Label>
               <Input
                 id="edit-addressLine1"
                 name="addressLine1"
                 defaultValue={address.address_line1}
                 placeholder="Sokak, No, Daire"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div>
-              <Label htmlFor="edit-addressLine2">Adres Devamı (Opsiyonel)</Label>
+              <Label htmlFor="edit-addressLine2" className="text-sm font-semibold text-gray-700">Adres Devamı (Opsiyonel)</Label>
               <Input
                 id="edit-addressLine2"
                 name="addressLine2"
                 defaultValue={address.address_line2 || ""}
                 placeholder="Apartman, Kat, vb."
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="edit-city">Şehir</Label>
+                <Label htmlFor="edit-city" className="text-sm font-semibold text-gray-700">Şehir</Label>
                 <Input
                   id="edit-city"
                   name="city"
                   defaultValue={address.city}
                   placeholder="İstanbul"
                   required
+                  className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
                 />
               </div>
               <div>
-                <Label htmlFor="edit-district">İlçe</Label>
+                <Label htmlFor="edit-district" className="text-sm font-semibold text-gray-700">İlçe</Label>
                 <Input
                   id="edit-district"
                   name="district"
                   defaultValue={address.district}
                   placeholder="Kadıköy"
                   required
+                  className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="edit-postalCode">Posta Kodu</Label>
+              <Label htmlFor="edit-postalCode" className="text-sm font-semibold text-gray-700">Posta Kodu</Label>
               <Input
                 id="edit-postalCode"
                 name="postalCode"
                 defaultValue={address.postal_code}
                 placeholder="34000"
                 required
+                className="mt-1 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
               />
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3 p-4 bg-green-50 rounded-xl border border-green-200">
               <input
                 type="checkbox"
                 id="edit-isDefault"
                 name="isDefault"
                 defaultChecked={address.is_default}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-green-300 text-green-600 focus:ring-green-500"
               />
-              <Label htmlFor="edit-isDefault" className="font-normal cursor-pointer">
+              <Label htmlFor="edit-isDefault" className="font-semibold text-gray-700 cursor-pointer">
                 Varsayılan adres olarak ayarla
               </Label>
             </div>
 
-            <div className="flex gap-2 justify-end pt-4 border-t">
+            <div className="flex gap-3 justify-end pt-6 border-t border-gray-200">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowEditDialog(false)}
+                className="border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-300"
               >
                 İptal
               </Button>
-              <Button type="submit" disabled={updating} className="bg-olive-gradient">
+              <Button 
+                type="submit" 
+                disabled={updating} 
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg shadow-green-500/30 hover:shadow-xl hover:shadow-green-500/40 transition-all duration-300 font-semibold"
+              >
                 {updating ? "Güncelleniyor..." : "Güncelle"}
               </Button>
             </div>
