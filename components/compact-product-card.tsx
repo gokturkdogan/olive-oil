@@ -62,11 +62,11 @@ export function CompactProductCard({ product }: CompactProductCardProps) {
   const firstImage = productImages[0];
 
   return (
-    <Card className="group border-2 border-gray-200 hover:border-green-400 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden bg-white hover:-translate-y-1">
+    <Card className="group border-2 border-gray-200 hover:border-green-400 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden bg-white hover:-translate-y-1 w-full max-w-full">
       <Link href={`/products/${product.slug}`}>
-        <div className="flex gap-3 p-3">
+        <div className="flex gap-2 p-2">
           {/* Product Image */}
-          <div className="relative w-24 h-24 flex-shrink-0 bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 overflow-hidden rounded-lg">
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 overflow-hidden rounded-lg">
             {firstImage ? (
               <img
                 src={firstImage}
@@ -83,13 +83,13 @@ export function CompactProductCard({ product }: CompactProductCardProps) {
               <></>
             )}
             <div className="hidden items-center justify-center h-full">
-              <span className="text-3xl">🫒</span>
+              <span className="text-2xl sm:text-3xl">🫒</span>
             </div>
             
             {/* Stock Badge */}
             {product.stock === 0 && (
-              <div className="absolute top-1 left-1">
-                <Badge className="bg-red-500 text-white text-xs py-0.5 px-1.5">Tükendi</Badge>
+              <div className="absolute top-0.5 left-0.5">
+                <Badge className="bg-red-500 text-white text-[8px] sm:text-[10px] py-0 px-1">Tükendi</Badge>
               </div>
             )}
             
@@ -98,17 +98,17 @@ export function CompactProductCard({ product }: CompactProductCardProps) {
           </div>
 
           {/* Product Info */}
-          <div className="flex-1 min-w-0 space-y-1">
-            <h3 className="font-semibold text-xs text-gray-900 group-hover:text-green-700 transition-colors duration-300 line-clamp-2">
+          <div className="flex-1 min-w-0 space-y-0.5 pr-1">
+            <h3 className="font-semibold text-[10px] sm:text-xs text-gray-900 group-hover:text-green-700 transition-colors duration-300 line-clamp-2 leading-tight">
               {product.title}
             </h3>
             
-            <p className="text-xs text-gray-600 line-clamp-1">
+            <p className="text-[9px] sm:text-[10px] text-gray-600 line-clamp-1 leading-tight">
               {product.description}
             </p>
 
-            <div className="flex items-center justify-between pt-1">
-              <span className="text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+            <div className="flex items-center justify-between pt-0.5">
+              <span className="text-xs sm:text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 {formatPrice(product.price)}
               </span>
             </div>
@@ -117,23 +117,26 @@ export function CompactProductCard({ product }: CompactProductCardProps) {
             <Button
               onClick={handleAddToCart}
               disabled={adding || added || product.stock === 0}
-              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white transition-all duration-300 group/btn text-xs py-1 h-7"
+              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white transition-all duration-300 group/btn text-[10px] sm:text-xs py-0.5 h-6 sm:h-7 px-2"
               size="sm"
             >
               {adding ? (
                 <>
-                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                  Ekleniyor...
+                  <div className="animate-spin rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 border-b-2 border-white mr-0.5 sm:mr-1"></div>
+                  <span className="hidden sm:inline">Ekleniyor...</span>
+                  <span className="sm:hidden">...</span>
                 </>
               ) : added ? (
                 <>
-                  <Check className="h-3 w-3 mr-1" />
-                  Eklendi!
+                  <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Eklendi!</span>
+                  <span className="sm:hidden">✓</span>
                 </>
               ) : (
                 <>
-                  <ShoppingCart className="h-3 w-3 mr-1" />
-                  Sepete Ekle
+                  <ShoppingCart className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Sepete Ekle</span>
+                  <span className="sm:hidden">Ekle</span>
                 </>
               )}
             </Button>

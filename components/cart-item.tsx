@@ -79,11 +79,11 @@ export function CartItem({ item }: CartItemProps) {
       <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl opacity-0 group-hover:opacity-10 blur-lg transition-all duration-500"></div>
       
       <Card className="relative overflow-hidden border-2 border-gray-200 hover:border-green-300 transition-all duration-500 shadow-lg hover:shadow-xl bg-white">
-        <CardContent className="p-4 md:p-5">
-          <div className="flex gap-4">
+        <CardContent className="p-2 sm:p-3 md:p-5">
+          <div className="flex gap-2 sm:gap-3 md:gap-4">
             {/* Product Image */}
             <div className="relative flex-shrink-0">
-              <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-xl h-20 w-20 md:h-24 md:w-24 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-500 overflow-hidden">
+              <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-xl h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-500 overflow-hidden">
                 {(() => {
                   const imageArray = extractProductImages(item.product.images);
                   const hasImages = imageArray.length > 0;
@@ -104,7 +104,7 @@ export function CartItem({ item }: CartItemProps) {
                           }}
                         />
                       )}
-                      <div className="text-4xl md:text-5xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" style={{ display: hasImages ? 'none' : 'flex' }}>
+                      <div className="text-3xl sm:text-4xl md:text-5xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" style={{ display: hasImages ? 'none' : 'flex' }}>
                         🫒
                       </div>
                     </>
@@ -112,21 +112,21 @@ export function CartItem({ item }: CartItemProps) {
                 })()}
               </div>
               {item.product.stock < 10 && (
-                <Badge className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white border-0 text-[10px] px-1.5 py-0.5 shadow-md">
+                <Badge className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white border-0 text-[9px] px-1.5 py-0.5 shadow-md">
                   Son {item.product.stock}
                 </Badge>
               )}
             </div>
 
             {/* Product Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-start gap-2 mb-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-base md:text-lg mb-1.5 text-gray-900 group-hover:text-green-700 transition-colors truncate">
+            <div className="flex-1 min-w-0 pr-1">
+              <div className="flex justify-between items-start gap-1 sm:gap-2 mb-2 md:mb-3">
+                <div className="flex-1 min-w-0 pr-1">
+                  <h3 className="font-bold text-xs sm:text-sm md:text-base lg:text-lg mb-0.5 sm:mb-1 text-gray-900 group-hover:text-green-700 transition-colors line-clamp-2">
                     {item.product.title}
                   </h3>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs text-gray-600">
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="text-[9px] sm:text-[10px] md:text-xs text-gray-600">
                       {formatPrice(item.product.price)} / adet
                     </span>
                   </div>
@@ -136,23 +136,23 @@ export function CartItem({ item }: CartItemProps) {
                   size="icon"
                   onClick={handleRemove}
                   disabled={loading}
-                  className="flex-shrink-0 h-8 w-8 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-300 group/delete"
+                  className="flex-shrink-0 h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all duration-300 group/delete"
                 >
-                  <Trash2 className="h-4 w-4 group-hover/delete:scale-110 transition-transform" />
+                  <Trash2 className="h-3 w-3 sm:h-3.5 sm:w-3.5 md:h-4 md:w-4 group-hover/delete:scale-110 transition-transform" />
                 </Button>
               </div>
 
-              <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center justify-between gap-1.5 sm:gap-2 md:gap-4 flex-wrap">
                 {/* Quantity Controls */}
-                <div className="flex items-center gap-1.5 bg-gray-100 rounded-lg p-1">
+                <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5 sm:p-1">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 hover:bg-white hover:text-green-700 rounded-md transition-all"
+                    className="h-6 w-6 sm:h-7 sm:w-7 hover:bg-white hover:text-green-700 rounded-md transition-all"
                     onClick={() => updateQuantity(Math.max(1, quantity - 1))}
                     disabled={quantity <= 1 || loading}
                   >
-                    <Minus className="h-3.5 w-3.5" />
+                    <Minus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   </Button>
                   <Input
                     type="number"
@@ -170,24 +170,24 @@ export function CartItem({ item }: CartItemProps) {
                       );
                       updateQuantity(val);
                     }}
-                    className="w-12 h-7 text-center border-0 bg-transparent font-bold text-sm"
+                    className="w-8 sm:w-10 md:w-12 h-6 sm:h-7 text-center border-0 bg-transparent font-bold text-[10px] sm:text-xs md:text-sm px-0"
                     disabled={loading}
                   />
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 hover:bg-white hover:text-green-700 rounded-md transition-all"
+                    className="h-6 w-6 sm:h-7 sm:w-7 hover:bg-white hover:text-green-700 rounded-md transition-all"
                     onClick={() => updateQuantity(Math.min(item.product.stock, quantity + 1))}
                     disabled={quantity >= item.product.stock || loading}
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                   </Button>
                 </div>
 
                 {/* Item Total */}
-                <div className="text-right">
-                  <p className="text-[10px] text-gray-500 mb-0.5">Toplam</p>
-                  <p className="text-lg md:text-xl font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                <div className="text-right min-w-[60px] sm:min-w-[80px]">
+                  <p className="text-[8px] sm:text-[9px] md:text-[10px] text-gray-500 mb-0.5">Toplam</p>
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent truncate">
                     {formatPrice(itemTotal)}
                   </p>
                 </div>

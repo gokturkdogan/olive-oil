@@ -310,7 +310,7 @@ export async function createOrder(data: CreateOrderData) {
           unit_price_snapshot: item.product.price,
           quantity: item.quantity,
           line_total: item.product.price * item.quantity,
-          image_url: imageUrl,
+          ...(imageUrl && { image_url: imageUrl }),
         },
       });
     }
