@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ShoppingBag, Package, Plus, MapPin, CheckCircle2, Home, Truck } from "lucide-react";
 import { formatPrice } from "@/lib/money";
 import { calculateShippingFee, getRemainingForFreeShipping } from "@/lib/shipping";
+import { extractProductImages } from "@/lib/image-utils";
 
 interface Address {
   id: string;
@@ -347,35 +348,46 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
                   <CardContent className="pt-6">
                     {/* Cart Items */}
                     <div className="space-y-4 mb-6">
-                      {cart?.items?.map((item: any) => (
-                        <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                          <div className="relative h-16 w-16 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-emerald-100">
-                            {item.product.images && (item.product.images as string[])[0] ? (
-                              <img
-                                src={(item.product.images as string[])[0]}
-                                alt={item.product.name}
-                                className="w-full h-full object-cover rounded-xl"
-                              />
-                            ) : (
-                              <div className="flex items-center justify-center h-full">
+                      {cart?.items?.map((item: any) => {
+                        const imageArray = extractProductImages(item.product.images);
+                        const hasImages = imageArray.length > 0;
+                        
+                        return (
+                          <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                            <div className="relative h-16 w-16 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-emerald-100">
+                              {hasImages && (
+                                <img
+                                  src={imageArray[0]}
+                                  alt={item.product.title}
+                                  className="w-full h-full object-cover rounded-xl"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                                    if (nextElement) {
+                                      nextElement.style.display = 'flex';
+                                    }
+                                  }}
+                                />
+                              )}
+                              <div className="flex items-center justify-center h-full" style={{ display: hasImages ? 'none' : 'flex' }}>
                                 <Package className="h-8 w-8 text-green-600" />
                               </div>
-                            )}
-                            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
-                              {item.quantity}
-                            </Badge>
+                              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
+                                {item.quantity}
+                              </Badge>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm truncate text-gray-800">{item.product.title}</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                {item.quantity} x {formatPrice(item.product.price)}
+                              </p>
+                              <p className="text-sm font-bold mt-1 text-green-600">
+                                {formatPrice(item.product.price * item.quantity)}
+                              </p>
+                            </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm truncate text-gray-800">{item.product.name}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {item.quantity} x {formatPrice(item.product.price)}
-                            </p>
-                            <p className="text-sm font-bold mt-1 text-green-600">
-                              {formatPrice(item.product.price * item.quantity)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {/* Price Summary */}

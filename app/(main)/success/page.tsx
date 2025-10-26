@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
 
 function SuccessContent({ orderId }: { orderId?: string }) {
+  // Format order ID to show only first 8 characters (matching admin and email)
+  const formattedOrderId = orderId ? orderId.slice(0, 8).toUpperCase() : undefined;
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Header Section */}
@@ -46,11 +48,11 @@ function SuccessContent({ orderId }: { orderId?: string }) {
           <Card className="border-2 border-green-200 shadow-2xl shadow-green-500/10 bg-white hover:shadow-3xl hover:border-green-300 transition-all duration-500">
             <CardContent className="pt-8 pb-8 px-6 md:px-12">
               {/* Order Number */}
-              {orderId && (
+              {formattedOrderId && (
                 <div className="text-center mb-8">
                   <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-base px-6 py-3 font-semibold shadow-lg">
                     <Package className="mr-2 h-4 w-4" />
-                    Sipariş No: <span className="font-bold ml-1">{orderId}</span>
+                    Sipariş No: <span className="font-bold ml-1">#{formattedOrderId}</span>
                   </Badge>
                 </div>
               )}

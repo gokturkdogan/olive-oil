@@ -6,6 +6,7 @@ import { getCart } from "@/actions/cart";
 import { validateCoupon, incrementCouponUsage } from "@/lib/coupons";
 import { calculateShippingFee } from "@/lib/shipping";
 import { sendOrderConfirmationEmail } from "@/lib/email";
+import { extractProductImages } from "@/lib/image-utils";
 import { redirect } from "next/navigation";
 import { createCheckoutForm } from "@/lib/iyzico";
 
@@ -305,6 +306,10 @@ export async function createOrder(data: CreateOrderData) {
 
     // Create order items (snapshot)
     for (const item of cart.items) {
+      // Get first image from product images
+      const images = extractProductImages(item.product.images);
+      const imageUrl = images.length > 0 ? images[0] : null;
+      
       await db.orderItem.create({
         data: {
           order_id: order.id,
@@ -313,6 +318,7 @@ export async function createOrder(data: CreateOrderData) {
           unit_price_snapshot: item.product.price,
           quantity: item.quantity,
           line_total: item.product.price * item.quantity,
+          image_url: imageUrl,
         },
       });
     }
@@ -330,11 +336,18 @@ export async function createOrder(data: CreateOrderData) {
       shippingFee,
       discount: discountTotal,
       shippingAddress: shippingAddressText,
-      items: cart.items.map(item => ({
-        title: item.product.title,
-        quantity: item.quantity,
-        price: item.product.price,
-      })),
+      items: cart.items.map(item => {
+        // Get first image from product images
+        const images = extractProductImages(item.product.images);
+        const imageUrl = images.length > 0 ? images[0] : undefined;
+        
+        return {
+          title: item.product.title,
+          quantity: item.quantity,
+          price: item.product.price,
+          imageUrl,
+        };
+      }),
     }).catch((error) => {
       console.error("Order confirmation email failed:", error);
       // Don't fail order if email fails
@@ -433,19 +446,35 @@ export async function completeOrder(orderId: string, paymentData: any) {
       }
 
       // Clear cart
-      const cart = await db.cart.findFirst({
-        where: {
-          OR: [
-            { user_id: order.user_id },
-            { items: { some: { cart_id: { not: undefined } } } },
-          ],
-        },
-      });
-
-      if (cart) {
-        await db.cartItem.deleteMany({
-          where: { cart_id: cart.id },
+      if (order.user_id) {
+        // For logged in users, find their cart
+        const userCart = await db.cart.findFirst({
+          where: { user_id: order.user_id },
         });
+
+        if (userCart) {
+          await db.cartItem.deleteMany({
+            where: { cart_id: userCart.id },
+          });
+          console.log("🧹 User cart cleared:", userCart.id);
+        }
+      } else {
+        // For guest users, find cart by items matching order items
+        const cart = await db.cart.findFirst({
+          where: {
+            guest_id: { not: null },
+          },
+          include: {
+            items: true,
+          },
+        });
+
+        if (cart) {
+          await db.cartItem.deleteMany({
+            where: { cart_id: cart.id },
+          });
+          console.log("🧹 Guest cart cleared:", cart.id);
+        }
       }
 
       return { success: true, status: "PAID" };

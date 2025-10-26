@@ -86,25 +86,30 @@ export function CartItem({ item }: CartItemProps) {
               <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-xl h-20 w-20 md:h-24 md:w-24 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-500 overflow-hidden">
                 {(() => {
                   const imageArray = extractProductImages(item.product.images);
-                  return imageArray.length > 0 ? (
-                    <img
-                      src={imageArray[0]}
-                      alt={item.product.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        // Fallback to emoji if image fails to load
-                        e.currentTarget.style.display = 'none';
-                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
-                        if (nextElement) {
-                          nextElement.style.display = 'flex';
-                        }
-                      }}
-                    />
-                  ) : null;
+                  const hasImages = imageArray.length > 0;
+                  
+                  return (
+                    <>
+                      {hasImages && (
+                        <img
+                          src={imageArray[0]}
+                          alt={item.product.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (nextElement) {
+                              nextElement.style.display = 'flex';
+                            }
+                          }}
+                        />
+                      )}
+                      <div className="text-4xl md:text-5xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" style={{ display: hasImages ? 'none' : 'flex' }}>
+                        🫒
+                      </div>
+                    </>
+                  );
                 })()}
-                <div className="text-4xl md:text-5xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" style={{ display: 'flex' }}>
-                  🫒
-                </div>
               </div>
               {item.product.stock < 10 && (
                 <Badge className="absolute -top-1.5 -right-1.5 bg-amber-500 text-white border-0 text-[10px] px-1.5 py-0.5 shadow-md">

@@ -145,6 +145,7 @@ model OrderItem {
   unit_price_snapshot Int
   quantity            Int
   line_total          Int
+  image_url           String?
   order               Order   @relation(fields: [order_id], references: [id], onDelete: Cascade)
   product             Product @relation(fields: [product_id], references: [id])
 

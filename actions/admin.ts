@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { OrderStatus } from "@prisma/client";
 import { calculateLoyaltyTier } from "@/lib/loyalty";
+import { sendOrderStatusUpdateEmail, sendOrderCancellationEmail } from "@/lib/email";
 
 /**
  * Sipariş durumunu günceller (Admin)
@@ -25,6 +26,23 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
         user_id: true,
         total: true,
         status: true,
+        email: true,
+        shipping_name: true,
+        tracking_code: true,
+        shipping_provider: true,
+        subtotal: true,
+        discount_total: true,
+        shipping_fee: true,
+        items: {
+          select: {
+            id: true,
+            title_snapshot: true,
+            quantity: true,
+            unit_price_snapshot: true,
+            line_total: true,
+            image_url: true,
+          },
+        },
       },
     });
 
@@ -64,6 +82,60 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
       }
     }
 
+    // Send email notification if status changed (and it's not the first status)
+    if (order.status !== status) {
+      try {
+        // Check if order is cancelled
+        if (status === "CANCELLED") {
+          // Prepare order items for email
+          const orderItems = order.items.map(item => ({
+            title: item.title_snapshot,
+            quantity: item.quantity,
+            price: item.unit_price_snapshot,
+            imageUrl: item.image_url,
+            lineTotal: item.line_total,
+          }));
+
+          // Send cancellation email
+          await sendOrderCancellationEmail(order.email, {
+            orderId: order.id,
+            name: order.shipping_name,
+            reason: "Sipariş admin tarafından iptal edildi.",
+            items: orderItems,
+            total: order.total,
+            trackingCode: order.tracking_code || undefined,
+            shippingProvider: order.shipping_provider || undefined,
+          });
+        } else {
+          // Prepare order items for email
+          const orderItems = order.items.map(item => ({
+            title: item.title_snapshot,
+            quantity: item.quantity,
+            price: item.unit_price_snapshot,
+            imageUrl: item.image_url,
+            lineTotal: item.line_total,
+          }));
+
+          // Send status update email
+          await sendOrderStatusUpdateEmail(order.email, {
+            orderId: order.id,
+            name: order.shipping_name,
+            status: status,
+            trackingCode: order.tracking_code || undefined,
+            shippingProvider: order.shipping_provider || undefined,
+            items: orderItems,
+            subtotal: order.subtotal,
+            shippingFee: order.shipping_fee,
+            discountTotal: order.discount_total,
+            total: order.total,
+          });
+        }
+      } catch (emailError) {
+        console.error("Email gönderilirken hata oluştu:", emailError);
+        // Continue with order update even if email fails
+      }
+    }
+
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath("/admin/orders");
 
@@ -89,6 +161,35 @@ export async function updateOrderShipping(
       return { success: false, error: "Yetkisiz erişim" };
     }
 
+    // Get order before update to check if status is changing to SHIPPED
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      select: {
+        id: true,
+        email: true,
+        shipping_name: true,
+        status: true,
+        subtotal: true,
+        discount_total: true,
+        shipping_fee: true,
+        total: true,
+        items: {
+          select: {
+            id: true,
+            title_snapshot: true,
+            quantity: true,
+            unit_price_snapshot: true,
+            line_total: true,
+            image_url: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      return { success: false, error: "Sipariş bulunamadı" };
+    }
+
     await db.order.update({
       where: { id: orderId },
       data: {
@@ -97,6 +198,35 @@ export async function updateOrderShipping(
         status: "SHIPPED", // Kargo bilgisi girilince otomatik SHIPPED yap
       },
     });
+
+    // Send email notification if status is changing to SHIPPED
+    if (order.status !== "SHIPPED") {
+      try {
+        const orderItems = order.items.map(item => ({
+          title: item.title_snapshot,
+          quantity: item.quantity,
+          price: item.unit_price_snapshot,
+          imageUrl: item.image_url,
+          lineTotal: item.line_total,
+        }));
+
+        await sendOrderStatusUpdateEmail(order.email, {
+          orderId: order.id,
+          name: order.shipping_name,
+          status: "SHIPPED",
+          trackingCode: trackingCode,
+          shippingProvider: shippingProvider,
+          items: orderItems,
+          subtotal: order.subtotal,
+          shippingFee: order.shipping_fee,
+          discountTotal: order.discount_total,
+          total: order.total,
+        });
+      } catch (emailError) {
+        console.error("Email gönderilirken hata oluştu:", emailError);
+        // Continue even if email fails
+      }
+    }
 
     revalidatePath(`/admin/orders/${orderId}`);
     revalidatePath("/admin/orders");

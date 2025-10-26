@@ -111,7 +111,7 @@ export default async function OrderDetailPage({
                 
                 {/* Title */}
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-white leading-tight">
-                  Sipariş #{order.id.slice(0, 8)}
+                  Sipariş #{order.id.slice(0, 8).toUpperCase()}
                 </h1>
                 
                 {/* Subtitle */}
