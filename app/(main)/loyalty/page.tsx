@@ -1,8 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Award, Crown, Gem, Check, Gift, Truck, Percent, Star, Sparkles, Zap } from "lucide-react";
+import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/money";
 
-export default function LoyaltyPage() {
+async function getShippingThreshold() {
+  const settings = await db.shippingSettings.findFirst();
+  return settings?.free_shipping_threshold || 200000; // Default 2000 TL in kurus
+}
+
+export default async function LoyaltyPage() {
+  const shippingThreshold = await getShippingThreshold();
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Hero Header - Green Theme */}
@@ -144,7 +152,7 @@ export default function LoyaltyPage() {
                       <div className="bg-gray-100 p-1 rounded-lg flex-shrink-0">
                         <Check className="h-3.5 w-3.5 text-gray-700" />
                       </div>
-                      <span className="text-gray-700">3000 TL üzeri ücretsiz kargo</span>
+                      <span className="text-gray-700">{(shippingThreshold / 100).toFixed(0)} TL üzeri ücretsiz kargo</span>
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <div className="bg-gray-100 p-1 rounded-lg flex-shrink-0">
@@ -194,13 +202,13 @@ export default function LoyaltyPage() {
                       <div className="bg-amber-100 p-1 rounded-lg flex-shrink-0">
                         <Check className="h-3.5 w-3.5 text-amber-700" />
                       </div>
-                      <span className="text-gray-700">1000 TL üzeri ücretsiz kargo</span>
+                      <span className="text-gray-700">{(shippingThreshold / 100).toFixed(0)} TL üzeri ücretsiz kargo</span>
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <div className="bg-amber-100 p-1 rounded-lg flex-shrink-0">
                         <Check className="h-3.5 w-3.5 text-amber-700" />
                       </div>
-                      <span className="text-gray-700">Özel kampanyalar</span>
+                      <span className="text-gray-700">Kampanya bildirimleri</span>
                     </div>
                   </div>
                 </CardContent>
@@ -250,7 +258,7 @@ export default function LoyaltyPage() {
                       <div className="bg-slate-100 p-1 rounded-lg flex-shrink-0">
                         <Check className="h-3.5 w-3.5 text-slate-700" />
                       </div>
-                      <span className="text-gray-700">VIP destek hattı</span>
+                      <span className="text-gray-700">Platinuma özel kampanyalar</span>
                     </div>
                   </div>
                 </CardContent>
@@ -304,13 +312,13 @@ export default function LoyaltyPage() {
                       <div className="bg-blue-100 p-1 rounded-lg flex-shrink-0">
                         <Check className="h-3.5 w-3.5 text-blue-700" />
                       </div>
-                      <span className="text-gray-700">VIP hediyeler</span>
+                      <span className="text-gray-700">Diamonda özel kampanyalar</span>
                     </div>
                     <div className="flex items-start gap-2 text-sm">
                       <div className="bg-blue-100 p-1 rounded-lg flex-shrink-0">
                         <Check className="h-3.5 w-3.5 text-blue-700" />
                       </div>
-                      <span className="text-gray-700">Öncelikli destek</span>
+                      <span className="text-gray-700">VIP hediyeler</span>
                     </div>
                   </div>
                 </CardContent>

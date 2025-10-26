@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
     const token = formData.get("token") as string;
     
     const baseUrl = getBaseUrl(request);
-    console.log("=== iyzico Callback Started ===");
-    console.log("Base URL:", baseUrl);
-    console.log("Token:", token);
+
+
+
 
     if (!token) {
       console.error("No token received");
@@ -42,14 +42,14 @@ export async function POST(request: NextRequest) {
 
     // Verify payment with iyzico
     const paymentResult = await retrieveCheckoutForm(token);
-    console.log("Payment Result:", JSON.stringify(paymentResult, null, 2));
+
     
-    console.log("🔍 Callback Payment Debug:");
-    console.log("  Token:", token);
-    console.log("  Payment Status:", paymentResult.paymentStatus);
-    console.log("  Payment ID:", paymentResult.paymentId);
-    console.log("  Conversation ID:", paymentResult.conversationId);
-    console.log("  Transaction ID:", paymentResult.transactionId);
+
+
+
+
+
+
 
     if (paymentResult.status !== "success") {
       console.error("Payment not successful:", paymentResult.status);
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       });
       
       if (order) {
-        console.log("🧹 Ödeme başarısız, PENDING order temizleniyor:", order.id);
+
         
         // Delete order items first
         await db.orderItem.deleteMany({
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
           where: { id: order.id }
         });
         
-        console.log("✅ PENDING order temizlendi");
+
       }
       
       return new Response(null, {
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     const orderId = order.id;
-    console.log("Order found:", orderId);
+
     
     // Complete order
     const result = await completeOrder(orderId, {
@@ -114,13 +114,13 @@ export async function POST(request: NextRequest) {
       itemTransactions: paymentResult.itemTransactions,
     });
 
-    console.log("Complete order result:", result);
+
 
     if (result.success && result.status === "PAID") {
       const redirectPath = `/success?order=${orderId}`;
-      console.log("Payment successful! Redirecting to:", redirectPath);
-      console.log("Full URL:", `${baseUrl}${redirectPath}`);
-      console.log("=== iyzico Callback Completed Successfully ===");
+
+
+
       
       // Use Response with Location header instead of NextResponse.redirect
       return new Response(null, {

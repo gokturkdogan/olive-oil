@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, ShoppingCart, Tag, Menu, X, BarChart3, FolderTree } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Tag, Menu, X, BarChart3, FolderTree, Truck } from "lucide-react";
 
 const navItems = [
   {
@@ -35,6 +35,12 @@ const navItems = [
     href: "/admin/coupons",
     label: "Kuponlar",
     icon: Tag,
+    exactMatch: false,
+  },
+  {
+    href: "/admin/shipping",
+    label: "Kargo",
+    icon: Truck,
     exactMatch: false,
   },
 ];

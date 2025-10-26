@@ -18,7 +18,7 @@ import { createAddress, getUserAddresses } from "@/actions/addresses";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingBag, Package, Plus, MapPin, CheckCircle2, Home, Truck } from "lucide-react";
 import { formatPrice } from "@/lib/money";
-import { calculateShippingFee, getRemainingForFreeShipping } from "@/lib/shipping";
+// Client component, shipping fee server-side calculated
 import { extractProductImages } from "@/lib/image-utils";
 
 interface Address {
@@ -39,9 +39,12 @@ interface CheckoutClientProps {
   cart: any;
   addresses: Address[];
   loyaltyTier: string;
+  shippingFee: number;
+  remainingForFreeShipping: number | null;
+  freeShippingReason?: string;
 }
 
-export function CheckoutClient({ session, cart, addresses: initialAddresses, loyaltyTier }: CheckoutClientProps) {
+export function CheckoutClient({ session, cart, addresses: initialAddresses, loyaltyTier, shippingFee, remainingForFreeShipping, freeShippingReason }: CheckoutClientProps) {
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
@@ -61,7 +64,7 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
     const error = searchParams.get('error');
     
     if (paymentReturn === 'true') {
-      console.log("🔄 Kullanıcı ödeme sayfasından geri döndü, PENDING order'lar temizleniyor...");
+
       
       // Clean up user's PENDING orders
       const cleanupPendingOrders = async () => {
@@ -80,7 +83,7 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
           
           if (response.ok) {
             const result = await response.json();
-            console.log("🧹 PENDING order'lar temizlendi:", result.deletedCount);
+
             
             // Show appropriate toast based on error
             if (error) {
@@ -118,11 +121,9 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
     0
   ) || 0;
   
-  // Dynamic shipping fee based on loyalty tier
-  const shippingCost = calculateShippingFee(subtotal, loyaltyTier as any);
-  const remainingForFreeShipping = getRemainingForFreeShipping(subtotal, loyaltyTier as any);
+  // Shipping fee from server (already calculated)
   
-  const total = subtotal + shippingCost;
+  const total = subtotal + shippingFee;
 
   const handleAddressSelect = (addressId: string) => {
     setSelectedAddressId(addressId);
@@ -243,8 +244,8 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
     };
 
     try {
-      console.log("🛒 Sipariş oluşturuluyor...");
-      console.log("⏰ Başlangıç:", new Date().toISOString());
+
+
       
       // 60 saniye timeout (daha uzun)
       const orderPromise = createOrder(data);
@@ -256,12 +257,12 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
       );
       
       const result = await Promise.race([orderPromise, timeoutPromise]) as any;
-      console.log("✅ Sipariş yanıt aldı:", new Date().toISOString());
 
-      console.log("Order result:", result);
+
+
 
       if (result.success && result.paymentPageUrl) {
-        console.log("✅ Ödeme sayfasına yönlendiriliyor...");
+
         window.location.href = result.paymentPageUrl;
       } else {
         console.error("❌ Sipariş hatası:", result.error);
@@ -401,8 +402,8 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
                           <Truck className="h-4 w-4 text-gray-500" />
                           <span className="text-gray-600">Kargo</span>
                         </div>
-                        <span className={`font-semibold ${shippingCost === 0 ? 'text-green-600' : 'text-gray-800'}`}>
-                          {shippingCost === 0 ? 'Ücretsiz' : formatPrice(shippingCost)}
+                        <span className={`font-semibold ${shippingFee === 0 ? 'text-green-600' : 'text-gray-800'}`}>
+                          {shippingFee === 0 ? 'Ücretsiz' : formatPrice(shippingFee)}
                         </span>
                       </div>
                       
@@ -410,16 +411,16 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
                       {remainingForFreeShipping !== null && remainingForFreeShipping > 0 && (
                         <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
                           <p className="text-xs text-amber-800 font-semibold">
-                            Ücretsiz kargo için sadece {formatPrice(remainingForFreeShipping)} daha ekleyin!
+                            ✨ {formatPrice(remainingForFreeShipping)} daha ekleyin, ücretsiz kargo kazanın!
                           </p>
                         </div>
                       )}
                       
-                      {shippingCost === 0 && subtotal > 0 && (
+                      {shippingFee === 0 && subtotal > 0 && (
                         <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
                           <p className="text-xs text-green-800 font-semibold flex items-center gap-1">
                             <Truck className="h-4 w-4" />
-                            Ücretsiz kargo kazandınız!
+                            {freeShippingReason && `${freeShippingReason} `}Ücretsiz kargo kazandınız!
                           </p>
                         </div>
                       )}

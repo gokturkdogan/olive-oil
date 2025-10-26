@@ -43,7 +43,7 @@ export function CheckoutProtection({ userEmail, userId }: CheckoutProtectionProp
           });
           
           if (response.ok) {
-            console.log("🧹 Kullanıcı checkout'tan ayrıldı, PENDING order'lar temizlendi");
+
           }
         } catch (error) {
           console.error("❌ Order temizleme hatası:", error);

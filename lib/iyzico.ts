@@ -5,11 +5,6 @@ const IYZICO_API_KEY = process.env.IYZICO_API_KEY || "";
 const IYZICO_SECRET_KEY = process.env.IYZICO_SECRET_KEY || "";
 const IYZICO_BASE_URL = process.env.IYZICO_BASE_URL || "https://sandbox-api.iyzipay.com";
 
-// Debug: Environment değişkenlerini kontrol et
-console.log("🔧 İyzico Environment Check:");
-console.log("  API Key:", IYZICO_API_KEY ? `✅ Var (${IYZICO_API_KEY.substring(0, 10)}...)` : "❌ YOK!");
-console.log("  Secret Key:", IYZICO_SECRET_KEY ? `✅ Var (${IYZICO_SECRET_KEY.substring(0, 10)}...)` : "❌ YOK!");
-console.log("  Base URL:", IYZICO_BASE_URL);
 
 /**
  * JSON stringify without whitespace (İyzico requirement)
@@ -41,11 +36,6 @@ async function iyzicoRequest(endpoint: string, body: any): Promise<any> {
   
   const authString = `IYZWS ${IYZICO_API_KEY}:${signature}:${randomString}`;
 
-  console.log("İyzico Request URL:", url);
-  console.log("İyzico Random String:", randomString);
-  console.log("İyzico Request Body Length:", requestBody.length);
-  console.log("İyzico Data to Sign Length:", dataToSign.length);
-
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -58,7 +48,7 @@ async function iyzicoRequest(endpoint: string, body: any): Promise<any> {
   });
 
   const responseText = await response.text();
-  console.log("İyzico Raw Response:", responseText);
+
 
   if (!response.ok) {
     console.error("İyzico API Error Status:", response.status);
@@ -127,16 +117,16 @@ export async function createCheckoutForm(
   const startTime = Date.now();
   
   try {
-    console.log("\n📤 createCheckoutForm() başladı");
-    console.log("Request Params:", JSON.stringify(params, null, 2));
+
+
     
     const baseUrl = typeof window === 'undefined' 
       ? (process.env.NEXTAUTH_URL || "http://localhost:3000")
       : '';
     
     const apiUrl = `${baseUrl}/api/iyzico/init`;
-    console.log("🌐 API URL:", apiUrl);
-    console.log("🔄 Fetch başlıyor...");
+
+
     
     const fetchStartTime = Date.now();
     const response = await fetch(apiUrl, {
@@ -148,15 +138,15 @@ export async function createCheckoutForm(
     });
     const fetchElapsed = Date.now() - fetchStartTime;
     
-    console.log(`📥 Fetch tamamlandı (${fetchElapsed}ms)`);
-    console.log("Response status:", response.status);
-    console.log("Response ok:", response.ok);
+
+
+
 
     const result = await response.json();
     const totalElapsed = Date.now() - startTime;
     
-    console.log(`✅ createCheckoutForm tamamlandı (${totalElapsed}ms)`);
-    console.log("Response:", JSON.stringify(result, null, 2));
+
+
     
     return result;
   } catch (error: any) {
@@ -172,8 +162,8 @@ export async function createCheckoutForm(
  */
 export async function retrieveCheckoutForm(token: string): Promise<any> {
   const startTime = Date.now();
-  console.log("🔄 İyzico retrieveCheckoutForm başlatılıyor (SDK)...");
-  console.log("Token:", token);
+
+
 
   try {
     const baseUrl = typeof window === 'undefined'
@@ -191,8 +181,8 @@ export async function retrieveCheckoutForm(token: string): Promise<any> {
     const result = await response.json();
     
     const elapsed = Date.now() - startTime;
-    console.log(`✅ retrieveCheckoutForm tamamlandı (${elapsed}ms)`);
-    console.log("Retrieve Result:", JSON.stringify(result, null, 2));
+
+
     
     return result;
   } catch (error: any) {
@@ -208,9 +198,9 @@ export async function retrieveCheckoutForm(token: string): Promise<any> {
  */
 export async function refundPayment(paymentTransactionId: string, amount?: number): Promise<any> {
   const startTime = Date.now();
-  console.log("🔄 İyzico refund başlatılıyor (SDK)...");
-  console.log("Payment Transaction ID:", paymentTransactionId);
-  console.log("Amount:", amount || "Full refund");
+
+
+
 
   try {
     const baseUrl = typeof window === 'undefined'
@@ -228,8 +218,8 @@ export async function refundPayment(paymentTransactionId: string, amount?: numbe
     const result = await response.json();
     
     const elapsed = Date.now() - startTime;
-    console.log(`✅ Refund tamamlandı (${elapsed}ms)`);
-    console.log("Refund Result:", JSON.stringify(result, null, 2));
+
+
     
     return result;
   } catch (error: any) {

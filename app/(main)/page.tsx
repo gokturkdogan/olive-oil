@@ -3,8 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Check, Leaf, Award, Heart, Sparkles, TrendingUp, ShieldCheck, ShoppingCart, ArrowRight, Star, Truck, Lock, Mail } from "lucide-react";
+import { db } from "@/lib/db";
+import { FeaturedProductCard } from "@/components/featured-product-card";
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Get products marked as main page featured
+  const featuredProducts = await db.product.findMany({
+    where: {
+      is_main_page: true,
+      active: true,
+    },
+    orderBy: { created_at: "desc" },
+    take: 8, // Limit to 8 products
+  });
   return (
     <div className="flex flex-col">
       {/* Hero Section - Dynamic & Modern */}
@@ -21,7 +32,7 @@ export default function HomePage() {
           <div className="mb-8 animate-fadeInUp">
             <span className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm text-green-800 px-5 py-2.5 rounded-full text-sm font-semibold border border-green-200 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
               <Sparkles className="w-4 h-4 text-amber-500" />
-              Premium Zeytinyağı
+              Liva Oil
             </span>
           </div>
           
@@ -66,8 +77,8 @@ export default function HomePage() {
           </div>
 
           {/* Animated Stats with Icons */}
-          <div className="grid grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-            <div className="group relative">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+            <div className="group relative w-full">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl opacity-0 group-hover:opacity-10 blur transition-all duration-300"></div>
               <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-green-100">
                 <Leaf className="h-8 w-8 text-green-700 mx-auto mb-3" />
@@ -76,7 +87,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="group relative">
+            <div className="group relative w-full">
               <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-2xl opacity-0 group-hover:opacity-10 blur transition-all duration-300"></div>
               <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-amber-100">
                 <Award className="h-8 w-8 text-amber-600 mx-auto mb-3" />
@@ -85,7 +96,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="group relative">
+            <div className="group relative w-full">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl opacity-0 group-hover:opacity-10 blur transition-all duration-300"></div>
               <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-blue-100">
                 <Heart className="h-8 w-8 text-blue-600 mx-auto mb-3" />
@@ -248,75 +259,19 @@ export default function HomePage() {
             </p>
           </div>
 
-          <Link href="/products" className="block group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl opacity-0 group-hover:opacity-10 blur-2xl transition-all duration-700"></div>
-              <Card className="relative border-2 border-gray-200 hover:border-green-400 hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                <CardContent className="p-8 md:p-10">
-                  <div className="grid md:grid-cols-2 gap-8 items-center">
-                    {/* Product Image */}
-                    <div className="relative bg-gradient-to-br from-green-50 via-emerald-50 to-lime-50 rounded-2xl h-64 md:h-80 flex items-center justify-center overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-green-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                      <div className="text-center relative z-10">
-                        <div className="text-8xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">🫒</div>
-                        <div className="flex items-center justify-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className="h-4 w-4 text-amber-500 fill-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" 
-                              style={{ transitionDelay: `${i * 100}ms` }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="text-left">
-                      <Badge className="mb-4 bg-gradient-to-r from-green-700 to-emerald-700 text-white shadow-lg">
-                        <Sparkles className="w-3 h-3 mr-1" />
-                        En Çok Satan
-                      </Badge>
-                      
-                      <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900 group-hover:text-green-700 transition-colors duration-300">
-                        Sızma Zeytinyağı
-                      </h3>
-                      
-                      <p className="text-gray-600 mb-6 leading-relaxed">
-                        Soğuk sıkım yöntemiyle işlenmiş, düşük asitli premium zeytinyağı
-                      </p>
-                      
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center gap-3 text-sm group/item hover:translate-x-2 transition-transform duration-300">
-                          <div className="bg-green-100 p-1 rounded-lg">
-                            <Check className="h-4 w-4 text-green-700" />
-                          </div>
-                          <span className="text-gray-700">Soğuk sıkım yöntemi</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm group/item hover:translate-x-2 transition-transform duration-300">
-                          <div className="bg-green-100 p-1 rounded-lg">
-                            <Check className="h-4 w-4 text-green-700" />
-                          </div>
-                          <span className="text-gray-700">%0.5'den düşük asit</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-sm group/item hover:translate-x-2 transition-transform duration-300">
-                          <div className="bg-green-100 p-1 rounded-lg">
-                            <Check className="h-4 w-4 text-green-700" />
-                          </div>
-                          <span className="text-gray-700">UV korumalı ambalaj</span>
-                        </div>
-                      </div>
-                      
-                      <Button className="bg-green-700 hover:bg-green-800 text-white px-6 py-5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105 group/btn">
-                        İncele
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          {featuredProducts.length > 0 ? (
+            <div className="space-y-6">
+              {featuredProducts.map((product) => (
+                <FeaturedProductCard key={product.id} product={product} />
+              ))}
             </div>
-          </Link>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">
+                Henüz anasayfada öne çıkarılmış ürün bulunmamaktadır.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -454,7 +409,7 @@ export default function HomePage() {
             </h2>
             
             <p className="text-lg sm:text-xl md:text-2xl mb-10 md:mb-12 text-white/90 max-w-2xl mx-auto px-4 leading-relaxed">
-              Hemen sipariş verin, premium zeytinyağımız kapınıza kadar gelsin
+              Hemen sipariş verin, Liva Oil ile kaliteli zeytinyağımız kapınıza kadar gelsin
             </p>
             
             {/* Features Row */}

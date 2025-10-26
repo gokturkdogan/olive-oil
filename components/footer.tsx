@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-primary">Zeytinyağı</h3>
+            <h3 className="text-lg font-bold text-primary">Liva Oil</h3>
             <p className="text-sm text-muted-foreground">
               Doğal, sağlıklı ve kaliteli zeytinyağı ile sofralarınıza lezzet
               katıyoruz.

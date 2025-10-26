@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShoppingCart, User, LogOut, Leaf, Menu, X } from "lucide-react";
+import { ShoppingCart, User, LogOut, Leaf, Menu, X, Star, Award, Gem, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -12,11 +12,35 @@ import { CategoryDropdown } from "@/components/category-dropdown";
 interface NavbarProps {
   session: any;
   cartItemsCount: number;
+  loyaltyTier?: string | null;
 }
 
-export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
+export function NavbarClient({ session, cartItemsCount, loyaltyTier }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  // Get loyalty tier badge
+  const getLoyaltyBadge = () => {
+    if (!loyaltyTier || loyaltyTier === "STANDARD") return null;
+
+    const badges = {
+      GOLD: { icon: Award, color: "from-amber-500 to-yellow-600", text: "GOLD" },
+      PLATINUM: { icon: Gem, color: "from-slate-500 to-gray-600", text: "PLATINUM" },
+      DIAMOND: { icon: Crown, color: "from-blue-500 to-cyan-600", text: "DIAMOND" },
+    };
+
+    const badge = badges[loyaltyTier as keyof typeof badges];
+    if (!badge) return null;
+
+    const Icon = badge.icon;
+    
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-gradient-to-r ${badge.color} shadow-md animate-pulse`}>
+        <Icon className="h-3 w-3" />
+        {badge.text}
+      </span>
+    );
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b-2 border-gray-200 shadow-lg">
@@ -31,7 +55,7 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg md:text-xl font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Zeytinyağı</span>
+              <span className="text-lg md:text-xl font-black bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Liva Oil</span>
               <span className="text-[9px] md:text-[10px] text-gray-600 font-medium -mt-0.5 tracking-wider">PREMIUM SIZMA</span>
             </div>
           </Link>
@@ -48,7 +72,7 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
             >
               Ana Sayfa
             </Link>
-            <CategoryDropdown pathname={pathname} />
+            <CategoryDropdown pathname={pathname} onLinkClick={undefined} />
             <Link
               href="/loyalty"
               className={`relative px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${
@@ -108,7 +132,8 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                     }`}
                   >
                     <User className="h-4 w-4 mr-1.5" />
-                    {session.user.name}
+                    <span>{session.user.name}</span>
+                    {getLoyaltyBadge()}
                   </Button>
                 </Link>
                 <Link href="/profile/orders">
@@ -200,17 +225,9 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
               >
                 Ana Sayfa
               </Link>
-              <Link
-                href="/products"
-                className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
-                  pathname.startsWith("/products")
-                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-md" 
-                    : "text-gray-700 hover:bg-green-50 hover:text-green-700"
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Ürünler
-              </Link>
+              <div className="mx-2">
+                <CategoryDropdown pathname={pathname} onLinkClick={() => setMobileMenuOpen(false)} />
+              </div>
               <Link
                 href="/loyalty"
                 className={`mx-2 px-4 py-2.5 text-sm font-semibold rounded-lg transition-all ${
@@ -248,7 +265,10 @@ export function NavbarClient({ session, cartItemsCount }: NavbarProps) {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <User className="h-4 w-4 mr-2" />
-                    {session.user.name}
+                    <span className="flex items-center gap-2">
+                      {session.user.name}
+                      {getLoyaltyBadge()}
+                    </span>
                   </Link>
                   <Link
                     href="/profile/orders"

@@ -249,6 +249,8 @@ export async function createProduct(data: {
   stock: number;
   imageUrl?: string | string[];
   active: boolean;
+  is_main_page?: boolean;
+  is_recommended?: boolean;
   category_id?: string;
   subcategory_id?: string;
 }) {
@@ -277,6 +279,8 @@ export async function createProduct(data: {
         stock: data.stock,
         images: data.imageUrl ? (Array.isArray(data.imageUrl) ? data.imageUrl : [data.imageUrl]) : [],
         active: data.active,
+        is_main_page: data.is_main_page || false,
+        is_recommended: data.is_recommended || false,
         category_id: data.category_id || undefined,
         subcategory_id: data.subcategory_id || undefined,
       },
@@ -304,6 +308,8 @@ export async function updateProduct(
     stock: number;
     imageUrl?: string | string[];
     active: boolean;
+    is_main_page?: boolean;
+    is_recommended?: boolean;
     category_id?: string;
     subcategory_id?: string;
   }
@@ -334,6 +340,8 @@ export async function updateProduct(
         stock: data.stock,
         images: data.imageUrl ? (Array.isArray(data.imageUrl) ? data.imageUrl : [data.imageUrl]) : [],
         active: data.active,
+        is_main_page: data.is_main_page || false,
+        is_recommended: data.is_recommended || false,
         category_id: data.category_id || undefined,
         subcategory_id: data.subcategory_id || undefined,
       },

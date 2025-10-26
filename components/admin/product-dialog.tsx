@@ -28,6 +28,8 @@ interface ProductDialogProps {
     stock: number;
     images: any; // Json field
     active: boolean;
+    is_main_page?: boolean;
+    is_recommended?: boolean;
     category_id?: string;
     subcategory_id?: string;
   };
@@ -78,6 +80,8 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(product?.category_id || "");
   const [selectedSubcategoryId, setSelectedSubcategoryId] = useState(product?.subcategory_id || "");
+  const [isMainPage, setIsMainPage] = useState(product?.is_main_page || false);
+  const [isRecommended, setIsRecommended] = useState(product?.is_recommended || false);
   const { toast } = useToast();
   const router = useRouter();
   
@@ -208,6 +212,8 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
       setNewImageUrl("");
       setSelectedCategoryId(product?.category_id || "");
       setSelectedSubcategoryId(product?.subcategory_id || "");
+      setIsMainPage(product?.is_main_page || false);
+      setIsRecommended(product?.is_recommended || false);
     }
   };
 
@@ -225,6 +231,8 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
       stock: parseInt(formData.get("stock") as string),
       imageUrl: imageUrls, // Use state value
       active: formData.get("active") === "on",
+      is_main_page: isMainPage,
+      is_recommended: isRecommended,
       category_id: selectedCategoryId || undefined,
       subcategory_id: selectedSubcategoryId || undefined,
     };
@@ -492,18 +500,46 @@ export function ProductDialog({ product, trigger }: ProductDialogProps) {
             </div>
           </div>
 
-          {/* Active Status */}
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="active"
-              name="active"
-              defaultChecked={product?.active !== false}
-              className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-            />
-            <Label htmlFor="active" className="text-sm font-medium text-gray-700">
-              Ürün aktif (müşteriler görebilir)
-            </Label>
+          {/* Status Checkboxes */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="active"
+                name="active"
+                defaultChecked={product?.active !== false}
+                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              />
+              <Label htmlFor="active" className="text-sm font-medium text-gray-700">
+                Ürün aktif (müşteriler görebilir)
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isMainPage"
+                checked={isMainPage}
+                onChange={(e) => setIsMainPage(e.target.checked)}
+                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              />
+              <Label htmlFor="isMainPage" className="text-sm font-medium text-gray-700">
+                Anasayfada öne çıkar
+              </Label>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isRecommended"
+                checked={isRecommended}
+                onChange={(e) => setIsRecommended(e.target.checked)}
+                className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+              />
+              <Label htmlFor="isRecommended" className="text-sm font-medium text-gray-700">
+                Sepette tavsiye et
+              </Label>
+            </div>
           </div>
 
           {/* Submit Button */}

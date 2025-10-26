@@ -9,8 +9,8 @@ export async function sendWelcomeEmail(email: string, name: string) {
   try {
     // Eğer API key yoksa, console'a yaz ve devam et (geliştirme ortamı için)
     if (!process.env.RESEND_API_KEY) {
-      console.log('📧 [DEV] Welcome email would be sent to:', email);
-      console.log('   Name:', name);
+
+
       return { success: true, message: 'Email skipped (no API key)' };
     }
 
@@ -111,7 +111,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
                           Sorularınız için bizimle iletişime geçebilirsiniz.
                         </p>
                         <p style="margin: 0; color: #a0aec0; font-size: 12px;">
-                          © ${new Date().getFullYear()} Premium Zeytinyağı. Tüm hakları saklıdır.
+                          © ${new Date().getFullYear()} Liva Oil. Tüm hakları saklıdır.
                         </p>
                       </td>
                     </tr>
@@ -130,7 +130,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
       return { success: false, error: error.message };
     }
 
-    console.log('✅ Welcome email sent to:', email);
+
     return { success: true, data };
   } catch (error: any) {
     console.error('❌ Email send error:', error);
@@ -158,9 +158,9 @@ export async function sendOrderConfirmationEmail(
 ) {
   try {
     if (!process.env.RESEND_API_KEY) {
-      console.log('📧 [DEV] Order confirmation would be sent to:', email);
-      console.log('   Order ID:', orderData.orderId);
-      console.log('   Total:', orderData.total / 100, 'TL');
+
+
+
       return { success: true, message: 'Email skipped (no API key)' };
     }
 
@@ -327,7 +327,7 @@ export async function sendOrderConfirmationEmail(
                           Bu mail ${email} adresine sipariş onayı olarak gönderilmiştir.
                         </p>
                         <p style="margin: 0; color: #a0aec0; font-size: 12px;">
-                          © ${new Date().getFullYear()} Premium Zeytinyağı. Tüm hakları saklıdır.
+                          © ${new Date().getFullYear()} Liva Oil. Tüm hakları saklıdır.
                         </p>
                       </td>
                     </tr>
@@ -346,7 +346,7 @@ export async function sendOrderConfirmationEmail(
       return { success: false, error: error.message };
     }
 
-    console.log('✅ Order confirmation email sent to:', email, '| Order:', orderData.orderId);
+
     return { success: true, data };
   } catch (error: any) {
     console.error('❌ Order email error:', error);
@@ -380,8 +380,8 @@ export async function sendOrderStatusUpdateEmail(
 ) {
   try {
     if (!process.env.RESEND_API_KEY) {
-      console.log('📧 [DEV] Status update email would be sent to:', email);
-      console.log('   Order ID:', orderData.orderId, '| Status:', orderData.status);
+
+
       return { success: true, message: 'Email skipped (no API key)' };
     }
 
@@ -556,7 +556,7 @@ export async function sendOrderStatusUpdateEmail(
                           Sorularınız için bizimle iletişime geçebilirsiniz.
                         </p>
                         <p style="margin: 0; color: #a0aec0; font-size: 12px;">
-                          © ${new Date().getFullYear()} Premium Zeytinyağı. Tüm hakları saklıdır.
+                          © ${new Date().getFullYear()} Liva Oil. Tüm hakları saklıdır.
                         </p>
                       </td>
                     </tr>
@@ -575,7 +575,7 @@ export async function sendOrderStatusUpdateEmail(
       return { success: false, error: error.message };
     }
 
-    console.log('✅ Status update email sent to:', email, '| Status:', orderData.status);
+
     return { success: true, data };
   } catch (error: any) {
     console.error('❌ Status email error:', error);
@@ -606,8 +606,8 @@ export async function sendOrderCancellationEmail(
 ) {
   try {
     if (!process.env.RESEND_API_KEY) {
-      console.log('📧 [DEV] Cancellation email would be sent to:', email);
-      console.log('   Order ID:', orderData.orderId);
+
+
       return { success: true, message: 'Email skipped (no API key)' };
     }
 
@@ -756,7 +756,7 @@ export async function sendOrderCancellationEmail(
                           Sorularınız için bizimle iletişime geçebilirsiniz.
                         </p>
                         <p style="margin: 0; color: #a0aec0; font-size: 12px;">
-                          © ${new Date().getFullYear()} Premium Zeytinyağı. Tüm hakları saklıdır.
+                          © ${new Date().getFullYear()} Liva Oil. Tüm hakları saklıdır.
                         </p>
                       </td>
                     </tr>
@@ -775,7 +775,7 @@ export async function sendOrderCancellationEmail(
       return { success: false, error: error.message };
     }
 
-    console.log('✅ Cancellation email sent to:', email);
+
     return { success: true, data };
   } catch (error: any) {
     console.error('❌ Cancellation email error:', error);

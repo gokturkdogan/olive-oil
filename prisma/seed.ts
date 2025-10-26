@@ -4,7 +4,7 @@ import { hash } from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding database...");
+
 
   // Create admin user
   const adminPassword = await hash("admin123", 10);
@@ -18,7 +18,7 @@ async function main() {
       role: "ADMIN",
     },
   });
-  console.log("✅ Admin user created:", admin.email);
+
 
   // Create customer user
   const customerPassword = await hash("customer123", 10);
@@ -32,7 +32,7 @@ async function main() {
       role: "CUSTOMER",
     },
   });
-  console.log("✅ Customer user created:", customer.email);
+
 
   // Create products
   const product1 = await prisma.product.upsert({
@@ -49,7 +49,7 @@ async function main() {
       active: true,
     },
   });
-  console.log("✅ Product created:", product1.title);
+
 
   const product2 = await prisma.product.upsert({
     where: { slug: "sizma-zeytinyagi-1l" },
@@ -65,7 +65,7 @@ async function main() {
       active: true,
     },
   });
-  console.log("✅ Product created:", product2.title);
+
 
   const product3 = await prisma.product.upsert({
     where: { slug: "sizma-zeytinyagi-5l" },
@@ -81,7 +81,7 @@ async function main() {
       active: true,
     },
   });
-  console.log("✅ Product created:", product3.title);
+
 
   // Create coupons
   const coupon1 = await prisma.coupon.upsert({
@@ -99,7 +99,7 @@ async function main() {
       active: true,
     },
   });
-  console.log("✅ Coupon created:", coupon1.code);
+
 
   const coupon2 = await prisma.coupon.upsert({
     where: { code: "YILBASI50" },
@@ -116,9 +116,24 @@ async function main() {
       active: true,
     },
   });
-  console.log("✅ Coupon created:", coupon2.code);
 
-  console.log("✅ Database seeded successfully!");
+
+  // Create shipping settings
+  const shippingSettings = await prisma.shippingSettings.findFirst();
+  if (!shippingSettings) {
+    await prisma.shippingSettings.create({
+      data: {
+        base_shipping_fee: 2500, // 25 TL
+        free_shipping_threshold: 100000, // 1000 TL
+        active: true,
+      },
+    });
+
+  } else {
+
+  }
+
+
 }
 
 main()

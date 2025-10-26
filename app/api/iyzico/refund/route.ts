@@ -12,7 +12,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    console.log("🔄 İyzico refund başlatılıyor (SDK API), PaymentTransactionId:", paymentTransactionId, "Amount:", amount);
+
     
     const iyzipay = new Iyzipay({
       apiKey: process.env.IYZICO_API_KEY,
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ...(amount && { price: amount.toFixed(2) }) // Amount already in TL
     };
 
-    console.log("Refund Body:", JSON.stringify(refundBody, null, 2));
+
 
     const result = await new Promise<any>((resolve, reject) => {
       const timeoutId = setTimeout(() => {
@@ -42,14 +42,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           console.error(JSON.stringify(err, null, 2));
           resolve(err);
         } else {
-          console.log("✅ İyzico Refund Success:");
-          console.log(JSON.stringify(res, null, 2));
+
+
           resolve(res);
         }
       });
     });
     
-    console.log("✅ İyzico refund tamamlandı:", result);
+
     
     return NextResponse.json(result);
   } catch (error: any) {

@@ -22,7 +22,7 @@ export async function cleanupPendingOrders() {
       }
     });
 
-    console.log(`🧹 ${pendingOrders.length} adet eski PENDING order bulundu`);
+
 
     for (const order of pendingOrders) {
       // Order items'ları sil (cascade ile otomatik silinir)
@@ -35,7 +35,7 @@ export async function cleanupPendingOrders() {
         where: { id: order.id }
       });
 
-      console.log(`🗑️ Order ${order.id} silindi (${order.created_at})`);
+
     }
 
     return {
@@ -85,7 +85,7 @@ export async function cleanupUserPendingOrders(userId?: string, email?: string) 
         where: { id: order.id }
       });
 
-      console.log(`🗑️ Kullanıcı PENDING order ${order.id} silindi`);
+
     }
 
     return {

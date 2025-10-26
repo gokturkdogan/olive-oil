@@ -7,8 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPrice } from "@/lib/money";
 import { calculateShippingFee, getRemainingForFreeShipping } from "@/lib/shipping";
 import { CartItem } from "@/components/cart-item";
-import { ShoppingBag, ArrowRight, Leaf, Package, Truck } from "lucide-react";
+import { ShoppingBag, ArrowRight, Leaf, Package, Truck, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { CompactProductCard } from "@/components/compact-product-card";
+
+async function getShippingThreshold() {
+  const settings = await db.shippingSettings.findFirst();
+  return settings?.free_shipping_threshold || 200000; // Default 2000 TL
+}
 
 export default async function CartPage() {
   const session = await auth();
@@ -60,10 +66,37 @@ export default async function CartPage() {
 
   const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
   
-  // Calculate shipping based on loyalty tier
-  const shippingCost = calculateShippingFee(subtotal, loyaltyTier as any);
-  const remainingForFreeShipping = getRemainingForFreeShipping(subtotal, loyaltyTier as any);
+  // Calculate shipping based on loyalty tier (async now)
+  const shippingCost = await calculateShippingFee(subtotal, loyaltyTier as any);
+  const remainingForFreeShipping = await getRemainingForFreeShipping(subtotal, loyaltyTier as any);
   const total = subtotal + shippingCost;
+  
+  // Get threshold directly from DB
+  const threshold = await getShippingThreshold();
+  
+  // Determine free shipping reason
+  let freeShippingReason = "";
+  if (shippingCost === 0 && subtotal > 0) {
+    if (loyaltyTier === "PLATINUM" || loyaltyTier === "DIAMOND") {
+      freeShippingReason = "VIP üyeliğiniz sayesinde";
+    } else if (subtotal >= threshold) {
+      freeShippingReason = `${formatPrice(threshold)} sepet tutarı limitini aştığınız için`;
+    }
+  }
+
+  // Get recommended products (excluding items already in cart)
+  const cartProductIds = cart.items.map(item => item.product_id);
+  const recommendedProducts = await db.product.findMany({
+    where: {
+      is_recommended: true,
+      active: true,
+      id: {
+        notIn: cartProductIds,
+      },
+    },
+    take: 4,
+    orderBy: { created_at: 'desc' },
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -101,6 +134,32 @@ export default async function CartPage() {
               <CartItem item={item} />
             </div>
           ))}
+
+          {/* Recommended Products */}
+          {recommendedProducts.length > 0 && (
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-1 w-12 bg-gradient-to-r from-green-600 to-emerald-600 rounded-full"></div>
+                <h2 className="text-lg md:text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-green-600" />
+                  İlginizi Çekebilecekler
+                </h2>
+              </div>
+
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {recommendedProducts.map((product) => (
+                  <div key={product.id} className="flex-shrink-0 w-64">
+                    <CompactProductCard
+                      product={{
+                        ...product,
+                        images: product.images,
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -138,7 +197,7 @@ export default async function CartPage() {
                   {remainingForFreeShipping !== null && remainingForFreeShipping > 0 && (
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
                       <p className="text-xs text-amber-900 font-medium">
-                        ✨ Ücretsiz kargo için {formatPrice(remainingForFreeShipping)} daha!
+                        ✨ {formatPrice(remainingForFreeShipping)} daha ekleyin, ücretsiz kargo kazanın!
                       </p>
                     </div>
                   )}
@@ -147,7 +206,7 @@ export default async function CartPage() {
                     <div className="p-3 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
                       <p className="text-xs text-green-900 font-medium flex items-center gap-1.5">
                         <Truck className="h-3.5 w-3.5" />
-                        Ücretsiz kargo kazandınız! 🎉
+                        {freeShippingReason && `${freeShippingReason} `}Ücretsiz kargo kazandınız! 🎉
                       </p>
                     </div>
                   )}

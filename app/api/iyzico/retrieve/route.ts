@@ -12,7 +12,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    console.log("🔄 İyzico retrieve başlatılıyor (SDK), token:", token);
+
     
     const iyzipay = new Iyzipay({
       apiKey: process.env.IYZICO_API_KEY,
@@ -33,14 +33,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           console.error(JSON.stringify(err, null, 2));
           resolve(err);
         } else {
-          console.log("✅ İyzico SDK Success:");
-          console.log(JSON.stringify(res, null, 2));
+
+
           resolve(res);
         }
       });
     });
     
-    console.log("✅ İyzico retrieve tamamlandı:", result);
+
     
     return NextResponse.json(result);
   } catch (error: any) {

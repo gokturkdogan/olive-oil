@@ -53,6 +53,8 @@ model Product {
   price         Int
   active        Boolean     @default(true)
   stock         Int         @default(0)
+  is_main_page  Boolean     @default(false)
+  is_recommended Boolean    @default(false)
   category_id   String?
   subcategory_id String?
   created_at    DateTime    @default(now())
@@ -196,6 +198,17 @@ model SubCategory {
   category    Category       @relation(fields: [category_id], references: [id], onDelete: Cascade)
 
   @@map("subcategories")
+}
+
+// Kargo Ayarları (Tekil kayıt)
+model ShippingSettings {
+  id                      String  @id @default(uuid())
+  base_shipping_fee       Int     @default(2500) // 25 TL kuruş cinsinden
+  free_shipping_threshold Int     @default(100000) // 1000 TL kuruş cinsinden
+  active                  Boolean @default(true)
+  updated_at              DateTime @updatedAt
+
+  @@map("shipping_settings")
 }
 
 enum Role {
