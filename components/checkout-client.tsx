@@ -276,7 +276,12 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
 
 
       if (result.success && result.paymentMethod === "BANK_TRANSFER") {
-        // Bank transfer - redirect to success page with payment info
+        // Bank transfer - clear cart and redirect to success page with payment info
+        try {
+          await fetch("/api/cart/clear", { method: "POST" });
+        } catch (error) {
+          console.error("Cart clear error:", error);
+        }
         router.push(`/success?orderId=${result.orderId}&paymentMethod=BANK_TRANSFER`);
       } else if (result.success && result.paymentPageUrl) {
         // Iyzico - redirect to payment page

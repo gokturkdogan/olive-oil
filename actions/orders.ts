@@ -566,8 +566,55 @@ export async function cancelOrder(orderId: string) {
 
     // Check if order was paid (has payment reference and payment_status is PAID)
     if ((order as any).payment_status === "PAID" && order.payment_reference) {
-
       
+      // Bank transfer payments require manual refund
+      if ((order as any).payment_provider === "BANK_TRANSFER") {
+        // Bank transfer iptalinde manuel iade gerektir
+        await db.order.update({
+          where: { id: orderId },
+          data: {
+            status: "CANCELLED",
+            refund_status: "MANUAL_REQUIRED",
+          },
+        });
+
+        // Restore stock for cancelled items
+        for (const item of order.items) {
+          await db.product.update({
+            where: { id: item.product_id },
+            data: {
+              stock: {
+                increment: item.quantity,
+              },
+            },
+          });
+        }
+
+        // Decrement coupon usage if it was used
+        if (order.coupon_code) {
+          const coupon = await db.coupon.findUnique({
+            where: { code: order.coupon_code },
+          });
+          if (coupon) {
+            await db.coupon.update({
+              where: { id: coupon.id },
+              data: {
+                used_count: {
+                  decrement: 1,
+                },
+              },
+            });
+          }
+        }
+
+        return {
+          success: true,
+          requiresManualRefund: true,
+          message: "Sipariş iptal edildi. Havale/EFT ile yapılan ödemeler için manuel iade gerekir. Paranız 1-3 iş günü içinde hesabınıza iade edilecektir."
+        };
+      }
+
+      // Iyzico otomatik iade işlemleri
       try {
         // Import refundPayment function
         const { refundPayment } = await import("@/lib/iyzico");
@@ -745,16 +792,72 @@ export async function cancelOrder(orderId: string) {
           requiresManualRefund: true
         };
       }
-    } else if (order.status === "PENDING") {
-
     }
 
-    // Update order status to CANCELLED
+    // Handle PENDING orders
+    if ((order as any).payment_status === "PENDING") {
+      // Bank transfer PENDING orders require manual refund
+      if ((order as any).payment_provider === "BANK_TRANSFER") {
+        await db.order.update({
+          where: { id: orderId },
+          data: {
+            status: "CANCELLED",
+            refund_status: "MANUAL_REQUIRED",
+          },
+        });
+      } else {
+        // Iyzico PENDING or other payment methods - no refund needed
+        await db.order.update({
+          where: { id: orderId },
+          data: {
+            status: "CANCELLED",
+            refund_status: "NOT_APPLICABLE",
+          },
+        });
+      }
+
+      // Restore stock for cancelled items
+      for (const item of order.items) {
+        await db.product.update({
+          where: { id: item.product_id },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        });
+      }
+
+      // Decrement coupon usage if it was used
+      if (order.coupon_code) {
+        const coupon = await db.coupon.findUnique({
+          where: { code: order.coupon_code },
+        });
+        if (coupon) {
+          await db.coupon.update({
+            where: { id: coupon.id },
+            data: {
+              used_count: {
+                decrement: 1,
+              },
+            },
+          });
+        }
+      }
+
+      const message = (order as any).payment_provider === "BANK_TRANSFER" 
+        ? "Sipariş iptal edildi. Havale/EFT ödemesi henüz alınmadığı için iade gerekmez."
+        : "Sipariş iptal edildi.";
+      
+      return { success: true, message };
+    }
+
+    // Update order status to CANCELLED for orders that were not paid
     await db.order.update({
       where: { id: orderId },
       data: {
         status: "CANCELLED",
-        refund_status: "AUTOMATIC_SUCCESS",
+        refund_status: "NOT_APPLICABLE",
       },
     });
 

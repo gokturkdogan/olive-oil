@@ -259,6 +259,19 @@ export function OrderCard({ order, statusColors, statusLabels }: OrderCardProps)
                   </span>
                 </div>
 
+                {/* Payment Method */}
+                {order.payment_provider && (
+                  <div className="flex items-center justify-between bg-white rounded-xl p-3 border border-gray-200">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="h-3.5 w-3.5 text-gray-600" />
+                      <span className="text-sm text-gray-700">Ödeme Yöntemi</span>
+                    </div>
+                    <span className="font-bold text-sm text-gray-900">
+                      {order.payment_provider === "BANK_TRANSFER" ? "Havale/EFT" : "Kredi Kartı"}
+                    </span>
+                  </div>
+                )}
+
                 {/* Total */}
                 <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-4 shadow-md">
                   <div className="flex items-center justify-between text-white">

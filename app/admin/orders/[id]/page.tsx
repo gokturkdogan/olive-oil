@@ -177,18 +177,37 @@ export default async function OrderDetailPage({
                       Manuel İade Tamamlandı!
                     </h3>
                     <div className="space-y-3 text-sm text-green-700">
-                      <p className="font-semibold">
-                        Bu sipariş için manuel iade işlemi başarıyla tamamlanmıştır.
-                      </p>
-                      <div className="bg-white/50 rounded-lg p-3 border border-green-200">
-                        <p className="font-semibold text-green-800 mb-1">İyzico Ödeme Numarası:</p>
-                        <p className="font-mono text-lg bg-white px-3 py-2 rounded-lg border border-green-200 text-green-900">
-                          {order.payment_reference || "Bilinmiyor"}
-                        </p>
-                      </div>
-                      <p className="text-xs text-green-600">
-                        ✅ İade işlemi tamamlandı ve müşteriye bilgi verildi.
-                      </p>
+                      {order.payment_provider === "BANK_TRANSFER" ? (
+                        <>
+                          <p className="font-semibold">
+                            Bu sipariş için manuel iade işlemi başarıyla tamamlanmıştır.
+                          </p>
+                          <div className="bg-white/50 rounded-lg p-3 border border-green-200">
+                            <p className="font-semibold text-green-800 mb-1">Sipariş No:</p>
+                            <p className="font-mono text-lg bg-white px-3 py-2 rounded-lg border border-green-200 text-green-900">
+                              #{order.id.slice(0, 8).toUpperCase()}
+                            </p>
+                          </div>
+                          <p className="text-xs text-green-600">
+                            ✅ Havale/EFT ile yapılan iade işlemi tamamlandı ve müşteriye bilgi verildi.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-semibold">
+                            Bu sipariş için manuel iade işlemi başarıyla tamamlanmıştır.
+                          </p>
+                          <div className="bg-white/50 rounded-lg p-3 border border-green-200">
+                            <p className="font-semibold text-green-800 mb-1">İyzico Ödeme Numarası:</p>
+                            <p className="font-mono text-lg bg-white px-3 py-2 rounded-lg border border-green-200 text-green-900">
+                              {order.payment_reference || "Bilinmiyor"}
+                            </p>
+                          </div>
+                          <p className="text-xs text-green-600">
+                            ✅ İade işlemi tamamlandı ve müşteriye bilgi verildi.
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -209,20 +228,43 @@ export default async function OrderDetailPage({
                       Manuel İade Gerekli!
                     </h3>
                     <div className="space-y-3 text-sm text-red-700">
-                      <p className="font-semibold">
-                        Bu sipariş için İyzico panelinden manuel iade işlemi yapılması gerekiyor.
-                      </p>
-                      <div className="bg-white/50 rounded-lg p-3 border border-red-200">
-                        <p className="font-semibold text-red-800 mb-1">İyzico Ödeme Numarası:</p>
-                        <p className="font-mono text-lg bg-white px-3 py-2 rounded-lg border border-red-200 text-red-900">
-                          {order.payment_reference || "Bilinmiyor"}
-                        </p>
-                      </div>
-                      <div className="space-y-1 text-xs">
-                        <p>• İyzico panelinde "İade İşlemleri" bölümüne gidin</p>
-                        <p>• Yukarıdaki ödeme numarasını kullanarak iade işlemini gerçekleştirin</p>
-                        <p>• İade tamamlandıktan sonra aşağıdaki "İade Ettim" butonuna basın</p>
-                      </div>
+                      {/* Bank Transfer */}
+                      {order.payment_provider === "BANK_TRANSFER" ? (
+                        <>
+                          <p className="font-semibold">
+                            Bu sipariş havale/EFT ile ödenmiştir. Satıcıdan alınan bilgiler ile manuel iade yapılması gerekiyor.
+                          </p>
+                          <div className="bg-white/50 rounded-lg p-3 border border-red-200">
+                            <p className="font-semibold text-red-800 mb-1">Sipariş No:</p>
+                            <p className="font-mono text-lg bg-white px-3 py-2 rounded-lg border border-red-200 text-red-900">
+                              #{order.id.slice(0, 8).toUpperCase()}
+                            </p>
+                          </div>
+                          <div className="space-y-1 text-xs">
+                            <p>• Müşteriye havale/EFT yapılmıştır</p>
+                            <p>• Satıcıdan manuel olarak iade yapılması gerekmektedir</p>
+                            <p>• İade işlemini tamamladıktan sonra aşağıdaki "İade Ettim" butonuna basın</p>
+                          </div>
+                        </>
+                      ) : (
+                        /* Iyzico */
+                        <>
+                          <p className="font-semibold">
+                            Bu sipariş için İyzico panelinden manuel iade işlemi yapılması gerekiyor.
+                          </p>
+                          <div className="bg-white/50 rounded-lg p-3 border border-red-200">
+                            <p className="font-semibold text-red-800 mb-1">İyzico Ödeme Numarası:</p>
+                            <p className="font-mono text-lg bg-white px-3 py-2 rounded-lg border border-red-200 text-red-900">
+                              {order.payment_reference || "Bilinmiyor"}
+                            </p>
+                          </div>
+                          <div className="space-y-1 text-xs">
+                            <p>• İyzico panelinde "İade İşlemleri" bölümüne gidin</p>
+                            <p>• Yukarıdaki ödeme numarasını kullanarak iade işlemini gerçekleştirin</p>
+                            <p>• İade tamamlandıktan sonra aşağıdaki "İade Ettim" butonuna basın</p>
+                          </div>
+                        </>
+                      )}
                       <div className="mt-4">
                         <MarkRefundCompletedButton orderId={order.id} />
                       </div>
@@ -279,6 +321,14 @@ export default async function OrderDetailPage({
                       : formatPrice(order.shipping_fee)}
                   </span>
                 </div>
+                {order.payment_provider && (
+                  <div className="flex justify-between py-2 border-b border-gray-100">
+                    <span className="text-gray-600 font-semibold">Ödeme Yöntemi:</span>
+                    <span className="font-medium text-gray-800">
+                      {order.payment_provider === "BANK_TRANSFER" ? "Havale/EFT" : "Kredi Kartı"}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between pt-3 text-lg font-bold">
                   <span className="text-gray-800">Toplam:</span>
                   <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
