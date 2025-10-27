@@ -9,7 +9,7 @@ import Link from "next/link";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-800",
-  PAID: "bg-green-100 text-green-800",
+  CONFIRMED: "bg-blue-100 text-blue-800",
   PROCESSING: "bg-blue-100 text-blue-800",
   SHIPPED: "bg-purple-100 text-purple-800",
   DELIVERED: "bg-green-100 text-green-800",
@@ -18,14 +18,13 @@ const statusColors: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  PENDING: "Ödeme Bekleniyor",
-  PAID: "Sipariş Alındı",
+  PENDING: "Sipariş Alındı",
+  CONFIRMED: "Onaylandı",
   PROCESSING: "Hazırlanıyor",
   SHIPPED: "Kargoda",
   DELIVERED: "Teslim Edildi",
   FAILED: "Başarısız",
   CANCELLED: "İptal Edildi",
-  FULFILLED: "Tamamlandı",
 };
 
 export default async function OrdersPage() {
@@ -38,10 +37,35 @@ export default async function OrdersPage() {
   const orders = await db.order.findMany({
     where: { user_id: session.user.id },
     orderBy: { created_at: "desc" },
-    include: {
+    select: {
+      id: true,
+      status: true,
+      payment_status: true,
+      payment_provider: true,
+      created_at: true,
+      total: true,
+      subtotal: true,
+      discount_total: true,
+      shipping_fee: true,
+      shipping_name: true,
+      shipping_address_line1: true,
+      shipping_address_line2: true,
+      city: true,
+      district: true,
+      postal_code: true,
+      country: true,
+      tracking_code: true,
+      shipping_provider: true,
+      coupon_code: true,
+      refund_status: true,
       items: {
-        include: {
-          product: true,
+        select: {
+          id: true,
+          title_snapshot: true,
+          quantity: true,
+          unit_price_snapshot: true,
+          line_total: true,
+          image_url: true,
         },
       },
     },
@@ -87,7 +111,8 @@ export default async function OrdersPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-8 max-w-5xl">
+      <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
+        <div className="max-w-5xl mx-auto">
 
         {/* Content */}
         {orders.length === 0 ? (
@@ -126,6 +151,7 @@ export default async function OrdersPage() {
             ))}
           </div>
         )}
+        </div>
       </div>
     </div>
   );

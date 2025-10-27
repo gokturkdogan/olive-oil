@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/lib/money";
 import { UpdateShippingForm } from "@/components/admin/update-shipping-form";
 import { OrderStatusUpdater } from "@/components/admin/order-status-updater";
+import { PaymentStatusUpdater } from "@/components/admin/payment-status-updater";
 import { MarkRefundCompletedButton } from "@/components/admin/mark-refund-completed-button";
 import { LOYALTY_LABELS, LOYALTY_COLORS } from "@/lib/loyalty";
 import { Star, Award, Gem, Crown, Package, User, MapPin, Clock, CheckCircle, Truck, XCircle, AlertCircle, ArrowLeft, AlertTriangle } from "lucide-react";
@@ -12,35 +13,46 @@ import Link from "next/link";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-gradient-to-r from-yellow-500 to-amber-500 text-white border-0 shadow-lg",
-  PAID: "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg",
+  CONFIRMED: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg",
   PROCESSING: "bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 shadow-lg",
   SHIPPED: "bg-gradient-to-r from-purple-500 to-violet-500 text-white border-0 shadow-lg",
   DELIVERED: "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg",
   FAILED: "bg-gradient-to-r from-red-500 to-rose-500 text-white border-0 shadow-lg",
   CANCELLED: "bg-gradient-to-r from-gray-500 to-slate-500 text-white border-0 shadow-lg",
-  FULFILLED: "bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-lg",
 };
 
 const statusLabels: Record<string, string> = {
-  PENDING: "Ödeme Bekleniyor",
-  PAID: "Sipariş Alındı",
+  PENDING: "Sipariş Alındı",
+  CONFIRMED: "Onaylandı",
   PROCESSING: "Hazırlanıyor",
   SHIPPED: "Kargoda",
   DELIVERED: "Teslim Edildi",
   FAILED: "Başarısız",
   CANCELLED: "İptal Edildi",
-  FULFILLED: "Tamamlandı",
+};
+
+const paymentStatusColors: Record<string, string> = {
+  PENDING: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  PAID: "bg-green-100 text-green-800 border-green-300",
+  FAILED: "bg-red-100 text-red-800 border-red-300",
+  CANCELLED: "bg-gray-100 text-gray-800 border-gray-300",
+};
+
+const paymentStatusLabels: Record<string, string> = {
+  PENDING: "Ödeme Bekleniyor",
+  PAID: "Ödeme Alındı",
+  FAILED: "Ödeme Başarısız",
+  CANCELLED: "İptal Edildi",
 };
 
 const statusIcons: Record<string, any> = {
   PENDING: Clock,
-  PAID: CheckCircle,
+  CONFIRMED: CheckCircle,
   PROCESSING: Package,
   SHIPPED: Truck,
   DELIVERED: CheckCircle,
   FAILED: XCircle,
   CANCELLED: XCircle,
-  FULFILLED: CheckCircle,
 };
 
 // Helper function to get tier icon component
@@ -127,11 +139,16 @@ export default async function OrderDetailPage({
               </div>
               
               {/* Status Badge */}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Badge className={statusColors[order.status]}>
                   <StatusIcon className="w-4 h-4 mr-2" />
                   {statusLabels[order.status]}
                 </Badge>
+                {order.payment_status && (
+                  <Badge className={`border ${paymentStatusColors[order.payment_status] || "bg-gray-100 text-gray-800 border-gray-300"}`}>
+                    {paymentStatusLabels[order.payment_status] || order.payment_status}
+                  </Badge>
+                )}
                 {order.refund_status === "MANUAL_REQUIRED" && (
                   <Badge className="bg-gradient-to-r from-red-600 to-red-700 text-white border-2 border-red-400 shadow-xl shadow-red-500/50 animate-pulse ring-2 ring-red-300 ring-opacity-50">
                     <AlertTriangle className="w-5 h-5 mr-2 animate-bounce" />
@@ -354,8 +371,18 @@ export default async function OrderDetailPage({
                     className="flex items-center justify-between border-b border-gray-100 pb-4 last:border-0 last:pb-0"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl h-12 w-12 flex items-center justify-center border-2 border-green-200">
-                        <Package className="h-6 w-6 text-green-600" />
+                      <div className="relative h-16 w-16 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-emerald-100 border-2 border-green-200">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.title_snapshot}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <Package className="h-7 w-7 text-green-600" />
+                          </div>
+                        )}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-800">{item.title_snapshot}</p>
@@ -384,6 +411,24 @@ export default async function OrderDetailPage({
                 </CardHeader>
                 <CardContent>
                   <OrderStatusUpdater orderId={id} currentStatus={order.status} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Payment Status Management */}
+            {order.payment_status && (
+              <Card className="border-2 border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                <CardHeader className="bg-gradient-to-br from-green-50/50 to-emerald-50/50">
+                  <CardTitle className="text-gray-800 flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-blue-600" />
+                    Ödeme Durumu Yönetimi
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PaymentStatusUpdater 
+                    orderId={id} 
+                    currentPaymentStatus={order.payment_status as "PENDING" | "PAID" | "FAILED" | "CANCELLED"} 
+                  />
                 </CardContent>
               </Card>
             )}

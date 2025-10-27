@@ -16,7 +16,7 @@ import {
 import { createOrder } from "@/actions/orders";
 import { createAddress, getUserAddresses } from "@/actions/addresses";
 import { useToast } from "@/hooks/use-toast";
-import { ShoppingBag, Package, Plus, MapPin, CheckCircle2, Home, Truck } from "lucide-react";
+import { ShoppingBag, Package, Plus, MapPin, CheckCircle2, Home, Truck, CreditCard } from "lucide-react";
 import { formatPrice } from "@/lib/money";
 // Client component, shipping fee server-side calculated
 import { extractProductImages } from "@/lib/image-utils";
@@ -42,14 +42,16 @@ interface CheckoutClientProps {
   shippingFee: number;
   remainingForFreeShipping: number | null;
   freeShippingReason?: string;
+  paymentMethods: any[];
 }
 
-export function CheckoutClient({ session, cart, addresses: initialAddresses, loyaltyTier, shippingFee, remainingForFreeShipping, freeShippingReason }: CheckoutClientProps) {
+export function CheckoutClient({ session, cart, addresses: initialAddresses, loyaltyTier, shippingFee, remainingForFreeShipping, freeShippingReason, paymentMethods }: CheckoutClientProps) {
   const [loading, setLoading] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     initialAddresses.find((a) => a.is_default)?.id || null
   );
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string>("");
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [addingAddress, setAddingAddress] = useState(false);
   const { toast } = useToast();
@@ -184,6 +186,17 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
 
     const formData = new FormData(e.currentTarget);
 
+    // Validate payment method selection
+    if (!selectedPaymentMethodId) {
+      toast({
+        title: "Hata",
+        description: "Lütfen bir ödeme yöntemi seçin",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
     let shippingData;
 
     if (isLoggedIn) {
@@ -241,6 +254,7 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
       ...shippingData,
       country: "TR",
       couponCode: formData.get("couponCode") as string,
+      paymentMethodId: selectedPaymentMethodId,
     };
 
     try {
@@ -261,8 +275,11 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
 
 
 
-      if (result.success && result.paymentPageUrl) {
-
+      if (result.success && result.paymentMethod === "BANK_TRANSFER") {
+        // Bank transfer - redirect to success page with payment info
+        router.push(`/success?orderId=${result.orderId}&paymentMethod=BANK_TRANSFER`);
+      } else if (result.success && result.paymentPageUrl) {
+        // Iyzico - redirect to payment page
         window.location.href = result.paymentPageUrl;
       } else {
         console.error("❌ Sipariş hatası:", result.error);
@@ -660,6 +677,75 @@ export function CheckoutClient({ session, cart, addresses: initialAddresses, loy
                       placeholder="KUPON KODUNUZ"
                       className="uppercase border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-300"
                     />
+                  </CardContent>
+                </Card>
+
+                {/* Payment Method Selection */}
+                <Card className="border-2 border-green-200 shadow-lg shadow-green-500/10 bg-white hover:shadow-xl hover:border-green-300 transition-all duration-300">
+                  <CardHeader className="bg-gradient-to-br from-green-50/50 to-emerald-50/50">
+                    <CardTitle className="text-gray-800">Ödeme Yöntemi</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="space-y-3">
+                      {paymentMethods.map((method) => (
+                        <div key={method.id}>
+                          <div
+                            onClick={() => setSelectedPaymentMethodId(method.id)}
+                            className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-300 hover:shadow-md ${
+                              selectedPaymentMethodId === method.id
+                                ? "border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg shadow-green-500/20"
+                                : "border-gray-200 hover:border-green-300 hover:bg-green-50/50"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <CreditCard className="h-5 w-5 text-green-600" />
+                                  <p className="font-semibold text-gray-900">{method.title}</p>
+                                  <Badge 
+                                    className={
+                                      method.type === "BANK_TRANSFER" 
+                                        ? "bg-blue-100 text-blue-700 border-0 text-xs" 
+                                        : "bg-purple-100 text-purple-700 border-0 text-xs"
+                                    }
+                                  >
+                                    {method.type === "BANK_TRANSFER" ? "Havale/EFT" : "Kredi Kartı"}
+                                  </Badge>
+                                </div>
+                                <p className="text-sm text-gray-600">{method.description}</p>
+                              </div>
+                              {selectedPaymentMethodId === method.id && (
+                                <div className="flex-shrink-0">
+                                  <div className="w-6 h-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center shadow-lg">
+                                    <CheckCircle2 className="w-4 h-4 text-white" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Payment Info Collapse */}
+                          {selectedPaymentMethodId === method.id && method.payment_info && Array.isArray(method.payment_info) && method.payment_info.length > 0 && (
+                            <div className="mt-3 border-t-2 border-green-200 pt-3">
+                              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+                                <p className="text-xs font-semibold text-green-700 mb-2 uppercase">Ödeme Bilgileri</p>
+                                <div className="space-y-2">
+                                  {method.payment_info.map((info: any, index: number) => (
+                                    <div key={index} className="bg-white rounded-md p-3 border border-green-200">
+                                      <p className="text-xs font-semibold text-green-700 mb-1">{info.label}</p>
+                                      <p className="text-sm text-gray-900 font-mono break-all">{info.value}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                                <p className="text-xs text-green-600 mt-3 italic">
+                                  Bu bilgilerle havale/EFT yapmanız gerekmektedir.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
 

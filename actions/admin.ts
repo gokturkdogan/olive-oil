@@ -147,6 +147,41 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
 }
 
 /**
+ * Sipariş ödeme durumunu günceller (Admin)
+ */
+export async function updatePaymentStatus(orderId: string, paymentStatus: "PENDING" | "PAID" | "FAILED" | "CANCELLED") {
+  try {
+    const session = await auth();
+
+    if (!session || session.user.role !== "ADMIN") {
+      return { success: false, error: "Yetkisiz erişim" };
+    }
+
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      select: { id: true, payment_status: true },
+    });
+
+    if (!order) {
+      return { success: false, error: "Sipariş bulunamadı" };
+    }
+
+    await db.order.update({
+      where: { id: orderId },
+      data: { payment_status: paymentStatus as any },
+    });
+
+    revalidatePath(`/admin/orders/${orderId}`);
+    revalidatePath("/admin/orders");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Update payment status error:", error);
+    return { success: false, error: "Ödeme durumu güncellenemedi" };
+  }
+}
+
+/**
  * Sipariş kargo bilgilerini günceller (Admin)
  */
 export async function updateOrderShipping(
@@ -462,6 +497,173 @@ export async function markRefundCompleted(orderId: string) {
   } catch (error) {
     console.error("Mark refund completed error:", error);
     return { success: false, error: "İade durumu güncellenemedi" };
+  }
+}
+
+/**
+ * Ödeme yöntemlerini listeler (Admin)
+ */
+export async function getPaymentMethods() {
+  try {
+    const session = await auth();
+
+    if (!session || session.user.role !== "ADMIN") {
+      return { success: false, error: "Yetkisiz erişim" };
+    }
+
+    const methods = await db.paymentMethod.findMany({
+      orderBy: { created_at: "desc" },
+    });
+
+    return { success: true, data: methods };
+  } catch (error) {
+    console.error("Get payment methods error:", error);
+    return { success: false, error: "Ödeme yöntemleri alınamadı" };
+  }
+}
+
+/**
+ * Ödeme yöntemi oluşturur (Admin)
+ */
+export async function createPaymentMethod(data: {
+  title: string;
+  description: string;
+  type?: "IYZICO" | "BANK_TRANSFER";
+  payment_info?: Array<{ label: string; value: string }>;
+  active?: boolean;
+}) {
+  try {
+    const session = await auth();
+
+    if (!session || session.user.role !== "ADMIN") {
+      return { success: false, error: "Yetkisiz erişim" };
+    }
+
+    if (!data.title || !data.description) {
+      return { success: false, error: "Başlık ve açıklama zorunludur" };
+    }
+
+    const paymentInfo = data.payment_info && data.payment_info.length > 0 
+      ? data.payment_info 
+      : undefined;
+
+    const method = await db.paymentMethod.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        type: data.type || "IYZICO",
+        payment_info: paymentInfo,
+        active: data.active ?? true,
+      },
+    });
+
+    revalidatePath("/admin/payment-methods");
+    return { success: true, data: method };
+  } catch (error) {
+    console.error("Create payment method error:", error);
+    return { success: false, error: "Ödeme yöntemi oluşturulamadı" };
+  }
+}
+
+/**
+ * Ödeme yöntemi günceller (Admin)
+ */
+export async function updatePaymentMethod(
+  id: string,
+  data: {
+    title: string;
+    description: string;
+    type?: "IYZICO" | "BANK_TRANSFER";
+    payment_info?: Array<{ label: string; value: string }>;
+    active?: boolean;
+  }
+) {
+  try {
+    const session = await auth();
+
+    if (!session || session.user.role !== "ADMIN") {
+      return { success: false, error: "Yetkisiz erişim" };
+    }
+
+    if (!data.title || !data.description) {
+      return { success: false, error: "Başlık ve açıklama zorunludur" };
+    }
+
+    const paymentInfo = data.payment_info && data.payment_info.length > 0 
+      ? data.payment_info 
+      : undefined;
+
+    const method = await db.paymentMethod.update({
+      where: { id },
+      data: {
+        title: data.title,
+        description: data.description,
+        type: data.type,
+        payment_info: paymentInfo,
+        active: data.active,
+      },
+    });
+
+    revalidatePath("/admin/payment-methods");
+    return { success: true, data: method };
+  } catch (error) {
+    console.error("Update payment method error:", error);
+    return { success: false, error: "Ödeme yöntemi güncellenemedi" };
+  }
+}
+
+/**
+ * Ödeme yöntemi siler (Admin)
+ */
+export async function deletePaymentMethod(id: string) {
+  try {
+    const session = await auth();
+
+    if (!session || session.user.role !== "ADMIN") {
+      return { success: false, error: "Yetkisiz erişim" };
+    }
+
+    await db.paymentMethod.delete({
+      where: { id },
+    });
+
+    revalidatePath("/admin/payment-methods");
+    return { success: true };
+  } catch (error) {
+    console.error("Delete payment method error:", error);
+    return { success: false, error: "Ödeme yöntemi silinemedi" };
+  }
+}
+
+/**
+ * Ödeme yöntemi aktif/pasif durumunu değiştirir (Admin)
+ */
+export async function togglePaymentMethodActive(id: string) {
+  try {
+    const session = await auth();
+
+    if (!session || session.user.role !== "ADMIN") {
+      return { success: false, error: "Yetkisiz erişim" };
+    }
+
+    const method = await db.paymentMethod.findUnique({
+      where: { id },
+    });
+
+    if (!method) {
+      return { success: false, error: "Ödeme yöntemi bulunamadı" };
+    }
+
+    await db.paymentMethod.update({
+      where: { id },
+      data: { active: !method.active },
+    });
+
+    revalidatePath("/admin/payment-methods");
+    return { success: true, newStatus: !method.active };
+  } catch (error) {
+    console.error("Toggle payment method active error:", error);
+    return { success: false, error: "Ödeme yöntemi durumu değiştirilemedi" };
   }
 }
 

@@ -48,7 +48,8 @@ export default async function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-6 md:py-8 max-w-5xl">
+      <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
+        <div className="max-w-5xl mx-auto">
         {/* User Header - Compact */}
         <div className="mb-6">
           <div className="flex items-center gap-4 mb-4">
@@ -249,6 +250,7 @@ export default async function ProfilePage() {
               </CardContent>
             </Card>
           </div>
+        </div>
         </div>
       </div>
     </div>

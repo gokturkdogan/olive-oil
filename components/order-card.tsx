@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/money";
-import { Package, Calendar, ChevronDown, ChevronUp, MapPin, CreditCard, Truck, XCircle, AlertTriangle, CheckCircle, Clock, RefreshCw, Phone } from "lucide-react";
+import { Package, Calendar, ChevronDown, ChevronUp, MapPin, CreditCard, Truck, XCircle, AlertTriangle, CheckCircle, Clock, RefreshCw, Phone, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { cancelOrder } from "@/actions/orders";
@@ -14,6 +14,8 @@ interface OrderCardProps {
   order: {
     id: string;
     status: string;
+    payment_status?: string | null;
+    payment_provider?: string | null;
     created_at: Date;
     total: number;
     subtotal: number;
@@ -36,6 +38,7 @@ interface OrderCardProps {
       quantity: number;
       unit_price_snapshot: number;
       line_total: number;
+      image_url: string | null;
     }>;
   };
   statusColors: Record<string, string>;
@@ -46,11 +49,46 @@ export function OrderCard({ order, statusColors, statusLabels }: OrderCardProps)
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [paymentMethodInfo, setPaymentMethodInfo] = useState<any>(null);
   const { toast } = useToast();
   const router = useRouter();
 
+  // Fetch payment method info if bank transfer
+  useEffect(() => {
+    if (
+      isExpanded &&
+      order.payment_provider === "BANK_TRANSFER" &&
+      order.payment_status === "PENDING"
+    ) {
+      // Fetch active bank transfer payment method
+      fetch("/api/payment-methods?type=BANK_TRANSFER")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.paymentMethods?.length > 0) {
+            setPaymentMethodInfo(data.paymentMethods[0]);
+          }
+        })
+        .catch((err) => console.error("Payment method fetch error:", err));
+    }
+  }, [isExpanded, order.payment_provider, order.payment_status]);
+
+  // Payment status colors and labels
+  const paymentStatusColors: Record<string, string> = {
+    PENDING: "bg-yellow-100 text-yellow-800",
+    PAID: "bg-green-100 text-green-800",
+    FAILED: "bg-red-100 text-red-800",
+    CANCELLED: "bg-gray-100 text-gray-800",
+  };
+
+  const paymentStatusLabels: Record<string, string> = {
+    PENDING: "Ödeme Bekleniyor",
+    PAID: "Ödendi",
+    FAILED: "Ödeme Başarısız",
+    CANCELLED: "İptal Edildi",
+  };
+
   // Check if order can be cancelled
-  const canCancel = order.status === "PENDING" || order.status === "PAID" || order.status === "PROCESSING";
+  const canCancel = order.status === "PENDING" || order.status === "CONFIRMED" || order.status === "PROCESSING";
 
   const handleCancelOrder = async () => {
     setIsCancelling(true);
@@ -114,9 +152,16 @@ export function OrderCard({ order, statusColors, statusLabels }: OrderCardProps)
             </div>
             
             <div className="flex items-center gap-3">
+              {/* Order Status Badge */}
               <Badge className={statusColors[order.status]} variant="outline">
                 {statusLabels[order.status]}
               </Badge>
+              {/* Payment Status Badge */}
+              {order.payment_status && (
+                <Badge className={paymentStatusColors[order.payment_status] || "bg-gray-100 text-gray-800"} variant="outline">
+                  {paymentStatusLabels[order.payment_status] || order.payment_status}
+                </Badge>
+              )}
               <button className="p-1.5 hover:bg-white rounded-lg transition-all">
                 {isExpanded ? (
                   <ChevronUp className="h-5 w-5 text-green-600" />
@@ -151,7 +196,17 @@ export function OrderCard({ order, statusColors, statusLabels }: OrderCardProps)
                     className="flex items-center justify-between bg-white rounded-xl p-3 border border-gray-200"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="text-2xl">🫒</div>
+                      <div className="relative h-12 w-12 rounded-lg overflow-hidden flex-shrink-0 bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.title_snapshot}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Package className="h-6 w-6 text-green-600" />
+                        )}
+                      </div>
                       <div>
                         <p className="font-semibold text-sm text-gray-900">
                           {item.title_snapshot}
@@ -240,6 +295,39 @@ export function OrderCard({ order, statusColors, statusLabels }: OrderCardProps)
                 </div>
               )}
             </div>
+
+            {/* Bank Transfer Payment Info */}
+            {order.payment_provider === "BANK_TRANSFER" && order.payment_status === "PENDING" && paymentMethodInfo && (
+              <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-5 border-2 border-yellow-300 shadow-lg">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="bg-gradient-to-r from-yellow-600 to-amber-600 p-2.5 rounded-xl shadow-lg">
+                    <Info className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-yellow-900 mb-1">Ödeme Yapmanız Gerekiyor</h3>
+                    <p className="text-sm text-yellow-800">
+                      Siparişiniz onaylanması için aşağıdaki bilgilerle havaleyi yapmanız gerekmektedir.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4 border border-yellow-200 space-y-3">
+                  {paymentMethodInfo.payment_info && typeof paymentMethodInfo.payment_info === 'object' && Array.isArray(paymentMethodInfo.payment_info) && paymentMethodInfo.payment_info.map((info: any, index: number) => (
+                    <div key={index} className="flex justify-between items-center pb-2 border-b border-gray-100 last:border-0 last:pb-0">
+                      <span className="text-sm text-gray-600 font-semibold">{info.label}:</span>
+                      <span className="text-sm font-bold text-gray-900 font-mono">{info.value}</span>
+                    </div>
+                  ))}
+                  
+                  <div className="mt-4 bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                    <p className="text-xs text-yellow-800 font-semibold flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5" />
+                      Ödemeyi yaptıktan sonra siparişiniz onaylanacak ve kargoya verilecektir.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
         {/* Refund Information for Cancelled Orders */}
         {order.status === "CANCELLED" && (
@@ -360,7 +448,7 @@ export function OrderCard({ order, statusColors, statusLabels }: OrderCardProps)
               
               <p className="text-gray-700 mb-6">
                 Bu siparişi iptal etmek istediğinizden emin misiniz? 
-                {order.status === "PAID" && " Ödeme yapılmışsa, paranız iade edilecektir."}
+                {order.payment_status === "PAID" && " Ödeme yapılmışsa, paranız iade edilecektir."}
               </p>
               
               <div className="flex gap-3">

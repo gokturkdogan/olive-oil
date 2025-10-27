@@ -125,6 +125,7 @@ model Order {
   total                   Int
   coupon_code             String?
   status                  OrderStatus     @default(PENDING)
+  payment_status          PaymentStatus   @default(PENDING)
   payment_provider        PaymentProvider @default(IYZICO)
   payment_reference       String?
   shipping_provider       String?
@@ -223,17 +224,24 @@ enum CouponType {
 
 enum OrderStatus {
   PENDING
-  PAID
-  FAILED
-  CANCELLED
+  CONFIRMED
   PROCESSING
   SHIPPED
   DELIVERED
-  FULFILLED
+  CANCELLED
+  FAILED
 }
 
 enum PaymentProvider {
   IYZICO
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
 }
 
 enum RefundStatus {
@@ -246,4 +254,17 @@ enum RefundStatus {
 enum CategoryStatus {
   ACTIVE
   INACTIVE
+}
+
+model PaymentMethod {
+  id           String          @id @default(uuid())
+  title        String
+  description  String
+  type         PaymentProvider @default(IYZICO)
+  payment_info Json?
+  active       Boolean         @default(true)
+  created_at   DateTime        @default(now())
+  updated_at   DateTime        @updatedAt
+
+  @@map("payment_methods")
 }

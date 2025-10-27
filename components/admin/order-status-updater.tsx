@@ -13,18 +13,18 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 const statusFlow = {
   PENDING: { 
     prev: null, 
-    next: null, 
-    label: "Ödeme Bekleniyor", 
+    next: "CONFIRMED", 
+    label: "Sipariş Alındı", 
     color: "bg-yellow-100 text-yellow-800" 
   },
-  PAID: { 
-    prev: null, 
+  CONFIRMED: { 
+    prev: "PENDING", 
     next: "PROCESSING", 
-    label: "Sipariş Alındı", 
-    color: "bg-green-100 text-green-800" 
+    label: "Onaylandı", 
+    color: "bg-blue-100 text-blue-800" 
   },
   PROCESSING: { 
-    prev: "PAID", 
+    prev: "CONFIRMED", 
     next: "SHIPPED", 
     label: "Hazırlanıyor", 
     color: "bg-blue-100 text-blue-800" 
@@ -53,17 +53,11 @@ const statusFlow = {
     label: "İptal Edildi", 
     color: "bg-gray-100 text-gray-800" 
   },
-  FULFILLED: { 
-    prev: null, 
-    next: null, 
-    label: "Tamamlandı", 
-    color: "bg-green-100 text-green-800" 
-  },
 } as const;
 
 // All possible statuses for manual selection
 const allStatuses: { value: OrderStatus; label: string; color: string }[] = [
-  { value: "PAID", label: "Sipariş Alındı", color: "bg-green-100 text-green-800" },
+  { value: "CONFIRMED", label: "Onaylandı", color: "bg-blue-100 text-blue-800" },
   { value: "PROCESSING", label: "Hazırlanıyor", color: "bg-blue-100 text-blue-800" },
   { value: "SHIPPED", label: "Kargoda", color: "bg-purple-100 text-purple-800" },
   { value: "DELIVERED", label: "Teslim Edildi", color: "bg-green-100 text-green-800" },
@@ -155,10 +149,17 @@ export function OrderStatusUpdater({ orderId, currentStatus }: OrderStatusUpdate
         <p className="text-sm font-medium">Sipariş Durumu Akışı</p>
         <div className="flex items-center gap-2 flex-wrap">
           <Badge
-            variant={currentStatus === "PAID" ? "default" : "outline"}
-            className={currentStatus === "PAID" ? statusFlow.PAID.color : "opacity-50"}
+            variant={currentStatus === "PENDING" ? "default" : "outline"}
+            className={currentStatus === "PENDING" ? statusFlow.PENDING.color : "opacity-50"}
           >
             Sipariş Alındı
+          </Badge>
+          <ChevronRight className="h-4 w-4 text-gray-400" />
+          <Badge
+            variant={currentStatus === "CONFIRMED" ? "default" : "outline"}
+            className={currentStatus === "CONFIRMED" ? statusFlow.CONFIRMED.color : "opacity-50"}
+          >
+            Onaylandı
           </Badge>
           <ChevronRight className="h-4 w-4 text-gray-400" />
           <Badge

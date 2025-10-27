@@ -54,6 +54,12 @@ export default async function CheckoutPage() {
     }
   }
 
+  // Get active payment methods
+  const paymentMethods = await db.paymentMethod.findMany({
+    where: { active: true },
+    orderBy: { created_at: "asc" },
+  });
+
   return (
     <>
       <CheckoutProtection 
@@ -68,6 +74,7 @@ export default async function CheckoutPage() {
         shippingFee={shippingFee}
         remainingForFreeShipping={remainingForFreeShipping}
         freeShippingReason={freeShippingReason}
+        paymentMethods={paymentMethods}
       />
     </>
   );

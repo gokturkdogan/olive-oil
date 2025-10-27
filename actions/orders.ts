@@ -23,10 +23,11 @@ interface CreateOrderData {
   couponCode?: string;
   saveAddress?: boolean;
   addressTitle?: string;
+  paymentMethodId: string;
 }
 
 /**
- * Sipariş oluşturur ve iyzico ödeme formunu başlatır
+ * Sipariş oluşturur ve seçilen ödeme yöntemine göre işlem yapar
  */
 export async function createOrder(data: CreateOrderData) {
   const startTime = Date.now();
@@ -49,6 +50,15 @@ export async function createOrder(data: CreateOrderData) {
       loyaltyTier = user?.loyalty_tier || "STANDARD";
     }
 
+
+    // Get payment method
+    const paymentMethod = await (db as any).paymentMethod.findUnique({
+      where: { id: data.paymentMethodId },
+    });
+
+    if (!paymentMethod || !paymentMethod.active) {
+      return { success: false, error: "Geçersiz ödeme yöntemi" };
+    }
 
     // Calculate subtotal
     const subtotal = cart.items.reduce(
@@ -80,8 +90,7 @@ export async function createOrder(data: CreateOrderData) {
       return { success: false, error: "Geçersiz sipariş tutarı" };
     }
 
-    // ÖNCE İyzico'yu test et, SONRA order oluştur
-    // Geçici conversationId oluştur
+    // Create order first (will be updated based on payment method)
     const tempConversationId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Save address if requested
@@ -118,103 +127,106 @@ export async function createOrder(data: CreateOrderData) {
       }
     }
 
-    // Initialize iyzico payment
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const callbackUrl = `${baseUrl}/api/iyzico/callback`;
+    let iyzicoParams: any = null;
+    
+    // Initialize iyzico payment only if payment method is IYZICO
+    if (paymentMethod.type === "IYZICO") {
+      const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+      const callbackUrl = `${baseUrl}/api/iyzico/callback`;
 
-    // Prepare buyer info
-    const [name, ...surnameParts] = data.shippingName.split(" ");
-    const surname = surnameParts.join(" ") || name;
+      // Prepare buyer info
+      const [name, ...surnameParts] = data.shippingName.split(" ");
+      const surname = surnameParts.join(" ") || name;
 
-    // Format phone number with +90 if not present
-    let formattedPhone = data.shippingPhone.replace(/\s/g, ""); // Remove spaces
-    if (!formattedPhone.startsWith("+90") && !formattedPhone.startsWith("90")) {
-      if (formattedPhone.startsWith("0")) {
-        formattedPhone = "+90" + formattedPhone.substring(1);
-      } else {
-        formattedPhone = "+90" + formattedPhone;
+      // Format phone number with +90 if not present
+      let formattedPhone = data.shippingPhone.replace(/\s/g, ""); // Remove spaces
+      if (!formattedPhone.startsWith("+90") && !formattedPhone.startsWith("90")) {
+        if (formattedPhone.startsWith("0")) {
+          formattedPhone = "+90" + formattedPhone.substring(1);
+        } else {
+          formattedPhone = "+90" + formattedPhone;
+        }
+      } else if (formattedPhone.startsWith("90")) {
+        formattedPhone = "+" + formattedPhone;
       }
-    } else if (formattedPhone.startsWith("90")) {
-      formattedPhone = "+" + formattedPhone;
+
+      // İyzico için toplam hesaplama
+      // NOT: İyzico'da price = basketItems toplamı olmalı (indirim öncesi)
+      // paidPrice = gerçekte ödenen tutar (indirim sonrası)
+      const iyzicoPrice = subtotal + shippingFee; // İndirim öncesi toplam
+      const iyzicoPaidPrice = total; // İndirim sonrası ödenecek tutar
+    
+
+
+
+
+
+
+
+      iyzicoParams = {
+        locale: "tr",
+        conversationId: tempConversationId, // Geçici ID kullan
+        price: (iyzicoPrice / 100).toFixed(2), // İndirim öncesi toplam
+        paidPrice: (iyzicoPaidPrice / 100).toFixed(2), // İndirim sonrası toplam
+        currency: "TRY",
+        basketId: cart.id,
+        paymentGroup: "PRODUCT",
+        paymentChannel: "WEB", // ZORUNLU: Ödeme kanalı
+        callbackUrl,
+        enabledInstallments: [1, 2, 3, 6, 9], // Taksit seçenekleri
+        buyer: {
+          id: session?.user?.id || tempConversationId,
+          name,
+          surname,
+          gsmNumber: formattedPhone,
+          email: data.email,
+          identityNumber: "11111111111", // MVP: dummy identity number
+          registrationAddress: data.shippingAddressLine1,
+          ip: "85.34.78.112", // MVP: dummy IP (should be real in production)
+          city: data.city,
+          country: data.country,
+          zipCode: data.postalCode,
+        },
+        shippingAddress: {
+          contactName: data.shippingName,
+          city: data.city,
+          country: data.country,
+          address: `${data.shippingAddressLine1} ${data.shippingAddressLine2 || ""}`.trim(),
+          zipCode: data.postalCode,
+        },
+        billingAddress: {
+          contactName: data.shippingName,
+          city: data.city,
+          country: data.country,
+          address: `${data.shippingAddressLine1} ${data.shippingAddressLine2 || ""}`.trim(),
+          zipCode: data.postalCode,
+        },
+        basketItems: [
+          // Ürünler
+          ...cart.items.map((item) => ({
+            id: item.product.id,
+            name: item.product.title,
+            category1: "Zeytinyağı",
+            itemType: "PHYSICAL",
+            price: ((item.product.price * item.quantity) / 100).toFixed(2),
+          })),
+          // Kargo ücreti (eğer varsa)
+          ...(shippingFee > 0 ? [{
+            id: "SHIPPING",
+            name: "Kargo",
+            category1: "Kargo",
+            itemType: "PHYSICAL",
+            price: (shippingFee / 100).toFixed(2),
+          }] : []),
+        ],
+      };
+
+      iyzicoParams.basketItems.forEach((item: any, index: number) => {
+
+      });
+      const basketItemsTotal = iyzicoParams.basketItems.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
     }
 
-    // İyzico için toplam hesaplama
-    // NOT: İyzico'da price = basketItems toplamı olmalı (indirim öncesi)
-    // paidPrice = gerçekte ödenen tutar (indirim sonrası)
-    const iyzicoPrice = subtotal + shippingFee; // İndirim öncesi toplam
-    const iyzicoPaidPrice = total; // İndirim sonrası ödenecek tutar
-    
-
-
-
-
-
-
-
-    const iyzicoParams = {
-      locale: "tr",
-      conversationId: tempConversationId, // Geçici ID kullan
-      price: (iyzicoPrice / 100).toFixed(2), // İndirim öncesi toplam
-      paidPrice: (iyzicoPaidPrice / 100).toFixed(2), // İndirim sonrası toplam
-      currency: "TRY",
-      basketId: cart.id,
-      paymentGroup: "PRODUCT",
-      paymentChannel: "WEB", // ZORUNLU: Ödeme kanalı
-      callbackUrl,
-      enabledInstallments: [1, 2, 3, 6, 9], // Taksit seçenekleri
-      buyer: {
-        id: session?.user?.id || tempConversationId,
-        name,
-        surname,
-        gsmNumber: formattedPhone,
-        email: data.email,
-        identityNumber: "11111111111", // MVP: dummy identity number
-        registrationAddress: data.shippingAddressLine1,
-        ip: "85.34.78.112", // MVP: dummy IP (should be real in production)
-        city: data.city,
-        country: data.country,
-        zipCode: data.postalCode,
-      },
-      shippingAddress: {
-        contactName: data.shippingName,
-        city: data.city,
-        country: data.country,
-        address: `${data.shippingAddressLine1} ${data.shippingAddressLine2 || ""}`.trim(),
-        zipCode: data.postalCode,
-      },
-      billingAddress: {
-        contactName: data.shippingName,
-        city: data.city,
-        country: data.country,
-        address: `${data.shippingAddressLine1} ${data.shippingAddressLine2 || ""}`.trim(),
-        zipCode: data.postalCode,
-      },
-      basketItems: [
-        // Ürünler
-        ...cart.items.map((item) => ({
-          id: item.product.id,
-          name: item.product.title,
-          category1: "Zeytinyağı",
-          itemType: "PHYSICAL",
-          price: ((item.product.price * item.quantity) / 100).toFixed(2),
-        })),
-        // Kargo ücreti (eğer varsa)
-        ...(shippingFee > 0 ? [{
-          id: "SHIPPING",
-          name: "Kargo",
-          category1: "Kargo",
-          itemType: "PHYSICAL",
-          price: (shippingFee / 100).toFixed(2),
-        }] : []),
-      ],
-    };
-
-
-    iyzicoParams.basketItems.forEach((item: any, index: number) => {
-
-    });
-    const basketItemsTotal = iyzicoParams.basketItems.reduce((sum: number, item: any) => sum + parseFloat(item.price), 0);
-
 
 
 
@@ -224,37 +236,43 @@ export async function createOrder(data: CreateOrderData) {
 
 
     
+    // Handle payment based on payment method type
     let paymentResult;
-    try {
-      const startTime = Date.now();
+    let paymentReference = null;
+    
+    if (paymentMethod.type === "IYZICO") {
+      // Iyzico payment flow
+      try {
+        const startTime = Date.now();
 
-      
-      paymentResult = await createCheckoutForm(iyzicoParams);
-      
-      const elapsed = Date.now() - startTime;
+        
+        paymentResult = await createCheckoutForm(iyzicoParams);
+        
+        const elapsed = Date.now() - startTime;
 
-    } catch (error: any) {
-      console.error("❌ İyzico API hatası:", error.message);
-      console.error("❌ Error stack:", error.stack);
-      
-      // Order henüz oluşturulmadı, sadece hata dön
-      return {
-        success: false,
-        error: "Ödeme sistemine bağlanılamadı. Lütfen tekrar deneyin. Sepetiniz korundu.",
-      };
+      } catch (error: any) {
+        console.error("❌ İyzico API hatası:", error.message);
+        console.error("❌ Error stack:", error.stack);
+        
+        return {
+          success: false,
+          error: "Ödeme sistemine bağlanılamadı. Lütfen tekrar deneyin. Sepetiniz korundu.",
+        };
+      }
+
+      if (paymentResult.status !== "success") {
+        console.error("⚠️ İyzico başarısız status:", paymentResult);
+        
+        return {
+          success: false,
+          error: paymentResult.errorMessage || "Ödeme başlatılamadı. Lütfen tekrar deneyin. Sepetiniz korundu.",
+        };
+      }
+
+      paymentReference = paymentResult.token;
     }
-
-    if (paymentResult.status !== "success") {
-      console.error("⚠️ İyzico başarısız status:", paymentResult);
-      
-      // Order henüz oluşturulmadı, sadece hata dön
-      return {
-        success: false,
-        error: paymentResult.errorMessage || "Ödeme başlatılamadı. Lütfen tekrar deneyin. Sepetiniz korundu.",
-      };
-    }
-
-    // ✅ İyzico başarılı! ŞİMDİ order oluştur
+    
+    // ✅ Order oluştur
 
 
 
@@ -265,6 +283,9 @@ export async function createOrder(data: CreateOrderData) {
 
 
     
+    // Create order - her zaman PENDING ile başla
+    // Iyzico için callback'te status PAID yapılacak
+    // Bank Transfer için manuel olarak değiştirilebilir
     const order = await db.order.create({
       data: {
         user_id: session?.user?.id || null,
@@ -282,9 +303,11 @@ export async function createOrder(data: CreateOrderData) {
         shipping_fee: shippingFee,
         total,
         coupon_code: data.couponCode?.toUpperCase() || null,
-        status: "PENDING",
-        payment_reference: paymentResult.token,
-      },
+        status: "PENDING" as any,
+        payment_status: "PENDING" as any,
+        payment_provider: paymentMethod.type as any,
+        payment_reference: paymentReference,
+      } as any,
     });
     
 
@@ -352,12 +375,30 @@ export async function createOrder(data: CreateOrderData) {
 
 
 
-    return {
-      success: true,
-      orderId: order.id,
-      paymentPageUrl: paymentResult.paymentPageUrl,
-      paymentToken: paymentResult.token,
-    };
+    // Return based on payment method type
+    if (paymentMethod.type === "BANK_TRANSFER") {
+      // For bank transfer, redirect to success page with order details
+      return {
+        success: true,
+        orderId: order.id,
+        paymentMethod: "BANK_TRANSFER",
+        paymentMethodDetails: paymentMethod.payment_info,
+      };
+    } else {
+      // For Iyzico, redirect to payment page
+      if (!paymentResult) {
+        return {
+          success: false,
+          error: "Ödeme başlatılamadı",
+        };
+      }
+      return {
+        success: true,
+        orderId: order.id,
+        paymentPageUrl: paymentResult.paymentPageUrl,
+        paymentToken: paymentResult.token,
+      };
+    }
   } catch (error: any) {
     const totalElapsed = Date.now() - startTime;
     console.error(`\n💥 ========================================`);
@@ -397,11 +438,13 @@ export async function completeOrder(orderId: string, paymentData: any) {
       return { success: false, error: "Sipariş zaten işlenmiş" };
     }
 
-    // Update order status and payment details
+    // Update payment status only - NOT order status!
+    // Status sadece admin tarafından manuel değiştirilecek
+    // payment_status: iyzico başarılı ise PAID, değilse FAILED
     await db.order.update({
       where: { id: orderId },
       data: {
-        status: paymentData.status === "success" ? "PAID" : "FAILED",
+        payment_status: paymentData.status === "success" ? "PAID" : "FAILED" as any,
         payment_reference: paymentData.paymentId || order.payment_reference,
         // Store payment transaction IDs for refund purposes
         payment_transaction_ids: paymentData.itemTransactions ? 
@@ -411,7 +454,7 @@ export async function completeOrder(orderId: string, paymentData: any) {
             price: item.price,
             paidPrice: item.paidPrice
           }))) : null,
-      },
+      } as any,
     });
 
     if (paymentData.status === "success") {
@@ -513,7 +556,7 @@ export async function cancelOrder(orderId: string) {
     }
 
     // Check if order can be cancelled (not shipped yet)
-    if (order.status === "SHIPPED" || order.status === "DELIVERED" || order.status === "FULFILLED") {
+    if (order.status === "SHIPPED" || order.status === "DELIVERED") {
       return { success: false, error: "Kargoya verilmiş siparişler iptal edilemez" };
     }
 
@@ -521,8 +564,8 @@ export async function cancelOrder(orderId: string) {
       return { success: false, error: "Sipariş zaten iptal edilmiş" };
     }
 
-    // Check if order was paid (has payment reference and status is PAID)
-    if (order.status === "PAID" && order.payment_reference) {
+    // Check if order was paid (has payment reference and payment_status is PAID)
+    if ((order as any).payment_status === "PAID" && order.payment_reference) {
 
       
       try {
