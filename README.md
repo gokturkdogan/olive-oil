@@ -28,7 +28,7 @@ Modern, full-stack zeytinyağı e-ticaret platformu.
 - **TailwindCSS v3** - Modern UI
 - **shadcn/ui** - UI bileşenleri
 - **Radix UI** - Primitives
-- **Lucide React** - İkonlar
+- **Lucide React** - İkonlar 
 
 ### Backend
 - **Next.js** - Server Actions & API Routes
