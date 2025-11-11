@@ -38,6 +38,6 @@ Modern, full-stack zeytinyağı e-ticaret platformu.
 - **İyzico** - Ödeme entegrasyonu
 
 ### Geliştirme
-- **TypeScript**
+- **TypeScript** 
 - **Zod** - Form validasyonu
 - **bcryptjs** - Şifre hashleme
