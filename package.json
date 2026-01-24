@@ -29,7 +29,7 @@
     "iyzipay": "^2.0.64",
     "lucide-react": "^0.460.0",
     "multer": "^2.0.2",
-    "next": "^15.5.5",
+    "next": "15.5.9",
     "next-auth": "^5.0.0-beta.25",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
